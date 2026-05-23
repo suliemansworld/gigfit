@@ -1,0 +1,2758 @@
+{
+  "sealed": {
+    "text": "Sealed.",
+    "wav": "audio/voice/sealed.wav"
+  },
+  "wall-forward": {
+    "text": "Wall forward.",
+    "wav": "audio/voice/wall-forward.wav"
+  },
+  "wall-retreat": {
+    "text": "Wall retreat.",
+    "wav": "audio/voice/wall-retreat-v2.wav"
+  },
+  "wall-left": {
+    "text": "Wall left.",
+    "wav": "audio/voice/wall-left.wav"
+  },
+  "wall-right": {
+    "text": "Wall right.",
+    "wav": "audio/voice/wall-right.wav"
+  },
+  "retreating": {
+    "text": "Retreating.",
+    "wav": "audio/voice/retreating.wav"
+  },
+  "base": {
+    "text": "Base.",
+    "wav": "audio/voice/base.wav"
+  },
+  "main-vein": {
+    "text": "Main vein.",
+    "wav": "audio/voice/main-vein.wav"
+  },
+  "side-passage": {
+    "text": "Side passage.",
+    "wav": "audio/voice/side-passage.wav"
+  },
+  "loot-here": {
+    "text": "Loot here.",
+    "wav": "audio/voice/loot-here.wav"
+  },
+  "exit": {
+    "text": "Exit.",
+    "wav": "audio/voice/exit.wav"
+  },
+  "no-way-forward": {
+    "text": "No way forward.",
+    "wav": "audio/voice/no-way-forward.wav"
+  },
+  "depth-0": {
+    "text": "Depth 0.",
+    "wav": "audio/voice/depth-0.wav"
+  },
+  "depth-1": {
+    "text": "Depth 1.",
+    "wav": "audio/voice/depth-1.wav"
+  },
+  "depth-2": {
+    "text": "Depth 2.",
+    "wav": "audio/voice/depth-2.wav"
+  },
+  "depth-3": {
+    "text": "Depth 3.",
+    "wav": "audio/voice/depth-3.wav"
+  },
+  "depth-4": {
+    "text": "Depth 4.",
+    "wav": "audio/voice/depth-4.wav"
+  },
+  "depth-5": {
+    "text": "Depth 5.",
+    "wav": "audio/voice/depth-5.wav"
+  },
+  "depth-6": {
+    "text": "Depth 6.",
+    "wav": "audio/voice/depth-6.wav"
+  },
+  "depth-7": {
+    "text": "Depth 7.",
+    "wav": "audio/voice/depth-7.wav"
+  },
+  "depth-8": {
+    "text": "Depth 8.",
+    "wav": "audio/voice/depth-8.wav"
+  },
+  "depth-9": {
+    "text": "Depth 9.",
+    "wav": "audio/voice/depth-9.wav"
+  },
+  "depth-10": {
+    "text": "Depth 10.",
+    "wav": "audio/voice/depth-10.wav"
+  },
+  "depth-11": {
+    "text": "Depth 11.",
+    "wav": "audio/voice/depth-11.wav"
+  },
+  "depth-12": {
+    "text": "Depth 12.",
+    "wav": "audio/voice/depth-12.wav"
+  },
+  "depth-13": {
+    "text": "Depth 13.",
+    "wav": "audio/voice/depth-13.wav"
+  },
+  "depth-14": {
+    "text": "Depth 14.",
+    "wav": "audio/voice/depth-14.wav"
+  },
+  "depth-15": {
+    "text": "Depth 15.",
+    "wav": "audio/voice/depth-15.wav"
+  },
+  "depth-16": {
+    "text": "Depth 16.",
+    "wav": "audio/voice/depth-16.wav"
+  },
+  "depth-17": {
+    "text": "Depth 17.",
+    "wav": "audio/voice/depth-17.wav"
+  },
+  "depth-18": {
+    "text": "Depth 18.",
+    "wav": "audio/voice/depth-18.wav"
+  },
+  "depth-19": {
+    "text": "Depth 19.",
+    "wav": "audio/voice/depth-19.wav"
+  },
+  "depth-20": {
+    "text": "Depth 20.",
+    "wav": "audio/voice/depth-20.wav"
+  },
+  "depth-21": {
+    "text": "Depth 21.",
+    "wav": "audio/voice/depth-21.wav"
+  },
+  "depth-22": {
+    "text": "Depth 22.",
+    "wav": "audio/voice/depth-22.wav"
+  },
+  "depth-23": {
+    "text": "Depth 23.",
+    "wav": "audio/voice/depth-23.wav"
+  },
+  "depth-24": {
+    "text": "Depth 24.",
+    "wav": "audio/voice/depth-24.wav"
+  },
+  "depth-25": {
+    "text": "Depth 25.",
+    "wav": "audio/voice/depth-25.wav"
+  },
+  "one-forward": {
+    "text": "One forward.",
+    "wav": "audio/voice/one-forward.wav"
+  },
+  "two-forward": {
+    "text": "Two forward.",
+    "wav": "audio/voice/two-forward.wav"
+  },
+  "three-forward": {
+    "text": "Three forward.",
+    "wav": "audio/voice/three-forward.wav"
+  },
+  "crossover": {
+    "text": "Crossover passage here.",
+    "wav": "audio/voice/crossover.wav"
+  },
+  "found-exit": {
+    "text": "Exit found. Cave open.",
+    "wav": "audio/voice/found-exit.wav"
+  },
+  "cave-explored": {
+    "text": "Every room mapped.",
+    "wav": "audio/voice/cave-explored.wav"
+  },
+  "descending": {
+    "text": "Descending.",
+    "wav": "audio/voice/descending.wav"
+  },
+  "size-small": {
+    "text": "A small chamber.",
+    "wav": "audio/voice/size-small.wav"
+  },
+  "size-wider": {
+    "text": "A wider room. Older air.",
+    "wav": "audio/voice/size-wider.wav"
+  },
+  "size-deep": {
+    "text": "A deep room. The ceiling is high above you.",
+    "wav": "audio/voice/size-deep.wav"
+  },
+  "size-vast": {
+    "text": "A vast cavern. Your steps echo for seconds.",
+    "wav": "audio/voice/size-vast.wav"
+  },
+  "size-impossibly-deep": {
+    "text": "An impossibly deep chamber. The dark feels alive.",
+    "wav": "audio/voice/size-impossibly-deep.wav"
+  },
+  "floor-stone": {
+    "text": "Cold stone underfoot.",
+    "wav": "audio/voice/floor-stone.wav"
+  },
+  "floor-wet": {
+    "text": "Shallow water laps your boots.",
+    "wav": "audio/voice/floor-wet.wav"
+  },
+  "floor-sand": {
+    "text": "Soft sand absorbs your steps.",
+    "wav": "audio/voice/floor-sand.wav"
+  },
+  "floor-gravel": {
+    "text": "Loose gravel grinds beneath you.",
+    "wav": "audio/voice/floor-gravel.wav"
+  },
+  "landmark-drip": {
+    "text": "You hear water dripping rhythmically from the ceiling.",
+    "wav": "audio/voice/landmark-drip.wav"
+  },
+  "landmark-wind": {
+    "text": "You hear wind moving through unseen passages.",
+    "wav": "audio/voice/landmark-wind.wav"
+  },
+  "landmark-hum": {
+    "text": "You hear a low resonant hum from the stone walls.",
+    "wav": "audio/voice/landmark-hum.wav"
+  },
+  "landmark-chime": {
+    "text": "You hear a faint metallic chime, source unknown.",
+    "wav": "audio/voice/landmark-chime.wav"
+  },
+  "landmark-echo": {
+    "text": "You hear an unusually long echo. This chamber is huge.",
+    "wav": "audio/voice/landmark-echo.wav"
+  },
+  "exit-room": {
+    "text": "A wide chamber, far from the entrance. The air feels different here. This is the exit.",
+    "wav": "audio/voice/exit-room.wav"
+  },
+  "base-room": {
+    "text": "You stand at the cave mouth. This is your base. Inventory and items are safe here.",
+    "wav": "audio/voice/base-room.wav"
+  },
+  "crossover-room": {
+    "text": "A crossover passage joins another part of the cave here.",
+    "wav": "audio/voice/crossover-room.wav"
+  },
+  "chamber-large": {
+    "text": "The chamber is large. Your steps echo.",
+    "wav": "audio/voice/chamber-large.wav"
+  },
+  "something-glints": {
+    "text": "Something glints. Loot here.",
+    "wav": "audio/voice/something-glints.wav"
+  },
+  "lore-classic-first-step": {
+    "text": "First step off the threshold. The air shifts \u2014 heavier, mineral. Behind me the cave entrance dims; ahead, a low room exhales cool breath.",
+    "wav": "audio/voice/lore-classic-first-step.wav"
+  },
+  "lore-grotto-first-step": {
+    "text": "First step into the grotto. The floor is glass-smooth, dusted with crystal grit. Each footfall rings faintly, as if the stone itself is listening.",
+    "wav": "audio/voice/lore-grotto-first-step.wav"
+  },
+  "lore-classic-drip": {
+    "text": "A slow drip pools somewhere in the dark. The drops fall on a perfect rhythm, older than I am, older than anyone.",
+    "wav": "audio/voice/lore-classic-drip.wav"
+  },
+  "lore-grotto-drip": {
+    "text": "Mineral water beads from the ceiling and pings into a still pool. Each drop sounds like a distant chime, perfectly tuned to the room.",
+    "wav": "audio/voice/lore-grotto-drip.wav"
+  },
+  "lore-classic-wind": {
+    "text": "Wind threads through this passage from a gap I cannot find. It carries the smell of wet earth and something faintly burnt.",
+    "wav": "audio/voice/lore-classic-wind.wav"
+  },
+  "lore-grotto-wind": {
+    "text": "A thin draft moves through here, making the crystals along the walls hum at the edge of hearing \u2014 a cathedral whispering to itself.",
+    "wav": "audio/voice/lore-grotto-wind.wav"
+  },
+  "lore-classic-hum": {
+    "text": "The whole room hums. Set my hand against the wall and the stone vibrates against my palm, low and patient.",
+    "wav": "audio/voice/lore-classic-hum.wav"
+  },
+  "lore-grotto-hum": {
+    "text": "The grotto resonates here. Strike one finger against the wall and the harmonic answers from every direction at once.",
+    "wav": "audio/voice/lore-grotto-hum.wav"
+  },
+  "lore-classic-chime": {
+    "text": "Crystals along the ceiling chime when sound passes them. My breath alone wakes a chord; I stop, just to listen to the silence after.",
+    "wav": "audio/voice/lore-classic-chime.wav"
+  },
+  "lore-grotto-chime": {
+    "text": "Forest of slender crystals, struck by the passing air. Each one rings a different note \u2014 together they map the room better than any light could.",
+    "wav": "audio/voice/lore-grotto-chime.wav"
+  },
+  "lore-classic-echo": {
+    "text": "I clap once and the echo returns nine times, each fainter than the last, each from a different wall. This room is bigger than I thought.",
+    "wav": "audio/voice/lore-classic-echo.wav"
+  },
+  "lore-grotto-echo": {
+    "text": "Vast chamber. My voice circles back to me changed, as if the grotto itself is repeating my words back to teach me their shape.",
+    "wav": "audio/voice/lore-grotto-echo.wav"
+  },
+  "lore-classic-exit": {
+    "text": "Found it. A seam of grey light along the wall, and beyond, the wider cave. Side passages I did not see before are settling open behind me.",
+    "wav": "audio/voice/lore-classic-exit.wav"
+  },
+  "lore-grotto-exit": {
+    "text": "Found the way through. Beyond, the grotto opens into something far larger, and along the walls the side passages I missed begin to glow faintly \u2014 they were always here.",
+    "wav": "audio/voice/lore-grotto-exit.wav"
+  },
+  "lore-classic-crossover": {
+    "text": "A passage I had not noticed loops back to a room I already know. The cave was quietly folding itself the whole time.",
+    "wav": "audio/voice/lore-classic-crossover.wav"
+  },
+  "lore-grotto-crossover": {
+    "text": "A crystal arch arcs back to a chamber I'd already mapped. The grotto is not a tree but a lattice \u2014 every path eventually meets another.",
+    "wav": "audio/voice/lore-grotto-crossover.wav"
+  },
+  "lore-classic-deep": {
+    "text": "Depth eight. The air tastes like cold iron. I have not seen daylight in a long while.",
+    "wav": "audio/voice/lore-classic-deep.wav"
+  },
+  "lore-grotto-deep": {
+    "text": "Depth eight. The crystals here are larger, slower-pulsing \u2014 older, perhaps. I feel watched, but kindly.",
+    "wav": "audio/voice/lore-grotto-deep.wav"
+  },
+  "lore-classic-explorer": {
+    "text": "Mapped every room. The cave has no more secrets to keep from me \u2014 only its silence, which is its own kind of answer.",
+    "wav": "audio/voice/lore-classic-explorer.wav"
+  },
+  "lore-grotto-explorer": {
+    "text": "Every chamber accounted for. The grotto rings, faintly, as if pleased to have been understood.",
+    "wav": "audio/voice/lore-grotto-explorer.wav"
+  },
+  "lore-classic-all-landmarks": {
+    "text": "Drip, wind, hum, chime, echo. Five voices of the cave. I have stood in each. They are not separate rooms; they are a chord.",
+    "wav": "audio/voice/lore-classic-all-landmarks.wav"
+  },
+  "lore-grotto-all-landmarks": {
+    "text": "All five voices heard. The grotto sang a chord I will not forget \u2014 drip, wind, hum, chime, echo, like five colors of one light.",
+    "wav": "audio/voice/lore-grotto-all-landmarks.wav"
+  },
+  "descent-classic-1": {
+    "text": "The exit was not the surface. It was a threshold. The cave continues, larger now, the air a few degrees colder.",
+    "wav": "audio/voice/descent-classic-1.wav"
+  },
+  "descent-classic-2": {
+    "text": "Through. The new cave hums on a lower note than the last. I keep moving \u2014 the entrance behind me is already a memory.",
+    "wav": "audio/voice/descent-classic-2.wav"
+  },
+  "descent-classic-3": {
+    "text": "Another floor. The walls are wider here. Whatever made this place was patient.",
+    "wav": "audio/voice/descent-classic-3.wav"
+  },
+  "descent-classic-4": {
+    "text": "Down again. I hear the same drips, but slower, as if the water has further to fall.",
+    "wav": "audio/voice/descent-classic-4.wav"
+  },
+  "descent-classic-5": {
+    "text": "Each cave opens into the next. I no longer think of going back.",
+    "wav": "audio/voice/descent-classic-5.wav"
+  },
+  "descent-grotto-1": {
+    "text": "The grotto was not the bottom. Below, larger crystal halls \u2014 they ring at lower frequencies, almost subaudible.",
+    "wav": "audio/voice/descent-grotto-1.wav"
+  },
+  "descent-grotto-2": {
+    "text": "Through. The new chamber is colder, the crystals here older and slower-pulsing.",
+    "wav": "audio/voice/descent-grotto-2.wav"
+  },
+  "descent-grotto-3": {
+    "text": "Another lattice. The geometry is the same and not the same \u2014 like a chord transposed down a step.",
+    "wav": "audio/voice/descent-grotto-3.wav"
+  },
+  "descent-grotto-4": {
+    "text": "I cross another threshold. The grotto's song shifts down an octave; I follow it.",
+    "wav": "audio/voice/descent-grotto-4.wav"
+  },
+  "descent-grotto-5": {
+    "text": "Each grotto opens into a deeper one. The light from the crystals has gone almost violet.",
+    "wav": "audio/voice/descent-grotto-5.wav"
+  },
+  "fwd-1": {
+    "text": "1 forward.",
+    "wav": "audio/voice/fwd-1.wav"
+  },
+  "fwd-2": {
+    "text": "2 forward.",
+    "wav": "audio/voice/fwd-2.wav"
+  },
+  "fwd-3": {
+    "text": "3 forward.",
+    "wav": "audio/voice/fwd-3.wav"
+  },
+  "fwd-4": {
+    "text": "4 forward.",
+    "wav": "audio/voice/fwd-4.wav"
+  },
+  "fwd-5": {
+    "text": "5 forward.",
+    "wav": "audio/voice/fwd-5.wav"
+  },
+  "fwd-6": {
+    "text": "6 forward.",
+    "wav": "audio/voice/fwd-6.wav"
+  },
+  "fwd-7": {
+    "text": "7 forward.",
+    "wav": "audio/voice/fwd-7.wav"
+  },
+  "fwd-8": {
+    "text": "8 forward.",
+    "wav": "audio/voice/fwd-8.wav"
+  },
+  "fwd-9": {
+    "text": "9 forward.",
+    "wav": "audio/voice/fwd-9.wav"
+  },
+  "passages-1": {
+    "text": "1 passage from here.",
+    "wav": "audio/voice/passages-1.wav"
+  },
+  "passages-2": {
+    "text": "2 passages from here.",
+    "wav": "audio/voice/passages-2.wav"
+  },
+  "passages-3": {
+    "text": "3 passages from here.",
+    "wav": "audio/voice/passages-3.wav"
+  },
+  "passages-4": {
+    "text": "4 passages from here.",
+    "wav": "audio/voice/passages-4.wav"
+  },
+  "passages-5": {
+    "text": "5 passages from here.",
+    "wav": "audio/voice/passages-5.wav"
+  },
+  "passages-6": {
+    "text": "6 passages from here.",
+    "wav": "audio/voice/passages-6.wav"
+  },
+  "passages-7": {
+    "text": "7 passages from here.",
+    "wav": "audio/voice/passages-7.wav"
+  },
+  "passages-8": {
+    "text": "8 passages from here.",
+    "wav": "audio/voice/passages-8.wav"
+  },
+  "passages-9": {
+    "text": "9 passages from here.",
+    "wav": "audio/voice/passages-9.wav"
+  },
+  "youre-at-base": {
+    "text": "You're at base.",
+    "wav": "audio/voice/youre-at-base.wav"
+  },
+  "already-at-base": {
+    "text": "Already at base.",
+    "wav": "audio/voice/already-at-base.wav"
+  },
+  "items-secured": {
+    "text": "Items secured.",
+    "wav": "audio/voice/items-secured.wav"
+  },
+  "welcome-back": {
+    "text": "Welcome back.",
+    "wav": "audio/voice/welcome-back.wav"
+  },
+  "teleport": {
+    "text": "Teleport.",
+    "wav": "audio/voice/teleport.wav"
+  },
+  "step-in-passage": {
+    "text": "Step into any open passage to begin.",
+    "wav": "audio/voice/step-in-passage.wav"
+  },
+  "swipe-tap": {
+    "text": "Swipe to move, tap to listen.",
+    "wav": "audio/voice/swipe-tap.wav"
+  },
+  "stage1-mainvein": {
+    "text": "Stage 1: follow the main vein to find the exit.",
+    "wav": "audio/voice/stage1-mainvein.wav"
+  },
+  "stage2-explore": {
+    "text": "Stage 2: explore freely.",
+    "wav": "audio/voice/stage2-explore.wav"
+  },
+  "exit-bang": {
+    "text": "EXIT!",
+    "wav": "audio/voice/exit-bang.wav"
+  },
+  "cannot-beacon-base": {
+    "text": "Cannot drop a beacon at base.",
+    "wav": "audio/voice/cannot-beacon-base.wav"
+  },
+  "you-are-at-base": {
+    "text": "You are at base.",
+    "wav": "audio/voice/you-are-at-base.wav"
+  },
+  "depth-1-deepest": {
+    "text": "Depth 1 deepest.",
+    "wav": "audio/voice/depth-1-deepest.wav"
+  },
+  "depth-2-deepest": {
+    "text": "Depth 2 deepest.",
+    "wav": "audio/voice/depth-2-deepest.wav"
+  },
+  "depth-3-deepest": {
+    "text": "Depth 3 deepest.",
+    "wav": "audio/voice/depth-3-deepest.wav"
+  },
+  "depth-4-deepest": {
+    "text": "Depth 4 deepest.",
+    "wav": "audio/voice/depth-4-deepest.wav"
+  },
+  "depth-5-deepest": {
+    "text": "Depth 5 deepest.",
+    "wav": "audio/voice/depth-5-deepest.wav"
+  },
+  "depth-6-deepest": {
+    "text": "Depth 6 deepest.",
+    "wav": "audio/voice/depth-6-deepest.wav"
+  },
+  "depth-7-deepest": {
+    "text": "Depth 7 deepest.",
+    "wav": "audio/voice/depth-7-deepest.wav"
+  },
+  "depth-8-deepest": {
+    "text": "Depth 8 deepest.",
+    "wav": "audio/voice/depth-8-deepest.wav"
+  },
+  "depth-9-deepest": {
+    "text": "Depth 9 deepest.",
+    "wav": "audio/voice/depth-9-deepest.wav"
+  },
+  "depth-10-deepest": {
+    "text": "Depth 10 deepest.",
+    "wav": "audio/voice/depth-10-deepest.wav"
+  },
+  "depth-11-deepest": {
+    "text": "Depth 11 deepest.",
+    "wav": "audio/voice/depth-11-deepest.wav"
+  },
+  "depth-12-deepest": {
+    "text": "Depth 12 deepest.",
+    "wav": "audio/voice/depth-12-deepest.wav"
+  },
+  "depth-13-deepest": {
+    "text": "Depth 13 deepest.",
+    "wav": "audio/voice/depth-13-deepest.wav"
+  },
+  "depth-14-deepest": {
+    "text": "Depth 14 deepest.",
+    "wav": "audio/voice/depth-14-deepest.wav"
+  },
+  "depth-15-deepest": {
+    "text": "Depth 15 deepest.",
+    "wav": "audio/voice/depth-15-deepest.wav"
+  },
+  "depth-16-deepest": {
+    "text": "Depth 16 deepest.",
+    "wav": "audio/voice/depth-16-deepest.wav"
+  },
+  "depth-17-deepest": {
+    "text": "Depth 17 deepest.",
+    "wav": "audio/voice/depth-17-deepest.wav"
+  },
+  "depth-18-deepest": {
+    "text": "Depth 18 deepest.",
+    "wav": "audio/voice/depth-18-deepest.wav"
+  },
+  "depth-19-deepest": {
+    "text": "Depth 19 deepest.",
+    "wav": "audio/voice/depth-19-deepest.wav"
+  },
+  "depth-20-deepest": {
+    "text": "Depth 20 deepest.",
+    "wav": "audio/voice/depth-20-deepest.wav"
+  },
+  "depth-21-deepest": {
+    "text": "Depth 21 deepest.",
+    "wav": "audio/voice/depth-21-deepest.wav"
+  },
+  "depth-22-deepest": {
+    "text": "Depth 22 deepest.",
+    "wav": "audio/voice/depth-22-deepest.wav"
+  },
+  "depth-23-deepest": {
+    "text": "Depth 23 deepest.",
+    "wav": "audio/voice/depth-23-deepest.wav"
+  },
+  "depth-24-deepest": {
+    "text": "Depth 24 deepest.",
+    "wav": "audio/voice/depth-24-deepest.wav"
+  },
+  "depth-25-deepest": {
+    "text": "Depth 25 deepest.",
+    "wav": "audio/voice/depth-25-deepest.wav"
+  },
+  "reach-exit-first": {
+    "text": "Reach the exit before descending. Stage 1 first.",
+    "wav": "audio/voice/reach-exit-first.wav"
+  },
+  "exit-reached": {
+    "text": "Exit reached. Branches unlocked.",
+    "wav": "audio/voice/exit-reached.wav"
+  },
+  "no-loot": {
+    "text": "All loot rooms are on cooldown. Come back in an hour.",
+    "wav": "audio/voice/no-loot.wav"
+  },
+  "cave-reset": {
+    "text": "Cave reset. Stage 1: find the exit.",
+    "wav": "audio/voice/cave-reset.wav"
+  },
+  "journal-empty": {
+    "text": "Journal is empty.",
+    "wav": "audio/voice/journal-empty.wav"
+  },
+  "settings-open": {
+    "text": "Settings open.",
+    "wav": "audio/voice/settings-open.wav"
+  },
+  "inventory-empty": {
+    "text": "Nothing to use yet.",
+    "wav": "audio/voice/inventory-empty.wav"
+  },
+  "journal-frag-00": {
+    "text": "A page torn from someone else's journal: 'Day three. The drips here have a rhythm. I think I'm starting to hear it.'",
+    "wav": "audio/voice/journal-frag-00.wav"
+  },
+  "journal-frag-01": {
+    "text": "A bootprint, not yours. Older. Pointing the way you came.",
+    "wav": "audio/voice/journal-frag-01.wav"
+  },
+  "journal-frag-02": {
+    "text": "Someone scratched a tally into the wall: forty-seven marks.",
+    "wav": "audio/voice/journal-frag-02.wav"
+  },
+  "journal-frag-03": {
+    "text": "A forgotten torch. The handle is still warm.",
+    "wav": "audio/voice/journal-frag-03.wav"
+  },
+  "journal-frag-04": {
+    "text": "A folded map, useless to you \u00e2\u0080\u0094 pencil lines in directions you don't recognize.",
+    "wav": "audio/voice/journal-frag-04.wav"
+  },
+  "journal-frag-05": {
+    "text": "An old steel cup. Half-full of cold, clear water.",
+    "wav": "audio/voice/journal-frag-05.wav"
+  },
+  "journal-frag-06": {
+    "text": "Tin cans, neatly stacked, dusted with silt. Someone camped here.",
+    "wav": "audio/voice/journal-frag-06.wav"
+  },
+  "journal-frag-07": {
+    "text": "A name carved into stone: HANNA. The year reads nineteen seventy-two.",
+    "wav": "audio/voice/journal-frag-07.wav"
+  },
+  "journal-frag-08": {
+    "text": "A small bone, smaller than your finger. Bird, you think.",
+    "wav": "audio/voice/journal-frag-08.wav"
+  },
+  "journal-frag-09": {
+    "text": "A coin from no country you recognize.",
+    "wav": "audio/voice/journal-frag-09.wav"
+  },
+  "journal-frag-10": {
+    "text": "A stone, polished smooth by hands.",
+    "wav": "audio/voice/journal-frag-10.wav"
+  },
+  "journal-frag-11": {
+    "text": "A page reads: 'I keep finding the same chamber. I don't think I am lost.'",
+    "wav": "audio/voice/journal-frag-11.wav"
+  },
+  "journal-frag-12": {
+    "text": "Three glass marbles in a small pile.",
+    "wav": "audio/voice/journal-frag-12.wav"
+  },
+  "journal-frag-13": {
+    "text": "A photograph, faded almost white. Two figures at a cave mouth.",
+    "wav": "audio/voice/journal-frag-13.wav"
+  },
+  "journal-frag-14": {
+    "text": "A pencil, snapped in two.",
+    "wav": "audio/voice/journal-frag-14.wav"
+  },
+  "journal-frag-15": {
+    "text": "A coil of rope. Uncut. Whoever left it didn't need it back.",
+    "wav": "audio/voice/journal-frag-15.wav"
+  },
+  "journal-frag-16": {
+    "text": "A piece of chalk. The wall behind you has a small arrow on it that you don't remember drawing.",
+    "wav": "audio/voice/journal-frag-16.wav"
+  },
+  "journal-frag-17": {
+    "text": "Words scratched in the stone, in a language you can't read.",
+    "wav": "audio/voice/journal-frag-17.wav"
+  },
+  "journal-frag-18": {
+    "text": "An empty notebook. The first page reads, 'For whoever finds this.'",
+    "wav": "audio/voice/journal-frag-18.wav"
+  },
+  "journal-frag-19": {
+    "text": "A child's wooden boat. The paint mostly worn off.",
+    "wav": "audio/voice/journal-frag-19.wav"
+  },
+  "journal-frag-20": {
+    "text": "A bone whistle. It still works.",
+    "wav": "audio/voice/journal-frag-20.wav"
+  },
+  "journal-frag-21": {
+    "text": "A page in someone else's hand: 'I think the cave is dreaming. So am I.'",
+    "wav": "audio/voice/journal-frag-21.wav"
+  },
+  "journal-frag-22": {
+    "text": "A sealed envelope, addressed to no one.",
+    "wav": "audio/voice/journal-frag-22.wav"
+  },
+  "journal-frag-23": {
+    "text": "A lock of hair, tied with thread.",
+    "wav": "audio/voice/journal-frag-23.wav"
+  },
+  "journal-frag-24": {
+    "text": "Two stones, identical, one warm and one cold. You can't tell which is which after a moment.",
+    "wav": "audio/voice/journal-frag-24.wav"
+  },
+  "journal-frag-25": {
+    "text": "A brass key, no lock to be seen.",
+    "wav": "audio/voice/journal-frag-25.wav"
+  },
+  "journal-frag-26": {
+    "text": "A photograph of an empty room.",
+    "wav": "audio/voice/journal-frag-26.wav"
+  },
+  "journal-frag-27": {
+    "text": "An apple, perfectly preserved. You don't eat it.",
+    "wav": "audio/voice/journal-frag-27.wav"
+  },
+  "journal-frag-28": {
+    "text": "A toy soldier, pointing at something only it can see.",
+    "wav": "audio/voice/journal-frag-28.wav"
+  },
+  "journal-frag-29": {
+    "text": "Sheet music, wordless. The notes form a tune you almost recognize.",
+    "wav": "audio/voice/journal-frag-29.wav"
+  },
+  "journal-frag-30": {
+    "text": "A small gold ring, sized for a finger smaller than yours.",
+    "wav": "audio/voice/journal-frag-30.wav"
+  },
+  "journal-frag-31": {
+    "text": "An ice ax, the head dulled from use.",
+    "wav": "audio/voice/journal-frag-31.wav"
+  },
+  "journal-frag-32": {
+    "text": "A painted rock: a smile.",
+    "wav": "audio/voice/journal-frag-32.wav"
+  },
+  "journal-frag-33": {
+    "text": "A glass eye. You leave it where you found it.",
+    "wav": "audio/voice/journal-frag-33.wav"
+  },
+  "intro-walk": {
+    "text": "You walk toward the cave mouth.",
+    "wav": "audio/voice/intro-walk.wav"
+  },
+  "intro-flashlight": {
+    "text": "You click on your flashlight.",
+    "wav": "audio/voice/intro-flashlight.wav"
+  },
+  "intro-wind": {
+    "text": "The wind shifts as you step inside.",
+    "wav": "audio/voice/intro-wind.wav"
+  },
+  "intro-dies": {
+    "text": "Your light dies.",
+    "wav": "audio/voice/intro-dies.wav"
+  },
+  "descend-prompt": {
+    "text": "Level up. Spine extended.",
+    "wav": "audio/voice/descend-prompt.wav"
+  },
+  "listening-stay": {
+    "text": "Listening. Stay still to hear more.",
+    "wav": "audio/voice/listening-stay.wav"
+  },
+  "boost-toggled": {
+    "text": "Atmosphere boost.",
+    "wav": "audio/voice/boost-toggled.wav"
+  },
+  "teleport-home": {
+    "text": "Teleport. You're at base. Items secured.",
+    "wav": "audio/voice/teleport-home.wav"
+  },
+  "size-wider-1": {
+    "text": "A wider room.",
+    "wav": "audio/voice/size-wider-1.wav"
+  },
+  "size-wider-2": {
+    "text": "Older air.",
+    "wav": "audio/voice/size-wider-2.wav"
+  },
+  "size-deep-1": {
+    "text": "A deep room.",
+    "wav": "audio/voice/size-deep-1.wav"
+  },
+  "size-deep-2": {
+    "text": "The ceiling is high above you.",
+    "wav": "audio/voice/size-deep-2.wav"
+  },
+  "size-vast-1": {
+    "text": "A vast cavern.",
+    "wav": "audio/voice/size-vast-1.wav"
+  },
+  "size-vast-2": {
+    "text": "Your steps echo for seconds.",
+    "wav": "audio/voice/size-vast-2.wav"
+  },
+  "size-impossibly-deep-1": {
+    "text": "An impossibly deep chamber.",
+    "wav": "audio/voice/size-impossibly-deep-1.wav"
+  },
+  "size-impossibly-deep-2": {
+    "text": "The dark feels alive.",
+    "wav": "audio/voice/size-impossibly-deep-2.wav"
+  },
+  "chamber-large-1": {
+    "text": "The chamber is large.",
+    "wav": "audio/voice/chamber-large-1.wav"
+  },
+  "chamber-large-2": {
+    "text": "Your steps echo.",
+    "wav": "audio/voice/chamber-large-2.wav"
+  },
+  "something-glints-1": {
+    "text": "Something glints.",
+    "wav": "audio/voice/something-glints-1.wav"
+  },
+  "forward-through-up": {
+    "text": "Forward through up.",
+    "wav": "audio/voice/forward-through-up.wav"
+  },
+  "forward-through-down": {
+    "text": "Forward through down.",
+    "wav": "audio/voice/forward-through-down.wav"
+  },
+  "forward-through-left": {
+    "text": "Forward through left.",
+    "wav": "audio/voice/forward-through-left.wav"
+  },
+  "forward-through-right": {
+    "text": "Forward through right.",
+    "wav": "audio/voice/forward-through-right.wav"
+  },
+  "forward-through-fwd": {
+    "text": "Forward through forward.",
+    "wav": "audio/voice/forward-through-fwd.wav"
+  },
+  "forward-through-retreat": {
+    "text": "Forward through retreat.",
+    "wav": "audio/voice/forward-through-retreat.wav"
+  },
+  "no-way-forward-only-back": {
+    "text": "No way forward \u2014 only back.",
+    "wav": "audio/voice/no-way-forward-only-back.wav"
+  },
+  "you-found-exit": {
+    "text": "You found the exit.",
+    "wav": "audio/voice/you-found-exit.wav"
+  },
+  "cave-is-open": {
+    "text": "The cave is open.",
+    "wav": "audio/voice/cave-is-open.wav"
+  },
+  "branches-unlocked": {
+    "text": "Branches unlocked.",
+    "wav": "audio/voice/branches-unlocked.wav"
+  },
+  "exit-reached-atomic": {
+    "text": "Exit reached.",
+    "wav": "audio/voice/exit-reached-atomic.wav"
+  },
+  "crossover-atomic": {
+    "text": "Crossover.",
+    "wav": "audio/voice/crossover-atomic.wav"
+  },
+  "listening-prefix": {
+    "text": "Listening.",
+    "wav": "audio/voice/listening-prefix.wav"
+  },
+  "stay-still-hear": {
+    "text": "Stay still to hear more.",
+    "wav": "audio/voice/stay-still-hear.wav"
+  },
+  "two-ways-forward": {
+    "text": "2 ways forward.",
+    "wav": "audio/voice/two-ways-forward.wav"
+  },
+  "three-ways-forward": {
+    "text": "3 ways forward.",
+    "wav": "audio/voice/three-ways-forward.wav"
+  },
+  "four-ways-forward": {
+    "text": "4 ways forward.",
+    "wav": "audio/voice/four-ways-forward.wav"
+  },
+  "compass-points": {
+    "text": "Compass points.",
+    "wav": "audio/voice/compass-points.wav"
+  },
+  "toward-exit": {
+    "text": "Toward exit.",
+    "wav": "audio/voice/toward-exit.wav"
+  },
+  "toward-loot": {
+    "text": "Toward loot.",
+    "wav": "audio/voice/toward-loot.wav"
+  },
+  "coins": {
+    "text": "Coins.",
+    "wav": "audio/voice/coins.wav"
+  },
+  "items": {
+    "text": "Items.",
+    "wav": "audio/voice/items.wav"
+  },
+  "a-still-chamber": {
+    "text": "A still chamber.",
+    "wav": "audio/voice/a-still-chamber.wav"
+  },
+  "cave-waits": {
+    "text": "The cave waits.",
+    "wav": "audio/voice/cave-waits.wav"
+  },
+  "begin": {
+    "text": "Begin.",
+    "wav": "audio/voice/begin.wav"
+  },
+  "loot-atomic": {
+    "text": "Loot.",
+    "wav": "audio/voice/loot-atomic.wav"
+  },
+  "inventory-open": {
+    "text": "Inventory open.",
+    "wav": "audio/voice/inventory-open.wav"
+  },
+  "one-coin": {
+    "text": "1 coin.",
+    "wav": "audio/voice/one-coin.wav"
+  },
+  "coins-2": {
+    "text": "2 coins.",
+    "wav": "audio/voice/coins-2.wav"
+  },
+  "coins-3": {
+    "text": "3 coins.",
+    "wav": "audio/voice/coins-3.wav"
+  },
+  "coins-4": {
+    "text": "4 coins.",
+    "wav": "audio/voice/coins-4.wav"
+  },
+  "coins-5": {
+    "text": "5 coins.",
+    "wav": "audio/voice/coins-5.wav"
+  },
+  "coins-6": {
+    "text": "6 coins.",
+    "wav": "audio/voice/coins-6.wav"
+  },
+  "coins-7": {
+    "text": "7 coins.",
+    "wav": "audio/voice/coins-7.wav"
+  },
+  "coins-8": {
+    "text": "8 coins.",
+    "wav": "audio/voice/coins-8.wav"
+  },
+  "coins-9": {
+    "text": "9 coins.",
+    "wav": "audio/voice/coins-9.wav"
+  },
+  "coins-10": {
+    "text": "10 coins.",
+    "wav": "audio/voice/coins-10.wav"
+  },
+  "coins-11": {
+    "text": "11 coins.",
+    "wav": "audio/voice/coins-11.wav"
+  },
+  "coins-12": {
+    "text": "12 coins.",
+    "wav": "audio/voice/coins-12.wav"
+  },
+  "coins-13": {
+    "text": "13 coins.",
+    "wav": "audio/voice/coins-13.wav"
+  },
+  "coins-14": {
+    "text": "14 coins.",
+    "wav": "audio/voice/coins-14.wav"
+  },
+  "coins-15": {
+    "text": "15 coins.",
+    "wav": "audio/voice/coins-15.wav"
+  },
+  "coins-16": {
+    "text": "16 coins.",
+    "wav": "audio/voice/coins-16.wav"
+  },
+  "coins-17": {
+    "text": "17 coins.",
+    "wav": "audio/voice/coins-17.wav"
+  },
+  "coins-18": {
+    "text": "18 coins.",
+    "wav": "audio/voice/coins-18.wav"
+  },
+  "coins-19": {
+    "text": "19 coins.",
+    "wav": "audio/voice/coins-19.wav"
+  },
+  "coins-20": {
+    "text": "20 coins.",
+    "wav": "audio/voice/coins-20.wav"
+  },
+  "coins-21": {
+    "text": "21 coins.",
+    "wav": "audio/voice/coins-21.wav"
+  },
+  "coins-22": {
+    "text": "22 coins.",
+    "wav": "audio/voice/coins-22.wav"
+  },
+  "coins-23": {
+    "text": "23 coins.",
+    "wav": "audio/voice/coins-23.wav"
+  },
+  "coins-24": {
+    "text": "24 coins.",
+    "wav": "audio/voice/coins-24.wav"
+  },
+  "coins-25": {
+    "text": "25 coins.",
+    "wav": "audio/voice/coins-25.wav"
+  },
+  "coins-26": {
+    "text": "26 coins.",
+    "wav": "audio/voice/coins-26.wav"
+  },
+  "coins-27": {
+    "text": "27 coins.",
+    "wav": "audio/voice/coins-27.wav"
+  },
+  "coins-28": {
+    "text": "28 coins.",
+    "wav": "audio/voice/coins-28.wav"
+  },
+  "coins-29": {
+    "text": "29 coins.",
+    "wav": "audio/voice/coins-29.wav"
+  },
+  "coins-30": {
+    "text": "30 coins.",
+    "wav": "audio/voice/coins-30.wav"
+  },
+  "coins-31": {
+    "text": "31 coins.",
+    "wav": "audio/voice/coins-31.wav"
+  },
+  "coins-32": {
+    "text": "32 coins.",
+    "wav": "audio/voice/coins-32.wav"
+  },
+  "coins-33": {
+    "text": "33 coins.",
+    "wav": "audio/voice/coins-33.wav"
+  },
+  "coins-34": {
+    "text": "34 coins.",
+    "wav": "audio/voice/coins-34.wav"
+  },
+  "coins-35": {
+    "text": "35 coins.",
+    "wav": "audio/voice/coins-35.wav"
+  },
+  "coins-36": {
+    "text": "36 coins.",
+    "wav": "audio/voice/coins-36.wav"
+  },
+  "coins-37": {
+    "text": "37 coins.",
+    "wav": "audio/voice/coins-37.wav"
+  },
+  "coins-38": {
+    "text": "38 coins.",
+    "wav": "audio/voice/coins-38.wav"
+  },
+  "coins-39": {
+    "text": "39 coins.",
+    "wav": "audio/voice/coins-39.wav"
+  },
+  "coins-40": {
+    "text": "40 coins.",
+    "wav": "audio/voice/coins-40.wav"
+  },
+  "coins-41": {
+    "text": "41 coins.",
+    "wav": "audio/voice/coins-41.wav"
+  },
+  "coins-42": {
+    "text": "42 coins.",
+    "wav": "audio/voice/coins-42.wav"
+  },
+  "coins-43": {
+    "text": "43 coins.",
+    "wav": "audio/voice/coins-43.wav"
+  },
+  "coins-44": {
+    "text": "44 coins.",
+    "wav": "audio/voice/coins-44.wav"
+  },
+  "coins-45": {
+    "text": "45 coins.",
+    "wav": "audio/voice/coins-45.wav"
+  },
+  "coins-46": {
+    "text": "46 coins.",
+    "wav": "audio/voice/coins-46.wav"
+  },
+  "coins-47": {
+    "text": "47 coins.",
+    "wav": "audio/voice/coins-47.wav"
+  },
+  "coins-48": {
+    "text": "48 coins.",
+    "wav": "audio/voice/coins-48.wav"
+  },
+  "coins-49": {
+    "text": "49 coins.",
+    "wav": "audio/voice/coins-49.wav"
+  },
+  "coins-50": {
+    "text": "50 coins.",
+    "wav": "audio/voice/coins-50.wav"
+  },
+  "coins-51": {
+    "text": "51 coins.",
+    "wav": "audio/voice/coins-51.wav"
+  },
+  "coins-52": {
+    "text": "52 coins.",
+    "wav": "audio/voice/coins-52.wav"
+  },
+  "coins-53": {
+    "text": "53 coins.",
+    "wav": "audio/voice/coins-53.wav"
+  },
+  "coins-54": {
+    "text": "54 coins.",
+    "wav": "audio/voice/coins-54.wav"
+  },
+  "coins-55": {
+    "text": "55 coins.",
+    "wav": "audio/voice/coins-55.wav"
+  },
+  "coins-56": {
+    "text": "56 coins.",
+    "wav": "audio/voice/coins-56.wav"
+  },
+  "coins-57": {
+    "text": "57 coins.",
+    "wav": "audio/voice/coins-57.wav"
+  },
+  "coins-58": {
+    "text": "58 coins.",
+    "wav": "audio/voice/coins-58.wav"
+  },
+  "coins-59": {
+    "text": "59 coins.",
+    "wav": "audio/voice/coins-59.wav"
+  },
+  "coins-60": {
+    "text": "60 coins.",
+    "wav": "audio/voice/coins-60.wav"
+  },
+  "coins-61": {
+    "text": "61 coins.",
+    "wav": "audio/voice/coins-61.wav"
+  },
+  "coins-62": {
+    "text": "62 coins.",
+    "wav": "audio/voice/coins-62.wav"
+  },
+  "coins-63": {
+    "text": "63 coins.",
+    "wav": "audio/voice/coins-63.wav"
+  },
+  "coins-64": {
+    "text": "64 coins.",
+    "wav": "audio/voice/coins-64.wav"
+  },
+  "coins-65": {
+    "text": "65 coins.",
+    "wav": "audio/voice/coins-65.wav"
+  },
+  "coins-66": {
+    "text": "66 coins.",
+    "wav": "audio/voice/coins-66.wav"
+  },
+  "coins-67": {
+    "text": "67 coins.",
+    "wav": "audio/voice/coins-67.wav"
+  },
+  "coins-68": {
+    "text": "68 coins.",
+    "wav": "audio/voice/coins-68.wav"
+  },
+  "coins-69": {
+    "text": "69 coins.",
+    "wav": "audio/voice/coins-69.wav"
+  },
+  "coins-70": {
+    "text": "70 coins.",
+    "wav": "audio/voice/coins-70.wav"
+  },
+  "coins-71": {
+    "text": "71 coins.",
+    "wav": "audio/voice/coins-71.wav"
+  },
+  "coins-72": {
+    "text": "72 coins.",
+    "wav": "audio/voice/coins-72.wav"
+  },
+  "coins-73": {
+    "text": "73 coins.",
+    "wav": "audio/voice/coins-73.wav"
+  },
+  "coins-74": {
+    "text": "74 coins.",
+    "wav": "audio/voice/coins-74.wav"
+  },
+  "coins-75": {
+    "text": "75 coins.",
+    "wav": "audio/voice/coins-75.wav"
+  },
+  "coins-76": {
+    "text": "76 coins.",
+    "wav": "audio/voice/coins-76.wav"
+  },
+  "coins-77": {
+    "text": "77 coins.",
+    "wav": "audio/voice/coins-77.wav"
+  },
+  "coins-78": {
+    "text": "78 coins.",
+    "wav": "audio/voice/coins-78.wav"
+  },
+  "coins-79": {
+    "text": "79 coins.",
+    "wav": "audio/voice/coins-79.wav"
+  },
+  "coins-80": {
+    "text": "80 coins.",
+    "wav": "audio/voice/coins-80.wav"
+  },
+  "coins-81": {
+    "text": "81 coins.",
+    "wav": "audio/voice/coins-81.wav"
+  },
+  "coins-82": {
+    "text": "82 coins.",
+    "wav": "audio/voice/coins-82.wav"
+  },
+  "coins-83": {
+    "text": "83 coins.",
+    "wav": "audio/voice/coins-83.wav"
+  },
+  "coins-84": {
+    "text": "84 coins.",
+    "wav": "audio/voice/coins-84.wav"
+  },
+  "coins-85": {
+    "text": "85 coins.",
+    "wav": "audio/voice/coins-85.wav"
+  },
+  "coins-86": {
+    "text": "86 coins.",
+    "wav": "audio/voice/coins-86.wav"
+  },
+  "coins-87": {
+    "text": "87 coins.",
+    "wav": "audio/voice/coins-87.wav"
+  },
+  "coins-88": {
+    "text": "88 coins.",
+    "wav": "audio/voice/coins-88.wav"
+  },
+  "coins-89": {
+    "text": "89 coins.",
+    "wav": "audio/voice/coins-89.wav"
+  },
+  "coins-90": {
+    "text": "90 coins.",
+    "wav": "audio/voice/coins-90.wav"
+  },
+  "coins-91": {
+    "text": "91 coins.",
+    "wav": "audio/voice/coins-91.wav"
+  },
+  "coins-92": {
+    "text": "92 coins.",
+    "wav": "audio/voice/coins-92.wav"
+  },
+  "coins-93": {
+    "text": "93 coins.",
+    "wav": "audio/voice/coins-93.wav"
+  },
+  "coins-94": {
+    "text": "94 coins.",
+    "wav": "audio/voice/coins-94.wav"
+  },
+  "coins-95": {
+    "text": "95 coins.",
+    "wav": "audio/voice/coins-95.wav"
+  },
+  "coins-96": {
+    "text": "96 coins.",
+    "wav": "audio/voice/coins-96.wav"
+  },
+  "coins-97": {
+    "text": "97 coins.",
+    "wav": "audio/voice/coins-97.wav"
+  },
+  "coins-98": {
+    "text": "98 coins.",
+    "wav": "audio/voice/coins-98.wav"
+  },
+  "coins-99": {
+    "text": "99 coins.",
+    "wav": "audio/voice/coins-99.wav"
+  },
+  "coins-100": {
+    "text": "100 coins.",
+    "wav": "audio/voice/coins-100.wav"
+  },
+  "coins-101": {
+    "text": "101 coins.",
+    "wav": "audio/voice/coins-101.wav"
+  },
+  "coins-102": {
+    "text": "102 coins.",
+    "wav": "audio/voice/coins-102.wav"
+  },
+  "coins-103": {
+    "text": "103 coins.",
+    "wav": "audio/voice/coins-103.wav"
+  },
+  "coins-104": {
+    "text": "104 coins.",
+    "wav": "audio/voice/coins-104.wav"
+  },
+  "coins-105": {
+    "text": "105 coins.",
+    "wav": "audio/voice/coins-105.wav"
+  },
+  "coins-106": {
+    "text": "106 coins.",
+    "wav": "audio/voice/coins-106.wav"
+  },
+  "coins-107": {
+    "text": "107 coins.",
+    "wav": "audio/voice/coins-107.wav"
+  },
+  "coins-108": {
+    "text": "108 coins.",
+    "wav": "audio/voice/coins-108.wav"
+  },
+  "coins-109": {
+    "text": "109 coins.",
+    "wav": "audio/voice/coins-109.wav"
+  },
+  "coins-110": {
+    "text": "110 coins.",
+    "wav": "audio/voice/coins-110.wav"
+  },
+  "coins-111": {
+    "text": "111 coins.",
+    "wav": "audio/voice/coins-111.wav"
+  },
+  "coins-112": {
+    "text": "112 coins.",
+    "wav": "audio/voice/coins-112.wav"
+  },
+  "coins-113": {
+    "text": "113 coins.",
+    "wav": "audio/voice/coins-113.wav"
+  },
+  "coins-114": {
+    "text": "114 coins.",
+    "wav": "audio/voice/coins-114.wav"
+  },
+  "coins-115": {
+    "text": "115 coins.",
+    "wav": "audio/voice/coins-115.wav"
+  },
+  "coins-116": {
+    "text": "116 coins.",
+    "wav": "audio/voice/coins-116.wav"
+  },
+  "coins-117": {
+    "text": "117 coins.",
+    "wav": "audio/voice/coins-117.wav"
+  },
+  "coins-118": {
+    "text": "118 coins.",
+    "wav": "audio/voice/coins-118.wav"
+  },
+  "coins-119": {
+    "text": "119 coins.",
+    "wav": "audio/voice/coins-119.wav"
+  },
+  "coins-120": {
+    "text": "120 coins.",
+    "wav": "audio/voice/coins-120.wav"
+  },
+  "coins-121": {
+    "text": "121 coins.",
+    "wav": "audio/voice/coins-121.wav"
+  },
+  "coins-122": {
+    "text": "122 coins.",
+    "wav": "audio/voice/coins-122.wav"
+  },
+  "coins-123": {
+    "text": "123 coins.",
+    "wav": "audio/voice/coins-123.wav"
+  },
+  "coins-124": {
+    "text": "124 coins.",
+    "wav": "audio/voice/coins-124.wav"
+  },
+  "coins-125": {
+    "text": "125 coins.",
+    "wav": "audio/voice/coins-125.wav"
+  },
+  "coins-126": {
+    "text": "126 coins.",
+    "wav": "audio/voice/coins-126.wav"
+  },
+  "coins-127": {
+    "text": "127 coins.",
+    "wav": "audio/voice/coins-127.wav"
+  },
+  "coins-128": {
+    "text": "128 coins.",
+    "wav": "audio/voice/coins-128.wav"
+  },
+  "coins-129": {
+    "text": "129 coins.",
+    "wav": "audio/voice/coins-129.wav"
+  },
+  "coins-130": {
+    "text": "130 coins.",
+    "wav": "audio/voice/coins-130.wav"
+  },
+  "coins-131": {
+    "text": "131 coins.",
+    "wav": "audio/voice/coins-131.wav"
+  },
+  "coins-132": {
+    "text": "132 coins.",
+    "wav": "audio/voice/coins-132.wav"
+  },
+  "coins-133": {
+    "text": "133 coins.",
+    "wav": "audio/voice/coins-133.wav"
+  },
+  "coins-134": {
+    "text": "134 coins.",
+    "wav": "audio/voice/coins-134.wav"
+  },
+  "coins-135": {
+    "text": "135 coins.",
+    "wav": "audio/voice/coins-135.wav"
+  },
+  "coins-136": {
+    "text": "136 coins.",
+    "wav": "audio/voice/coins-136.wav"
+  },
+  "coins-137": {
+    "text": "137 coins.",
+    "wav": "audio/voice/coins-137.wav"
+  },
+  "coins-138": {
+    "text": "138 coins.",
+    "wav": "audio/voice/coins-138.wav"
+  },
+  "coins-139": {
+    "text": "139 coins.",
+    "wav": "audio/voice/coins-139.wav"
+  },
+  "coins-140": {
+    "text": "140 coins.",
+    "wav": "audio/voice/coins-140.wav"
+  },
+  "coins-141": {
+    "text": "141 coins.",
+    "wav": "audio/voice/coins-141.wav"
+  },
+  "coins-142": {
+    "text": "142 coins.",
+    "wav": "audio/voice/coins-142.wav"
+  },
+  "coins-143": {
+    "text": "143 coins.",
+    "wav": "audio/voice/coins-143.wav"
+  },
+  "coins-144": {
+    "text": "144 coins.",
+    "wav": "audio/voice/coins-144.wav"
+  },
+  "coins-145": {
+    "text": "145 coins.",
+    "wav": "audio/voice/coins-145.wav"
+  },
+  "coins-146": {
+    "text": "146 coins.",
+    "wav": "audio/voice/coins-146.wav"
+  },
+  "coins-147": {
+    "text": "147 coins.",
+    "wav": "audio/voice/coins-147.wav"
+  },
+  "coins-148": {
+    "text": "148 coins.",
+    "wav": "audio/voice/coins-148.wav"
+  },
+  "coins-149": {
+    "text": "149 coins.",
+    "wav": "audio/voice/coins-149.wav"
+  },
+  "coins-150": {
+    "text": "150 coins.",
+    "wav": "audio/voice/coins-150.wav"
+  },
+  "coins-151": {
+    "text": "151 coins.",
+    "wav": "audio/voice/coins-151.wav"
+  },
+  "coins-152": {
+    "text": "152 coins.",
+    "wav": "audio/voice/coins-152.wav"
+  },
+  "coins-153": {
+    "text": "153 coins.",
+    "wav": "audio/voice/coins-153.wav"
+  },
+  "coins-154": {
+    "text": "154 coins.",
+    "wav": "audio/voice/coins-154.wav"
+  },
+  "coins-155": {
+    "text": "155 coins.",
+    "wav": "audio/voice/coins-155.wav"
+  },
+  "coins-156": {
+    "text": "156 coins.",
+    "wav": "audio/voice/coins-156.wav"
+  },
+  "coins-157": {
+    "text": "157 coins.",
+    "wav": "audio/voice/coins-157.wav"
+  },
+  "coins-158": {
+    "text": "158 coins.",
+    "wav": "audio/voice/coins-158.wav"
+  },
+  "coins-159": {
+    "text": "159 coins.",
+    "wav": "audio/voice/coins-159.wav"
+  },
+  "coins-160": {
+    "text": "160 coins.",
+    "wav": "audio/voice/coins-160.wav"
+  },
+  "coins-161": {
+    "text": "161 coins.",
+    "wav": "audio/voice/coins-161.wav"
+  },
+  "coins-162": {
+    "text": "162 coins.",
+    "wav": "audio/voice/coins-162.wav"
+  },
+  "coins-163": {
+    "text": "163 coins.",
+    "wav": "audio/voice/coins-163.wav"
+  },
+  "coins-164": {
+    "text": "164 coins.",
+    "wav": "audio/voice/coins-164.wav"
+  },
+  "coins-165": {
+    "text": "165 coins.",
+    "wav": "audio/voice/coins-165.wav"
+  },
+  "coins-166": {
+    "text": "166 coins.",
+    "wav": "audio/voice/coins-166.wav"
+  },
+  "coins-167": {
+    "text": "167 coins.",
+    "wav": "audio/voice/coins-167.wav"
+  },
+  "coins-168": {
+    "text": "168 coins.",
+    "wav": "audio/voice/coins-168.wav"
+  },
+  "coins-169": {
+    "text": "169 coins.",
+    "wav": "audio/voice/coins-169.wav"
+  },
+  "coins-170": {
+    "text": "170 coins.",
+    "wav": "audio/voice/coins-170.wav"
+  },
+  "coins-171": {
+    "text": "171 coins.",
+    "wav": "audio/voice/coins-171.wav"
+  },
+  "coins-172": {
+    "text": "172 coins.",
+    "wav": "audio/voice/coins-172.wav"
+  },
+  "coins-173": {
+    "text": "173 coins.",
+    "wav": "audio/voice/coins-173.wav"
+  },
+  "coins-174": {
+    "text": "174 coins.",
+    "wav": "audio/voice/coins-174.wav"
+  },
+  "coins-175": {
+    "text": "175 coins.",
+    "wav": "audio/voice/coins-175.wav"
+  },
+  "coins-176": {
+    "text": "176 coins.",
+    "wav": "audio/voice/coins-176.wav"
+  },
+  "coins-177": {
+    "text": "177 coins.",
+    "wav": "audio/voice/coins-177.wav"
+  },
+  "coins-178": {
+    "text": "178 coins.",
+    "wav": "audio/voice/coins-178.wav"
+  },
+  "coins-179": {
+    "text": "179 coins.",
+    "wav": "audio/voice/coins-179.wav"
+  },
+  "coins-180": {
+    "text": "180 coins.",
+    "wav": "audio/voice/coins-180.wav"
+  },
+  "coins-181": {
+    "text": "181 coins.",
+    "wav": "audio/voice/coins-181.wav"
+  },
+  "coins-182": {
+    "text": "182 coins.",
+    "wav": "audio/voice/coins-182.wav"
+  },
+  "coins-183": {
+    "text": "183 coins.",
+    "wav": "audio/voice/coins-183.wav"
+  },
+  "coins-184": {
+    "text": "184 coins.",
+    "wav": "audio/voice/coins-184.wav"
+  },
+  "coins-185": {
+    "text": "185 coins.",
+    "wav": "audio/voice/coins-185.wav"
+  },
+  "coins-186": {
+    "text": "186 coins.",
+    "wav": "audio/voice/coins-186.wav"
+  },
+  "coins-187": {
+    "text": "187 coins.",
+    "wav": "audio/voice/coins-187.wav"
+  },
+  "coins-188": {
+    "text": "188 coins.",
+    "wav": "audio/voice/coins-188.wav"
+  },
+  "coins-189": {
+    "text": "189 coins.",
+    "wav": "audio/voice/coins-189.wav"
+  },
+  "coins-190": {
+    "text": "190 coins.",
+    "wav": "audio/voice/coins-190.wav"
+  },
+  "coins-191": {
+    "text": "191 coins.",
+    "wav": "audio/voice/coins-191.wav"
+  },
+  "coins-192": {
+    "text": "192 coins.",
+    "wav": "audio/voice/coins-192.wav"
+  },
+  "coins-193": {
+    "text": "193 coins.",
+    "wav": "audio/voice/coins-193.wav"
+  },
+  "coins-194": {
+    "text": "194 coins.",
+    "wav": "audio/voice/coins-194.wav"
+  },
+  "coins-195": {
+    "text": "195 coins.",
+    "wav": "audio/voice/coins-195.wav"
+  },
+  "coins-196": {
+    "text": "196 coins.",
+    "wav": "audio/voice/coins-196.wav"
+  },
+  "coins-197": {
+    "text": "197 coins.",
+    "wav": "audio/voice/coins-197.wav"
+  },
+  "coins-198": {
+    "text": "198 coins.",
+    "wav": "audio/voice/coins-198.wav"
+  },
+  "coins-199": {
+    "text": "199 coins.",
+    "wav": "audio/voice/coins-199.wav"
+  },
+  "coins-200": {
+    "text": "200 coins.",
+    "wav": "audio/voice/coins-200.wav"
+  },
+  "coins-201": {
+    "text": "201 coins.",
+    "wav": "audio/voice/coins-201.wav"
+  },
+  "coins-202": {
+    "text": "202 coins.",
+    "wav": "audio/voice/coins-202.wav"
+  },
+  "coins-203": {
+    "text": "203 coins.",
+    "wav": "audio/voice/coins-203.wav"
+  },
+  "coins-204": {
+    "text": "204 coins.",
+    "wav": "audio/voice/coins-204.wav"
+  },
+  "coins-205": {
+    "text": "205 coins.",
+    "wav": "audio/voice/coins-205.wav"
+  },
+  "coins-206": {
+    "text": "206 coins.",
+    "wav": "audio/voice/coins-206.wav"
+  },
+  "coins-207": {
+    "text": "207 coins.",
+    "wav": "audio/voice/coins-207.wav"
+  },
+  "coins-208": {
+    "text": "208 coins.",
+    "wav": "audio/voice/coins-208.wav"
+  },
+  "coins-209": {
+    "text": "209 coins.",
+    "wav": "audio/voice/coins-209.wav"
+  },
+  "coins-210": {
+    "text": "210 coins.",
+    "wav": "audio/voice/coins-210.wav"
+  },
+  "coins-211": {
+    "text": "211 coins.",
+    "wav": "audio/voice/coins-211.wav"
+  },
+  "coins-212": {
+    "text": "212 coins.",
+    "wav": "audio/voice/coins-212.wav"
+  },
+  "coins-213": {
+    "text": "213 coins.",
+    "wav": "audio/voice/coins-213.wav"
+  },
+  "coins-214": {
+    "text": "214 coins.",
+    "wav": "audio/voice/coins-214.wav"
+  },
+  "coins-215": {
+    "text": "215 coins.",
+    "wav": "audio/voice/coins-215.wav"
+  },
+  "coins-216": {
+    "text": "216 coins.",
+    "wav": "audio/voice/coins-216.wav"
+  },
+  "coins-217": {
+    "text": "217 coins.",
+    "wav": "audio/voice/coins-217.wav"
+  },
+  "coins-218": {
+    "text": "218 coins.",
+    "wav": "audio/voice/coins-218.wav"
+  },
+  "coins-219": {
+    "text": "219 coins.",
+    "wav": "audio/voice/coins-219.wav"
+  },
+  "coins-220": {
+    "text": "220 coins.",
+    "wav": "audio/voice/coins-220.wav"
+  },
+  "coins-221": {
+    "text": "221 coins.",
+    "wav": "audio/voice/coins-221.wav"
+  },
+  "coins-222": {
+    "text": "222 coins.",
+    "wav": "audio/voice/coins-222.wav"
+  },
+  "coins-223": {
+    "text": "223 coins.",
+    "wav": "audio/voice/coins-223.wav"
+  },
+  "coins-224": {
+    "text": "224 coins.",
+    "wav": "audio/voice/coins-224.wav"
+  },
+  "coins-225": {
+    "text": "225 coins.",
+    "wav": "audio/voice/coins-225.wav"
+  },
+  "coins-226": {
+    "text": "226 coins.",
+    "wav": "audio/voice/coins-226.wav"
+  },
+  "coins-227": {
+    "text": "227 coins.",
+    "wav": "audio/voice/coins-227.wav"
+  },
+  "coins-228": {
+    "text": "228 coins.",
+    "wav": "audio/voice/coins-228.wav"
+  },
+  "coins-229": {
+    "text": "229 coins.",
+    "wav": "audio/voice/coins-229.wav"
+  },
+  "coins-230": {
+    "text": "230 coins.",
+    "wav": "audio/voice/coins-230.wav"
+  },
+  "coins-231": {
+    "text": "231 coins.",
+    "wav": "audio/voice/coins-231.wav"
+  },
+  "coins-232": {
+    "text": "232 coins.",
+    "wav": "audio/voice/coins-232.wav"
+  },
+  "coins-233": {
+    "text": "233 coins.",
+    "wav": "audio/voice/coins-233.wav"
+  },
+  "coins-234": {
+    "text": "234 coins.",
+    "wav": "audio/voice/coins-234.wav"
+  },
+  "coins-235": {
+    "text": "235 coins.",
+    "wav": "audio/voice/coins-235.wav"
+  },
+  "coins-236": {
+    "text": "236 coins.",
+    "wav": "audio/voice/coins-236.wav"
+  },
+  "coins-237": {
+    "text": "237 coins.",
+    "wav": "audio/voice/coins-237.wav"
+  },
+  "coins-238": {
+    "text": "238 coins.",
+    "wav": "audio/voice/coins-238.wav"
+  },
+  "coins-239": {
+    "text": "239 coins.",
+    "wav": "audio/voice/coins-239.wav"
+  },
+  "coins-240": {
+    "text": "240 coins.",
+    "wav": "audio/voice/coins-240.wav"
+  },
+  "coins-241": {
+    "text": "241 coins.",
+    "wav": "audio/voice/coins-241.wav"
+  },
+  "coins-242": {
+    "text": "242 coins.",
+    "wav": "audio/voice/coins-242.wav"
+  },
+  "coins-243": {
+    "text": "243 coins.",
+    "wav": "audio/voice/coins-243.wav"
+  },
+  "coins-244": {
+    "text": "244 coins.",
+    "wav": "audio/voice/coins-244.wav"
+  },
+  "coins-245": {
+    "text": "245 coins.",
+    "wav": "audio/voice/coins-245.wav"
+  },
+  "coins-246": {
+    "text": "246 coins.",
+    "wav": "audio/voice/coins-246.wav"
+  },
+  "coins-247": {
+    "text": "247 coins.",
+    "wav": "audio/voice/coins-247.wav"
+  },
+  "coins-248": {
+    "text": "248 coins.",
+    "wav": "audio/voice/coins-248.wav"
+  },
+  "coins-249": {
+    "text": "249 coins.",
+    "wav": "audio/voice/coins-249.wav"
+  },
+  "coins-250": {
+    "text": "250 coins.",
+    "wav": "audio/voice/coins-250.wav"
+  },
+  "coins-251": {
+    "text": "251 coins.",
+    "wav": "audio/voice/coins-251.wav"
+  },
+  "coins-252": {
+    "text": "252 coins.",
+    "wav": "audio/voice/coins-252.wav"
+  },
+  "coins-253": {
+    "text": "253 coins.",
+    "wav": "audio/voice/coins-253.wav"
+  },
+  "coins-254": {
+    "text": "254 coins.",
+    "wav": "audio/voice/coins-254.wav"
+  },
+  "coins-255": {
+    "text": "255 coins.",
+    "wav": "audio/voice/coins-255.wav"
+  },
+  "coins-256": {
+    "text": "256 coins.",
+    "wav": "audio/voice/coins-256.wav"
+  },
+  "coins-257": {
+    "text": "257 coins.",
+    "wav": "audio/voice/coins-257.wav"
+  },
+  "coins-258": {
+    "text": "258 coins.",
+    "wav": "audio/voice/coins-258.wav"
+  },
+  "coins-259": {
+    "text": "259 coins.",
+    "wav": "audio/voice/coins-259.wav"
+  },
+  "coins-260": {
+    "text": "260 coins.",
+    "wav": "audio/voice/coins-260.wav"
+  },
+  "coins-261": {
+    "text": "261 coins.",
+    "wav": "audio/voice/coins-261.wav"
+  },
+  "coins-262": {
+    "text": "262 coins.",
+    "wav": "audio/voice/coins-262.wav"
+  },
+  "coins-263": {
+    "text": "263 coins.",
+    "wav": "audio/voice/coins-263.wav"
+  },
+  "coins-264": {
+    "text": "264 coins.",
+    "wav": "audio/voice/coins-264.wav"
+  },
+  "coins-265": {
+    "text": "265 coins.",
+    "wav": "audio/voice/coins-265.wav"
+  },
+  "coins-266": {
+    "text": "266 coins.",
+    "wav": "audio/voice/coins-266.wav"
+  },
+  "coins-267": {
+    "text": "267 coins.",
+    "wav": "audio/voice/coins-267.wav"
+  },
+  "coins-268": {
+    "text": "268 coins.",
+    "wav": "audio/voice/coins-268.wav"
+  },
+  "coins-269": {
+    "text": "269 coins.",
+    "wav": "audio/voice/coins-269.wav"
+  },
+  "coins-270": {
+    "text": "270 coins.",
+    "wav": "audio/voice/coins-270.wav"
+  },
+  "coins-271": {
+    "text": "271 coins.",
+    "wav": "audio/voice/coins-271.wav"
+  },
+  "coins-272": {
+    "text": "272 coins.",
+    "wav": "audio/voice/coins-272.wav"
+  },
+  "coins-273": {
+    "text": "273 coins.",
+    "wav": "audio/voice/coins-273.wav"
+  },
+  "coins-274": {
+    "text": "274 coins.",
+    "wav": "audio/voice/coins-274.wav"
+  },
+  "coins-275": {
+    "text": "275 coins.",
+    "wav": "audio/voice/coins-275.wav"
+  },
+  "coins-276": {
+    "text": "276 coins.",
+    "wav": "audio/voice/coins-276.wav"
+  },
+  "coins-277": {
+    "text": "277 coins.",
+    "wav": "audio/voice/coins-277.wav"
+  },
+  "coins-278": {
+    "text": "278 coins.",
+    "wav": "audio/voice/coins-278.wav"
+  },
+  "coins-279": {
+    "text": "279 coins.",
+    "wav": "audio/voice/coins-279.wav"
+  },
+  "coins-280": {
+    "text": "280 coins.",
+    "wav": "audio/voice/coins-280.wav"
+  },
+  "coins-281": {
+    "text": "281 coins.",
+    "wav": "audio/voice/coins-281.wav"
+  },
+  "coins-282": {
+    "text": "282 coins.",
+    "wav": "audio/voice/coins-282.wav"
+  },
+  "coins-283": {
+    "text": "283 coins.",
+    "wav": "audio/voice/coins-283.wav"
+  },
+  "coins-284": {
+    "text": "284 coins.",
+    "wav": "audio/voice/coins-284.wav"
+  },
+  "coins-285": {
+    "text": "285 coins.",
+    "wav": "audio/voice/coins-285.wav"
+  },
+  "coins-286": {
+    "text": "286 coins.",
+    "wav": "audio/voice/coins-286.wav"
+  },
+  "coins-287": {
+    "text": "287 coins.",
+    "wav": "audio/voice/coins-287.wav"
+  },
+  "coins-288": {
+    "text": "288 coins.",
+    "wav": "audio/voice/coins-288.wav"
+  },
+  "coins-289": {
+    "text": "289 coins.",
+    "wav": "audio/voice/coins-289.wav"
+  },
+  "coins-290": {
+    "text": "290 coins.",
+    "wav": "audio/voice/coins-290.wav"
+  },
+  "coins-291": {
+    "text": "291 coins.",
+    "wav": "audio/voice/coins-291.wav"
+  },
+  "coins-292": {
+    "text": "292 coins.",
+    "wav": "audio/voice/coins-292.wav"
+  },
+  "coins-293": {
+    "text": "293 coins.",
+    "wav": "audio/voice/coins-293.wav"
+  },
+  "coins-294": {
+    "text": "294 coins.",
+    "wav": "audio/voice/coins-294.wav"
+  },
+  "coins-295": {
+    "text": "295 coins.",
+    "wav": "audio/voice/coins-295.wav"
+  },
+  "coins-296": {
+    "text": "296 coins.",
+    "wav": "audio/voice/coins-296.wav"
+  },
+  "coins-297": {
+    "text": "297 coins.",
+    "wav": "audio/voice/coins-297.wav"
+  },
+  "coins-298": {
+    "text": "298 coins.",
+    "wav": "audio/voice/coins-298.wav"
+  },
+  "coins-299": {
+    "text": "299 coins.",
+    "wav": "audio/voice/coins-299.wav"
+  },
+  "coins-300": {
+    "text": "300 coins.",
+    "wav": "audio/voice/coins-300.wav"
+  },
+  "coins-0": {
+    "text": "0 coins.",
+    "wav": "audio/voice/coins-0.wav"
+  },
+  "no-compass-frags": {
+    "text": "No compass fragments.",
+    "wav": "audio/voice/no-compass-frags.wav"
+  },
+  "no-target-looted": {
+    "text": "No target. All rooms looted.",
+    "wav": "audio/voice/no-target-looted.wav"
+  },
+  "cannot-find-path": {
+    "text": "Cannot find a path.",
+    "wav": "audio/voice/cannot-find-path.wav"
+  },
+  "no-echo-stones": {
+    "text": "No echo stones.",
+    "wav": "audio/voice/no-echo-stones.wav"
+  },
+  "echo-stone-placed": {
+    "text": "Echo stone placed. Listen for it from nearby rooms.",
+    "wav": "audio/voice/echo-stone-placed.wav"
+  },
+  "echo-stone-picked": {
+    "text": "Echo stone picked up.",
+    "wav": "audio/voice/echo-stone-picked.wav"
+  },
+  "listen-for-it": {
+    "text": "Listen for it from nearby rooms.",
+    "wav": "audio/voice/listen-for-it.wav"
+  },
+  "already-daily": {
+    "text": "Already in daily mode.",
+    "wav": "audio/voice/already-daily.wav"
+  },
+  "already-personal": {
+    "text": "Already in your cave.",
+    "wav": "audio/voice/already-personal.wav"
+  },
+  "back-personal": {
+    "text": "Back in your personal cave.",
+    "wav": "audio/voice/back-personal.wav"
+  },
+  "result-copied": {
+    "text": "Result copied.",
+    "wav": "audio/voice/result-copied.wav"
+  },
+  "already-solved": {
+    "text": "Already solved.",
+    "wav": "audio/voice/already-solved.wav"
+  },
+  "find-the-exit": {
+    "text": "Find the exit.",
+    "wav": "audio/voice/find-the-exit.wav"
+  },
+  "home-items-secured": {
+    "text": "Home. Items secured.",
+    "wav": "audio/voice/home-items-secured.wav"
+  },
+  "cave-map-open": {
+    "text": "Cave map open. Drag the menu to read paths aloud or print as braille.",
+    "wav": "audio/voice/cave-map-open.wav"
+  },
+  "drag-menu-paths": {
+    "text": "Drag the menu to read paths aloud or print as braille.",
+    "wav": "audio/voice/drag-menu-paths.wav"
+  },
+  "braille-export-open": {
+    "text": "Braille export open. Tap Copy to copy the cave guide to your clipboard.",
+    "wav": "audio/voice/braille-export-open.wav"
+  },
+  "tap-copy-clipboard": {
+    "text": "Tap Copy to copy the cave guide to your clipboard.",
+    "wav": "audio/voice/tap-copy-clipboard.wav"
+  },
+  "braille-copied": {
+    "text": "Braille copied to clipboard.",
+    "wav": "audio/voice/braille-copied.wav"
+  },
+  "menu-open": {
+    "text": "Menu open.",
+    "wav": "audio/voice/menu-open.mp3"
+  },
+  "classic-theme": {
+    "text": "Classic theme.",
+    "wav": "audio/voice/classic-theme.wav"
+  },
+  "crystal-grotto-theme": {
+    "text": "Crystal Grotto theme.",
+    "wav": "audio/voice/crystal-grotto-theme.wav"
+  },
+  "cave-deeper-here": {
+    "text": "The cave is deeper here.",
+    "wav": "audio/voice/cave-deeper-here.wav"
+  },
+  "find-exit-again": {
+    "text": "Find the exit again.",
+    "wav": "audio/voice/find-exit-again.wav"
+  },
+  "level-1": {
+    "text": "Level 1.",
+    "wav": "audio/voice/level-1.wav"
+  },
+  "level-2": {
+    "text": "Level 2.",
+    "wav": "audio/voice/level-2.wav"
+  },
+  "level-3": {
+    "text": "Level 3.",
+    "wav": "audio/voice/level-3.wav"
+  },
+  "level-4": {
+    "text": "Level 4.",
+    "wav": "audio/voice/level-4.wav"
+  },
+  "level-5": {
+    "text": "Level 5.",
+    "wav": "audio/voice/level-5.wav"
+  },
+  "level-6": {
+    "text": "Level 6.",
+    "wav": "audio/voice/level-6.wav"
+  },
+  "level-7": {
+    "text": "Level 7.",
+    "wav": "audio/voice/level-7.wav"
+  },
+  "level-8": {
+    "text": "Level 8.",
+    "wav": "audio/voice/level-8.wav"
+  },
+  "level-9": {
+    "text": "Level 9.",
+    "wav": "audio/voice/level-9.wav"
+  },
+  "level-10": {
+    "text": "Level 10.",
+    "wav": "audio/voice/level-10.wav"
+  },
+  "level-11": {
+    "text": "Level 11.",
+    "wav": "audio/voice/level-11.wav"
+  },
+  "level-12": {
+    "text": "Level 12.",
+    "wav": "audio/voice/level-12.wav"
+  },
+  "level-13": {
+    "text": "Level 13.",
+    "wav": "audio/voice/level-13.wav"
+  },
+  "level-14": {
+    "text": "Level 14.",
+    "wav": "audio/voice/level-14.wav"
+  },
+  "level-15": {
+    "text": "Level 15.",
+    "wav": "audio/voice/level-15.wav"
+  },
+  "achievements-bare": {
+    "text": "Achievements.",
+    "wav": "audio/voice/achievements-bare.wav"
+  },
+  "journal-bare": {
+    "text": "Journal.",
+    "wav": "audio/voice/journal-bare.wav"
+  },
+  "audio-only-on": {
+    "text": "Pure audio mode on.",
+    "wav": "audio/voice/audio-only-on.wav"
+  },
+  "audio-only-off": {
+    "text": "Pure audio mode off.",
+    "wav": "audio/voice/audio-only-off.wav"
+  },
+  "cp-forward-exit": {
+    "text": "Forward. Toward exit.",
+    "wav": "audio/voice/cp-forward-exit.wav"
+  },
+  "cp-forward-loot": {
+    "text": "Forward. Toward loot.",
+    "wav": "audio/voice/cp-forward-loot.wav"
+  },
+  "cp-retreat-exit": {
+    "text": "Retreat. Toward exit.",
+    "wav": "audio/voice/cp-retreat-exit.wav"
+  },
+  "cp-retreat-loot": {
+    "text": "Retreat. Toward loot.",
+    "wav": "audio/voice/cp-retreat-loot.wav"
+  },
+  "cp-left-exit": {
+    "text": "Left. Toward exit.",
+    "wav": "audio/voice/cp-left-exit.wav"
+  },
+  "cp-left-loot": {
+    "text": "Left. Toward loot.",
+    "wav": "audio/voice/cp-left-loot.wav"
+  },
+  "cp-right-exit": {
+    "text": "Right. Toward exit.",
+    "wav": "audio/voice/cp-right-exit.wav"
+  },
+  "cp-right-loot": {
+    "text": "Right. Toward loot.",
+    "wav": "audio/voice/cp-right-loot.wav"
+  },
+  "welcome-tap-msg": {
+    "text": "Tap anywhere to enter the cave.",
+    "wav": "audio/voice/welcome-tap-msg.wav"
+  },
+  "intro-flickers": {
+    "text": "Your light flickers.",
+    "wav": "audio/voice/intro-flickers.wav"
+  },
+  "intro-flickers-2": {
+    "text": "It flickers again.",
+    "wav": "audio/voice/intro-flickers-2.wav"
+  },
+  "intro-pitch-black": {
+    "text": "Pitch black.",
+    "wav": "audio/voice/intro-pitch-black.wav"
+  },
+  "welcome-greeting-full": {
+    "text": "Welcome to Echo Cave. Tap anywhere to enter.",
+    "wav": "audio/voice/welcome-greeting-full.wav"
+  },
+  "welcome-greeting": {
+    "text": "Welcome to Echo Cave.",
+    "wav": "audio/voice/welcome-greeting.wav"
+  },
+  "welcome-tap-anywhere": {
+    "text": "Tap anywhere to enter.",
+    "wav": "audio/voice/welcome-tap-anywhere.wav"
+  },
+  "tutorial-in-the-dark": {
+    "text": "In the dark.",
+    "wav": "audio/voice/tutorial-in-the-dark.wav"
+  },
+  "tutorial-first-cave": {
+    "text": "Your first cave is one straight path.",
+    "wav": "audio/voice/tutorial-first-cave.wav"
+  },
+  "tutorial-sealed": {
+    "text": "Side passages are sealed.",
+    "wav": "audio/voice/tutorial-sealed.wav"
+  },
+  "tutorial-listen": {
+    "text": "Listen to each doorway, follow it forward, reach the exit.",
+    "wav": "audio/voice/tutorial-listen.wav"
+  },
+  "tutorial-once-you-do": {
+    "text": "Once you do, the cave opens up.",
+    "wav": "audio/voice/tutorial-once-you-do.wav"
+  },
+  "tutorial-tap-begin": {
+    "text": "Tap Begin to play, or Audio-only mode.",
+    "wav": "audio/voice/tutorial-tap-begin.mp3"
+  },
+  "tutorial-menu-hold": {
+    "text": "To open the menu, double-tap and hold.",
+    "wav": "audio/voice/tutorial-menu-hold.wav"
+  },
+  "tutorial-part-1": {
+    "text": "In the dark. Your first cave is one straight path. Side passages are sealed. Listen to each doorway, follow it forward, reach the exit.",
+    "wav": "audio/voice/tutorial-part-1.wav"
+  },
+  "tutorial-part-2": {
+    "text": "Once you do, the cave opens up. To teleport home, tap with both fingers. To open the menu, double-tap and hold. Tap Begin to play, or Audio-only mode.",
+    "wav": "audio/voice/tutorial-part-2.mp3"
+  },
+  "tutorial-teleport-v3": {
+    "text": "To teleport home, tap with both fingers, please.",
+    "wav": "audio/voice/tutorial-teleport-v3.wav"
+  },
+  "loot-1-coin": {
+    "text": "Loot. 1 coin.",
+    "wav": "audio/voice/loot-1-coin.wav"
+  },
+  "daily-mode-on": {
+    "text": "Daily mode.",
+    "wav": "audio/voice/daily-mode-on.wav"
+  },
+  "inv-1-usable": {
+    "text": "1 usable.",
+    "wav": "audio/voice/inv-1-usable.wav"
+  },
+  "inv-2-usable": {
+    "text": "2 usable.",
+    "wav": "audio/voice/inv-2-usable.wav"
+  },
+  "inv-3-usable": {
+    "text": "3 usable.",
+    "wav": "audio/voice/inv-3-usable.wav"
+  },
+  "inv-tap-use": {
+    "text": "Tap Use buttons or use the gesture menu.",
+    "wav": "audio/voice/inv-tap-use.wav"
+  },
+  "help-intro": {
+    "text": "Help. Press slash any time to return here. Press M for the cave map, J for the journal, R to read your location.",
+    "wav": "audio/voice/help-intro.mp3"
+  },
+  "help-short": {
+    "text": "Help.",
+    "wav": "audio/voice/help-short.mp3"
+  },
+  "help-slash-hint": {
+    "text": "Press slash any time to return here.",
+    "wav": "audio/voice/help-slash-hint.mp3"
+  },
+  "help-shortcuts-summary": {
+    "text": "Press M for the cave map, J for the journal, R to read your location.",
+    "wav": "audio/voice/help-shortcuts-summary.mp3"
+  },
+  "help-and-tips": {
+    "text": "Help and tips.",
+    "wav": "audio/voice/help-and-tips.mp3"
+  },
+  "rotor-help-and-tips": {
+    "text": "Help and tips.",
+    "wav": "audio/voice/rotor-help-and-tips.mp3"
+  },
+  "rotor-inventory": {
+    "text": "Inventory.",
+    "wav": "audio/voice/rotor-inventory.mp3"
+  },
+  "rotor-achievements": {
+    "text": "Achievements.",
+    "wav": "audio/voice/rotor-achievements.mp3"
+  },
+  "rotor-journal": {
+    "text": "Journal.",
+    "wav": "audio/voice/rotor-journal.mp3"
+  },
+  "rotor-descend-deeper": {
+    "text": "Descend deeper.",
+    "wav": "audio/voice/rotor-descend-deeper.mp3"
+  },
+  "rotor-cave-map": {
+    "text": "Cave map.",
+    "wav": "audio/voice/rotor-cave-map.mp3"
+  },
+  "rotor-settings": {
+    "text": "Settings.",
+    "wav": "audio/voice/rotor-settings.mp3"
+  },
+  "rotor-teleport-home": {
+    "text": "Teleport home.",
+    "wav": "audio/voice/rotor-teleport-home.mp3"
+  },
+  "rotor-print-braille": {
+    "text": "Print as Braille.",
+    "wav": "audio/voice/rotor-print-braille.mp3"
+  },
+  "rotor-replay-tutorial": {
+    "text": "Replay tutorial.",
+    "wav": "audio/voice/rotor-replay-tutorial.mp3"
+  },
+  "rotor-reset-cave": {
+    "text": "Reset cave.",
+    "wav": "audio/voice/rotor-reset-cave.mp3"
+  },
+  "base-stage1-prefix": {
+    "text": "You're at base. Stage 1: follow the main vein to find the exit.",
+    "wav": "audio/voice/base-stage1-prefix.mp3"
+  },
+  "base-stage2-prefix": {
+    "text": "You're at base. Stage 2: explore freely.",
+    "wav": "audio/voice/base-stage2-prefix.mp3"
+  },
+  "base-tail-stage1-1": {
+    "text": "1 passage from here. Swipe to move, tap to listen.",
+    "wav": "audio/voice/base-tail-stage1-1.mp3"
+  },
+  "base-tail-stage1-2": {
+    "text": "2 passage from here. Swipe to move, tap to listen.",
+    "wav": "audio/voice/base-tail-stage1-2.mp3"
+  },
+  "base-tail-stage1-3": {
+    "text": "3 passage from here. Swipe to move, tap to listen.",
+    "wav": "audio/voice/base-tail-stage1-3.mp3"
+  },
+  "base-tail-stage1-4": {
+    "text": "4 passage from here. Swipe to move, tap to listen.",
+    "wav": "audio/voice/base-tail-stage1-4.mp3"
+  },
+  "base-tail-stage2-1": {
+    "text": "1 passages from here.",
+    "wav": "audio/voice/base-tail-stage2-1.mp3"
+  },
+  "base-tail-stage2-2": {
+    "text": "2 passages from here.",
+    "wav": "audio/voice/base-tail-stage2-2.mp3"
+  },
+  "base-tail-stage2-3": {
+    "text": "3 passages from here.",
+    "wav": "audio/voice/base-tail-stage2-3.mp3"
+  },
+  "base-tail-stage2-4": {
+    "text": "4 passages from here.",
+    "wav": "audio/voice/base-tail-stage2-4.mp3"
+  },
+  "base-tail-stage2-5": {
+    "text": "5 passages from here.",
+    "wav": "audio/voice/base-tail-stage2-5.mp3"
+  },
+  "base-tail-stage2-6": {
+    "text": "6 passages from here.",
+    "wav": "audio/voice/base-tail-stage2-6.mp3"
+  },
+  "settings-close": {
+    "text": "Close settings.",
+    "wav": "audio/voice/settings-close.mp3"
+  },
+  "settings-pure-audio": {
+    "text": "Pure audio mode.",
+    "wav": "audio/voice/settings-pure-audio.mp3"
+  },
+  "settings-door-hints": {
+    "text": "Visual door hints.",
+    "wav": "audio/voice/settings-door-hints.mp3"
+  },
+  "settings-spoken-narration": {
+    "text": "Spoken narration.",
+    "wav": "audio/voice/settings-spoken-narration.mp3"
+  },
+  "settings-haptic": {
+    "text": "Haptic feedback.",
+    "wav": "audio/voice/settings-haptic.mp3"
+  },
+  "settings-door-pings": {
+    "text": "Door pings.",
+    "wav": "audio/voice/settings-door-pings.mp3"
+  },
+  "settings-mainvein-chime": {
+    "text": "Main-vein chime.",
+    "wav": "audio/voice/settings-mainvein-chime.mp3"
+  },
+  "settings-listen-auto": {
+    "text": "Listen Mode auto.",
+    "wav": "audio/voice/settings-listen-auto.mp3"
+  },
+  "settings-swipe-gestures": {
+    "text": "Swipe gestures.",
+    "wav": "audio/voice/settings-swipe-gestures.mp3"
+  },
+  "settings-hide-pad": {
+    "text": "Hide on-screen pad.",
+    "wav": "audio/voice/settings-hide-pad.mp3"
+  },
+  "settings-audio-rumble": {
+    "text": "Audio rumble.",
+    "wav": "audio/voice/settings-audio-rumble.mp3"
+  },
+  "settings-boost-volume": {
+    "text": "Boost atmosphere volume.",
+    "wav": "audio/voice/settings-boost-volume.mp3"
+  },
+  "settings-gesture-sounds": {
+    "text": "Gesture sounds.",
+    "wav": "audio/voice/settings-gesture-sounds.mp3"
+  },
+  "settings-crossover": {
+    "text": "Crossover passages.",
+    "wav": "audio/voice/settings-crossover.mp3"
+  },
+  "settings-test-as-new": {
+    "text": "Test as new player.",
+    "wav": "audio/voice/settings-test-as-new.mp3"
+  },
+  "inv-use-compass-1": {
+    "text": "Use Compass.",
+    "wav": "audio/voice/inv-use-compass-1.mp3"
+  },
+  "inv-use-compass-2": {
+    "text": "Use Compass, 2 charges.",
+    "wav": "audio/voice/inv-use-compass-2.mp3"
+  },
+  "inv-use-compass-3": {
+    "text": "Use Compass, 3 charges.",
+    "wav": "audio/voice/inv-use-compass-3.mp3"
+  },
+  "inv-drop-echo-stone-1": {
+    "text": "Drop Echo Stone.",
+    "wav": "audio/voice/inv-drop-echo-stone-1.mp3"
+  },
+  "inv-drop-echo-stone-2": {
+    "text": "Drop Echo Stone, 2 left.",
+    "wav": "audio/voice/inv-drop-echo-stone-2.mp3"
+  },
+  "inv-drop-echo-stone-3": {
+    "text": "Drop Echo Stone, 3 left.",
+    "wav": "audio/voice/inv-drop-echo-stone-3.mp3"
+  },
+  "inv-pickup-echo-stone": {
+    "text": "Pick up Echo Stone.",
+    "wav": "audio/voice/inv-pickup-echo-stone.mp3"
+  },
+  "rotor-daily-cave": {
+    "text": "Daily Cave.",
+    "wav": "audio/voice/rotor-daily-cave.mp3"
+  },
+  "rotor-back-personal": {
+    "text": "Back to my cave.",
+    "wav": "audio/voice/rotor-back-personal.mp3"
+  },
+  "toggle-on": {
+    "text": "On.",
+    "wav": "audio/voice/toggle-on.mp3"
+  },
+  "toggle-off": {
+    "text": "Off.",
+    "wav": "audio/voice/toggle-off.mp3"
+  },
+  "settings-saved": {
+    "text": "Settings saved.",
+    "wav": "audio/voice/settings-saved.mp3"
+  },
+  "listen-on": {
+    "text": "Listen Mode on.",
+    "wav": "audio/voice/listen-on.mp3"
+  },
+  "listen-off": {
+    "text": "Listen Mode off.",
+    "wav": "audio/voice/listen-off.mp3"
+  },
+  "braille-copy": {
+    "text": "Copy braille text.",
+    "wav": "audio/voice/braille-copy.mp3"
+  },
+  "braille-close": {
+    "text": "Close braille.",
+    "wav": "audio/voice/braille-close.mp3"
+  },
+  "closed-generic": {
+    "text": "Closed.",
+    "wav": "audio/voice/closed-generic.mp3"
+  },
+  "rotor-close-achievements": {
+    "text": "Close achievements.",
+    "wav": "audio/voice/rotor-close-achievements.mp3"
+  },
+  "rotor-close-journal": {
+    "text": "Close journal.",
+    "wav": "audio/voice/rotor-close-journal.mp3"
+  },
+  "rotor-close-help": {
+    "text": "Close help.",
+    "wav": "audio/voice/rotor-close-help.mp3"
+  },
+  "rotor-read-achievements": {
+    "text": "Read achievements aloud.",
+    "wav": "audio/voice/rotor-read-achievements.mp3"
+  },
+  "rotor-read-journal": {
+    "text": "Read journal aloud.",
+    "wav": "audio/voice/rotor-read-journal.mp3"
+  },
+  "ach-none-yet": {
+    "text": "No achievements earned yet.",
+    "wav": "audio/voice/ach-none-yet.mp3"
+  },
+  "ach-1-earned": {
+    "text": "1 achievements earned.",
+    "wav": "audio/voice/ach-1-earned.mp3"
+  },
+  "ach-2-earned": {
+    "text": "2 achievements earned.",
+    "wav": "audio/voice/ach-2-earned.mp3"
+  },
+  "ach-3-earned": {
+    "text": "3 achievements earned.",
+    "wav": "audio/voice/ach-3-earned.mp3"
+  },
+  "ach-4-earned": {
+    "text": "4 achievements earned.",
+    "wav": "audio/voice/ach-4-earned.mp3"
+  },
+  "ach-5-earned": {
+    "text": "5 achievements earned.",
+    "wav": "audio/voice/ach-5-earned.mp3"
+  },
+  "ach-6-earned": {
+    "text": "6 achievements earned.",
+    "wav": "audio/voice/ach-6-earned.mp3"
+  },
+  "ach-7-earned": {
+    "text": "7 achievements earned.",
+    "wav": "audio/voice/ach-7-earned.mp3"
+  },
+  "ach-8-earned": {
+    "text": "8 achievements earned.",
+    "wav": "audio/voice/ach-8-earned.mp3"
+  },
+  "ach-9-earned": {
+    "text": "9 achievements earned.",
+    "wav": "audio/voice/ach-9-earned.mp3"
+  },
+  "ach-10-earned": {
+    "text": "10 achievements earned.",
+    "wav": "audio/voice/ach-10-earned.mp3"
+  }
+}

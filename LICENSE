@@ -1,0 +1,25 @@
+PROPRIETARY LICENSE — Echo Cave
+
+Copyright (c) 2026 Sulieman Vidal. All rights reserved.
+
+This file and the accompanying source code, audio assets, and documentation
+(collectively, "the Software") are the proprietary property of the copyright
+holder.
+
+NO PART OF THIS SOFTWARE MAY BE COPIED, MODIFIED, REDISTRIBUTED, SUBLICENSED,
+OR USED IN DERIVATIVE WORKS WITHOUT WRITTEN PERMISSION FROM THE COPYRIGHT
+HOLDER.
+
+Third-party content notices:
+  - Voice clips in audio/voice/ were generated using ElevenLabs (premade voice
+    "George", voice ID JBFqnCBsd6RMkjVDRZzb) under the license terms of the
+    ElevenLabs subscription account that generated them. Commercial use is
+    permitted under that subscription's tier; transferring ownership of the
+    generated audio requires confirmation of the appropriate ElevenLabs
+    license tier.
+  - Welcome music (audio/welcome-music.mp3) was generated using ElevenLabs
+    Music under the same subscription terms.
+  - Cave-bed atmospheric recordings (audio/bed-*.wav) were generated using
+    ElevenLabs Sound Effects under the same subscription terms.
+
+For licensing inquiries or transfer of rights, contact the copyright holder.
