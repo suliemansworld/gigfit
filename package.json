@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "serve": "python3 -m http.server 8080",
-    "test": "python3 ~/test_echo_game.py && python3 ~/test_echo_game_e2e.py"
+    "test": "python3 tests/test_echo_game.py && python3 tests/test_echo_game_e2e.py",
+    "test:all": "python3 tests/test_echo_game.py && python3 tests/test_echo_game_e2e.py && python3 tests/test_echo_game_fuzz.py && python3 tests/test_cache_lookup.py && python3 tests/test_rotor_fuzz.py"
   },
   "license": "SEE LICENSE IN LICENSE",
   "private": true,

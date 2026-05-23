@@ -1,7 +1,7 @@
 // Echo Cave — Service Worker
 // Build tag must match window.ECHO_BUILD in index.html.
 // Changing BUILD invalidates the old cache and re-fetches everything on next visit.
-const BUILD = '20260519a';
+const BUILD = '20260523a';
 const CACHE = `echo-cave-${BUILD}`;
 
 // Core assets pre-cached on install (~35 MB).
@@ -60,10 +60,32 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Only handle GET requests for our own origin
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+
+  // Network-first for HTML / navigation so a stuck cached index.html can never
+  // pin players to an old build. Falls back to cache when offline.
+  const isHTML =
+    event.request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('/') ||
+    url.pathname.endsWith('.html');
+
+  if (isHTML) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request, { ignoreSearch: true }))
+    );
+    return;
+  }
 
   event.respondWith(
     // ignoreSearch: true so ?v=BUILD cache-bust params don't cause cache misses

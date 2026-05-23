@@ -31,7 +31,9 @@ Open `http://localhost:8080/` in a browser. Save state lives in `localStorage` u
 ## File layout
 
 ```
-index.html             # 5,100 lines — game logic, UI, audio pipeline
+index.html             # ~5,800 lines — game logic, UI, audio pipeline
+sw.js                  # Service worker — precache + runtime voice cache
+manifest.json          # PWA manifest
 audio/
   bed-*.wav            # 8 atmospheric beds (Classic + Crystal Grotto, base/shallow/mid/deep)
   drip-loop.wav        # Landmark sound loops (5 types)
@@ -39,8 +41,10 @@ audio/
   friction-*.wav       # Continuous slide sounds (4 floor textures)
   welcome-music.mp3    # Welcome screen ambient track
   voice/
-    manifest.json      # 613 entries — text → WAV index
-    *.wav              # ~600 voice clips for the corpus
+    manifest.json      # 689 entries — text → WAV index
+    *.wav              # ~689 voice clips for the corpus
+tests/                 # Playwright + unit test suites (see Tests section)
+icons/                 # PWA icons (192, 512, 180, maskable-512)
 LICENSE                # Proprietary license; commercial use restricted
 README.md              # This file
 ```
@@ -65,7 +69,13 @@ This is how 613 atomic clips can compose tens of thousands of utterances. Adding
 
 ## Build tag + cache busting
 
-`window.ECHO_BUILD` is the cache-bust tag. Audio fetches append `?v=<ECHO_BUILD>` so phones never serve stale `.wav` files. Bump it whenever audio is regenerated or significant code changes ship. Current: see `index.html` line 10.
+`window.ECHO_BUILD` is the cache-bust tag (see top of `index.html`, around line 16). Audio fetches append `?v=<ECHO_BUILD>` so phones never serve stale `.wav` files. Bump it whenever audio is regenerated or significant code changes ship.
+
+**Deploy checklist — must bump both:**
+1. `window.ECHO_BUILD` in `index.html`
+2. `const BUILD` in `sw.js` (must match)
+
+If only one is bumped, the service worker keeps serving stale cached assets. `sw.js` is network-first for HTML so the page itself updates immediately on next visit.
 
 ## Kill switches (URL flags for emergency rollback)
 
@@ -85,14 +95,26 @@ Open Settings → Diagnostics for an on-device readout: build tag, audio context
 
 ## Tests
 
-Two Playwright suites in `~/test_echo_game.py` and `~/test_echo_game_e2e.py` (path is project-relative; adjust as needed). Run with:
+All test suites live under `tests/` in this repo:
 
 ```bash
-~/.venv-scanners/bin/python ~/test_echo_game.py     # 53 unit checks
-~/.venv-scanners/bin/python ~/test_echo_game_e2e.py # 24 end-to-end checks
+npm test          # runs the two primary suites (unit + e2e)
+npm run test:all  # also runs fuzz + cache + rotor suites
 ```
 
-Coverage: welcome flow, panels, gestures, settings, audio assets, achievements, journal, descent, SVG schematic, voice resolution, gesture blocks, panel modal interactions.
+Or directly:
+
+```bash
+python3 tests/test_echo_game.py       # unit checks
+python3 tests/test_echo_game_e2e.py   # end-to-end Playwright
+python3 tests/test_echo_game_fuzz.py  # input fuzzer
+python3 tests/test_cache_lookup.py    # voice-corpus lookup checks
+python3 tests/test_rotor_fuzz.py      # rotor gesture fuzzer
+```
+
+Coverage: welcome flow, panels, gestures, settings, audio assets, achievements, journal, descent, SVG schematic, voice resolution, gesture blocks, panel modal interactions, rotor menu.
+
+**Note:** the tests assume the game is served at `http://localhost:8080/echo-game/`. If you run `npm run serve` directly from this repo (which serves at `http://localhost:8080/`), update the `BASE` constant at the top of each test file to `http://localhost:8080`.
 
 ## Dependencies
 
