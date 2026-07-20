@@ -6,6 +6,7 @@ struct CalibrationView: View {
     @Binding var session: ScanSession
     @ObservedObject var scanStore: ScanStore
     @Binding var showingReview: Bool
+    var dismissAll: () -> Void = {}
 
     @State private var pointALabel: ScanPointLabel = .rearLeftFloor
     @State private var pointBLabel: ScanPointLabel = .rearRightFloor
@@ -119,6 +120,7 @@ struct CalibrationView: View {
             }
             .navigationTitle("Calibration")
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Skip") { computeResults() }
@@ -188,6 +190,8 @@ struct CalibrationView: View {
 
         session.name = "Cargo Scan — \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
         dismiss()
-        showingReview = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            showingReview = true
+        }
     }
 }

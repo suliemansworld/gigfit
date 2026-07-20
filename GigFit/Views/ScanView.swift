@@ -4,6 +4,7 @@ import SwiftUI
 struct ScanView: View {
     @Binding var session: ScanSession
     @ObservedObject var scanStore: ScanStore
+    @Environment(\.dismiss) private var dismissToHome
     @StateObject private var coordinator = ARScanCoordinator()
     @State private var showingCalibration = false
     @State private var showingReview = false
@@ -29,17 +30,37 @@ struct ScanView: View {
                     .padding(.horizontal, 12)
                     .padding(.bottom, 28)
             }
+
+            closeButton
         }
         .onAppear {
-            coordinator.onPointsChanged = { points in
-                session.points = points
-            }
+            coordinator.onPointsChanged = { session.points = $0 }
+        }
+        .onChange(of: showingReview) {
+            showingReview ? coordinator.pauseSession() : coordinator.startSession()
         }
         .sheet(isPresented: $showingCalibration) {
-            CalibrationView(session: $session, scanStore: scanStore, showingReview: $showingReview)
+            CalibrationView(session: $session, scanStore: scanStore, showingReview: $showingReview, dismissAll: { dismissToHome() })
         }
-        .fullScreenCover(isPresented: $showingReview) {
+        .sheet(isPresented: $showingReview) {
             ScanReviewView(scan: session, scanStore: scanStore)
+        }
+    }
+
+    private var closeButton: some View {
+        VStack {
+            HStack {
+                Button(action: { dismissToHome() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.white.opacity(0.75))
+                }
+                .accessibilityLabel("Close and return home")
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            Spacer()
         }
     }
 

@@ -92,6 +92,10 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         sceneView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
     }
 
+
+    func pauseSession() {
+        sceneView?.session.pause()
+    }
     func resetSession() {
         floorOrigin = nil
         widthVector = nil
