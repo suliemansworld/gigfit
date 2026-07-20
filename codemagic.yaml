@@ -41,6 +41,7 @@ workflows:
       groups:
         - app_store_credentials
       vars:
+        BUNDLE_ID: com.suliemansworld.GigFit
         XCODE_PROJECT: GigFit.xcodeproj
         XCODE_SCHEME: GigFit
     scripts:
@@ -49,6 +50,15 @@ workflows:
           /usr/libexec/PlistBuddy \
             -c "Set :CFBundleVersion $CM_BUILD_NUMBER" \
             "$CM_BUILD_DIR/GigFit/Resources/Info.plist"
+      - name: Initialize keychain
+        script: keychain initialize
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Add signing certificates
+        script: keychain add-certificates
       - name: Set up code signing
         script: |
           xcode-project use-profiles \
