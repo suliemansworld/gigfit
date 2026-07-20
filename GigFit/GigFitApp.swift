@@ -6,7 +6,8 @@ struct GigFitApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView(scanStore: scanStore)
+            ContentView()
+                .environmentObject(scanStore)
                 .preferredColorScheme(.dark)
         }
     }

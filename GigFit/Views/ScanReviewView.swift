@@ -1,11 +1,13 @@
 import SwiftUI
 import SceneKit
 
+/// 3D review of a completed scan — SceneKit hexahedron with touch controls.
 struct ScanReviewView: View {
     let scan: ScanSession
     @ObservedObject var scanStore: ScanStore
+    @State private var scene: SCNScene?
+    @State private var isSaved = false
     @Environment(\.dismiss) private var dismiss
-    @State private var saved = false
 
     var body: some View {
         NavigationStack {
@@ -14,150 +16,125 @@ struct ScanReviewView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // 3D Scene View
-                    SceneReview3DView(scan: scan)
-                        .frame(maxHeight: UIScreen.main.bounds.height * 0.45)
+                    // 3D view
+                    if let scene {
+                        SceneView(
+                            scene: scene,
+                            pointOfView: nil,
+                            options: [.allowsCameraControl, .autoenablesDefaultLighting],
+                            preferredFramesPerSecond: 60
+                        )
                         .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
+                        .padding(12)
+                        .frame(height: UIScreen.main.bounds.height * 0.45)
+                    } else {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.05))
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .padding(12)
+                            .frame(height: UIScreen.main.bounds.height * 0.45)
+                            .overlay {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                    }
 
                     // Dimensions card
-                    dimensionsCard
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
+                    if let dims = scan.dimensions {
+                        VStack(spacing: 16) {
+                            HStack {
+                                DimBlock(label: "Length", value: UnitFormatter.formatFeetAndInches(dims.lengthMeters))
+                                Divider().background(Color.white.opacity(0.1))
+                                DimBlock(label: "Width", value: UnitFormatter.formatFeetAndInches(dims.widthMeters))
+                                Divider().background(Color.white.opacity(0.1))
+                                DimBlock(label: "Height", value: UnitFormatter.formatFeetAndInches(dims.heightMeters))
+                            }
+
+                            HStack(spacing: 20) {
+                                VStack {
+                                    Text("Raw Volume")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.4))
+                                    Text(UnitFormatter.formatCubicFeet(dims.rawVolumeCubicMeters))
+                                        .font(.title3.weight(.bold))
+                                        .foregroundColor(.white)
+                                }
+                                VStack {
+                                    Text("Conservative")
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.4))
+                                    Text(UnitFormatter.formatCubicFeet(dims.conservativeVolumeCubicMeters))
+                                        .font(.title3.weight(.bold))
+                                        .foregroundColor(.orange)
+                                }
+                            }
+                        }
+                        .padding(20)
+                        .background(Color.white.opacity(0.06))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .padding(.horizontal, 20)
+                    }
 
                     // Confidence badge
-                    confidenceBadge
-                        .padding(.horizontal, 12)
+                    if let level = scan.confidenceLevel, let score = scan.confidenceScore {
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(confidenceColor)
+                                .frame(width: 10, height: 10)
+                            Text("\(level.displayName) confidence — \(score)%")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundColor(confidenceColor)
+                        }
                         .padding(.top, 8)
+
+                        Text(level.description)
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.4))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                    }
 
                     Spacer()
 
                     // Action buttons
-                    actionButtons
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 40)
+                    VStack(spacing: 10) {
+                        Button(action: saveScan) {
+                            Label(isSaved ? "Saved" : "Save Scan", systemImage: isSaved ? "checkmark" : "square.and.arrow.down")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(isSaved ? Color.green : Color(red: 0.27, green: 0.53, blue: 1.0))
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                        }
+                        .disabled(isSaved)
+
+                        Button(action: { dismiss() }) {
+                            Text("New Scan")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 40)
                 }
             }
-            .navigationTitle(saved ? "Scan Saved" : "Review")
+            .navigationTitle(scan.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
                 }
-            }
-        }
-    }
-
-    // MARK: — Components —
-
-    private var dimensionsCard: some View {
-        VStack(spacing: 0) {
-            Text("Dimensions")
-                .font(.caption.weight(.semibold))
-                .foregroundColor(.white.opacity(0.5))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.bottom, 8)
-
-            if let dims = scan.dimensions {
-                HStack(spacing: 0) {
-                    dimColumn(label: "Length", value: UnitFormatter.formatFeetAndInches(dims.lengthMeters),
-                              metric: UnitFormatter.formatMeters(dims.lengthMeters))
-                    Divider().background(Color.white.opacity(0.15)).frame(height: 40)
-                    dimColumn(label: "Width", value: UnitFormatter.formatFeetAndInches(dims.widthMeters),
-                              metric: UnitFormatter.formatMeters(dims.widthMeters))
-                    Divider().background(Color.white.opacity(0.15)).frame(height: 40)
-                    dimColumn(label: "Height", value: UnitFormatter.formatFeetAndInches(dims.heightMeters),
-                              metric: UnitFormatter.formatMeters(dims.heightMeters))
+                if !isSaved {
+                    ToolbarItem(placement: .destructiveAction) {
+                        Button("Discard", role: .destructive) { dismiss() }
+                    }
                 }
-
-                Divider().background(Color.white.opacity(0.1)).padding(.vertical, 10)
-
-                HStack(spacing: 0) {
-                    dimColumn(label: "Raw Volume",
-                              value: UnitFormatter.formatCubicFeet(dims.rawVolumeCubicMeters),
-                              metric: UnitFormatter.formatCubicMeters(dims.rawVolumeCubicMeters))
-                    Divider().background(Color.white.opacity(0.15)).frame(height: 40)
-                    dimColumn(label: "Conservative",
-                              value: UnitFormatter.formatCubicFeet(dims.conservativeVolumeCubicMeters),
-                              metric: UnitFormatter.formatCubicMeters(dims.conservativeVolumeCubicMeters))
-                }
-            } else {
-                Text("No dimensions computed")
-                    .font(.body)
-                    .foregroundColor(.white.opacity(0.4))
             }
-        }
-        .padding(16)
-        .background(Color.white.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-
-    private func dimColumn(label: String, value: String, metric: String) -> some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.title3.weight(.bold))
-                .foregroundColor(.white)
-            Text(metric)
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.4))
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.4))
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var confidenceBadge: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(confidenceColor)
-                .frame(width: 8, height: 8)
-            if let level = scan.confidenceLevel {
-                Text("\(level.displayName) Confidence")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(confidenceColor)
+            .onAppear {
+                scene = HexahedronMeshBuilder.buildScene(from: scan.pointPositions(),
+                                                          dimensions: scan.dimensions)
             }
-            if let score = scan.confidenceScore {
-                Text("• \(score)%")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.5))
-            }
-            Spacer()
-            if let level = scan.confidenceLevel {
-                Text(level.description)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.4))
-                    .multilineTextAlignment(.trailing)
-            }
-        }
-        .padding(12)
-        .background(Color.white.opacity(0.04))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-
-    private var actionButtons: some View {
-        HStack(spacing: 12) {
-            Button(action: { dismiss() }) {
-                Text("Rescan")
-                    .font(.headline)
-                    .foregroundColor(.white.opacity(0.7))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Color.white.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-
-            Button(action: { saveAndDismiss() }) {
-                Text(saved ? "Saved" : "Save Scan")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(saved ? Color.green : Color(red: 0.27, green: 0.53, blue: 1.0))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            .disabled(saved)
         }
     }
 
@@ -170,36 +147,27 @@ struct ScanReviewView: View {
         }
     }
 
-    private func saveAndDismiss() {
+    private func saveScan() {
         scanStore.save(scan)
-        saved = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            dismiss()
-        }
+        isSaved = true
     }
 }
 
-// MARK: — SceneKit 3D Review View —
+struct DimBlock: View {
+    let label: String
+    let value: String
 
-struct SceneReview3DView: UIViewRepresentable {
-    let scan: ScanSession
-
-    func makeUIView(context: Context) -> SCNView {
-        let view = SCNView()
-        view.backgroundColor = UIColor(red: 0.06, green: 0.06, blue: 0.14, alpha: 1)
-        view.allowsCameraControl = true
-        view.autoenablesDefaultLighting = true
-        view.antialiasingMode = .multisampling4X
-
-        let positions = scan.pointPositions()
-        if !positions.isEmpty {
-            let scene = HexahedronMeshBuilder.buildScene(from: positions,
-                                                           dimensions: scan.dimensions)
-            view.scene = scene
+    var body: some View {
+        VStack(spacing: 3) {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.4))
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
-
-        return view
+        .frame(maxWidth: .infinity)
     }
-
-    func updateUIView(_ uiView: SCNView, context: Context) {}
 }
