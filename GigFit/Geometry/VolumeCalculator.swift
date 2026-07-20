@@ -37,7 +37,7 @@ enum VolumeCalculator {
         let FRU = points[.frontRightUpper]!
         let FLU = points[.frontLeftUpper]!
 
-        var pts = [
+        let pts = [
             tetrahedronVolume(RLF, RRF, FLF, RLU),
             tetrahedronVolume(RRF, FRF, FLF, FRU),
             tetrahedronVolume(RRF, FLF, RLU, FRU),

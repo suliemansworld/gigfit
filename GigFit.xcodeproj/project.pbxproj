@@ -1,0 +1,626 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2B5E0F6F472BDF260DB472AE /* ScanDimensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDFAD62811879CE48333443 /* ScanDimensions.swift */; };
+		2BDF9B755044DF972B9D5395 /* ARScanCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3989F9B1ADB64DA1183F1A02 /* ARScanCoordinator.swift */; };
+		2D0F13FDB91485093E9D9A29 /* DimensionExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB9F382970C48EE21372B04F /* DimensionExtractor.swift */; };
+		3923D6CF614B9C066CAB5397 /* CalibrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B79ACB5F34C54491E42C6AA /* CalibrationService.swift */; };
+		3CCDEEE429E7A6852B21A538 /* ScanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E36B94D3E898FF126014AE4 /* ScanReviewView.swift */; };
+		49706A92617A8EADD16BBDC6 /* GigFitApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462A590731E9F71C8C993A4D /* GigFitApp.swift */; };
+		4A476CD1A02EB9D9F9B9A2AF /* MarkerEntityFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4421BB5C6C88D39EB3EDA103 /* MarkerEntityFactory.swift */; };
+		610A143F07F6D42083E0B1BF /* SIMDHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DCBEB290B21F759F0C801CB /* SIMDHelpers.swift */; };
+		66E3079609C6F93A26D1C7D3 /* HexahedronMeshBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E404B395708762209FABEE /* HexahedronMeshBuilder.swift */; };
+		68ECF2B9BBF036D81D1B4214 /* ScanPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC129863AF14DC62630258B7 /* ScanPoint.swift */; };
+		7B6FCD7F4FFF26A58CD6FB3F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 181AC5EC40BA6A4CC237F3CA /* Foundation.framework */; };
+		9650264079983B8DDC17C784 /* ARScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31F38DE7F3B00484BAB93C46 /* ARScanView.swift */; };
+		9B3D9A75EF64A9AD30E5B675 /* VolumeCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBE88BD3BF73D1D2CDF3220 /* VolumeCalculatorTests.swift */; };
+		9CE1B4C773C3BD60D5468470 /* ScanInstructionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FD222CA2DF0BB9B0ED48CB1 /* ScanInstructionsView.swift */; };
+		9D4555B9D7798CB35B5D7651 /* CoordinateSystemBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D992493474C154C01D6EF85 /* CoordinateSystemBuilder.swift */; };
+		9E1C0514213C1BCD471BFB6D /* SafetyInsetCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533E92FBABCDBB33EFFDC479 /* SafetyInsetCalculator.swift */; };
+		9E8CC425EF32C7AAD878542D /* ScanStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB949F8C791D0C4EDCB91A9 /* ScanStore.swift */; };
+		9F99ECDF837CB6FA112F6A88 /* ConfidenceScoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A5016D9538DC7C4C535B6E /* ConfidenceScoring.swift */; };
+		A28902319AE397FA806CF221 /* ScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 950F2973D7F3FE81BAA92260 /* ScanView.swift */; };
+		AC231B3A52FD881DF4D74F6B /* SafetyInsetCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDF9F9B73B8EAB76880F28BB /* SafetyInsetCalculatorTests.swift */; };
+		B04119FF5865A68E2A2F6B60 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EE9AC4ABF40F834292A00EB /* CalibrationView.swift */; };
+		BAE715EBDC85F3D00AC4DB8C /* ScanConfidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669F8068E6785FBA9859EE66 /* ScanConfidence.swift */; };
+		CA4C9A6D61D43FAA7E32EB9A /* VolumeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28CF834359DB0924ECF3BABC /* VolumeCalculator.swift */; };
+		CBA03540CBF8CA815FBD75D5 /* ARSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B55FCA89CE02499E3396F8 /* ARSessionController.swift */; };
+		D44831016DE19DEBBD7520D1 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05E63BC1395291903E21421 /* HomeView.swift */; };
+		D5E4BF9FBB821FB0AA33378F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 181AC5EC40BA6A4CC237F3CA /* Foundation.framework */; };
+		DB767D1F21A9E2820CFAF620 /* PointPlacementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22ECE6C7691106FCF955588 /* PointPlacementService.swift */; };
+		DBA8C46B39716A1E6D7C8E6D /* UnitFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1ABC2CB3FFFCD2A23469CE /* UnitFormatter.swift */; };
+		F2F4757BB6EAB309D7AD46D0 /* ScanSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C797871B5CAD0600FA61B98F /* ScanSession.swift */; };
+		F856687BAC8FE8024274B69B /* CalibrationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B882DCC60BAD5A6411BE737 /* CalibrationServiceTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A7DE16D885A198D1EA645365 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6D4D1E271341ACA75003C5BD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 413E2562BDF9EEB13365CD66;
+			remoteInfo = GigFit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		05FA89498782A18083D1F95C /* GigFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GigFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0B79ACB5F34C54491E42C6AA /* CalibrationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalibrationService.swift; sourceTree = "<group>"; };
+		0B882DCC60BAD5A6411BE737 /* CalibrationServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalibrationServiceTests.swift; sourceTree = "<group>"; };
+		0DCBEB290B21F759F0C801CB /* SIMDHelpers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SIMDHelpers.swift; sourceTree = "<group>"; };
+		0FD222CA2DF0BB9B0ED48CB1 /* ScanInstructionsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanInstructionsView.swift; sourceTree = "<group>"; };
+		0FDFAD62811879CE48333443 /* ScanDimensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanDimensions.swift; sourceTree = "<group>"; };
+		181AC5EC40BA6A4CC237F3CA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		1E36B94D3E898FF126014AE4 /* ScanReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanReviewView.swift; sourceTree = "<group>"; };
+		24E404B395708762209FABEE /* HexahedronMeshBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HexahedronMeshBuilder.swift; sourceTree = "<group>"; };
+		28CF834359DB0924ECF3BABC /* VolumeCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VolumeCalculator.swift; sourceTree = "<group>"; };
+		2A1ABC2CB3FFFCD2A23469CE /* UnitFormatter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UnitFormatter.swift; sourceTree = "<group>"; };
+		31F38DE7F3B00484BAB93C46 /* ARScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ARScanView.swift; sourceTree = "<group>"; };
+		3989F9B1ADB64DA1183F1A02 /* ARScanCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ARScanCoordinator.swift; sourceTree = "<group>"; };
+		4421BB5C6C88D39EB3EDA103 /* MarkerEntityFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MarkerEntityFactory.swift; sourceTree = "<group>"; };
+		462A590731E9F71C8C993A4D /* GigFitApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GigFitApp.swift; sourceTree = "<group>"; };
+		4D992493474C154C01D6EF85 /* CoordinateSystemBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoordinateSystemBuilder.swift; sourceTree = "<group>"; };
+		533E92FBABCDBB33EFFDC479 /* SafetyInsetCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SafetyInsetCalculator.swift; sourceTree = "<group>"; };
+		54B55FCA89CE02499E3396F8 /* ARSessionController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ARSessionController.swift; sourceTree = "<group>"; };
+		59A5016D9538DC7C4C535B6E /* ConfidenceScoring.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfidenceScoring.swift; sourceTree = "<group>"; };
+		5DB949F8C791D0C4EDCB91A9 /* ScanStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanStore.swift; sourceTree = "<group>"; };
+		669F8068E6785FBA9859EE66 /* ScanConfidence.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanConfidence.swift; sourceTree = "<group>"; };
+		6FBE88BD3BF73D1D2CDF3220 /* VolumeCalculatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VolumeCalculatorTests.swift; sourceTree = "<group>"; };
+		7CC838144648D425AC3D9749 /* GigFitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GigFitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EE9AC4ABF40F834292A00EB /* CalibrationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalibrationView.swift; sourceTree = "<group>"; };
+		950F2973D7F3FE81BAA92260 /* ScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanView.swift; sourceTree = "<group>"; };
+		9E623B3C79C28D7870966687 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B05E63BC1395291903E21421 /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		BDF9F9B73B8EAB76880F28BB /* SafetyInsetCalculatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SafetyInsetCalculatorTests.swift; sourceTree = "<group>"; };
+		C797871B5CAD0600FA61B98F /* ScanSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanSession.swift; sourceTree = "<group>"; };
+		CB9F382970C48EE21372B04F /* DimensionExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DimensionExtractor.swift; sourceTree = "<group>"; };
+		CC129863AF14DC62630258B7 /* ScanPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanPoint.swift; sourceTree = "<group>"; };
+		E22ECE6C7691106FCF955588 /* PointPlacementService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PointPlacementService.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		211371871E80B5F26344CDA7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D5E4BF9FBB821FB0AA33378F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		60A176444303314AE12817BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B6FCD7F4FFF26A58CD6FB3F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1CF25A45249308832257EECC /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				669F8068E6785FBA9859EE66 /* ScanConfidence.swift */,
+				0FDFAD62811879CE48333443 /* ScanDimensions.swift */,
+				CC129863AF14DC62630258B7 /* ScanPoint.swift */,
+				C797871B5CAD0600FA61B98F /* ScanSession.swift */,
+			);
+			name = Models;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		230740D829AB03B2D4AB533E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E87BD375B2FD3E9F1A0D2AB2 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		39AA9EEF51689DAD5125058E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B05E63BC1395291903E21421 /* HomeView.swift */,
+				0FD222CA2DF0BB9B0ED48CB1 /* ScanInstructionsView.swift */,
+				1E36B94D3E898FF126014AE4 /* ScanReviewView.swift */,
+				950F2973D7F3FE81BAA92260 /* ScanView.swift */,
+				7EE9AC4ABF40F834292A00EB /* CalibrationView.swift */,
+			);
+			name = Views;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		48F0B07D8361F6B785622012 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				05FA89498782A18083D1F95C /* GigFit.app */,
+				7CC838144648D425AC3D9749 /* GigFitTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		616CC1B6F25039B482DB208F /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				0DCBEB290B21F759F0C801CB /* SIMDHelpers.swift */,
+				2A1ABC2CB3FFFCD2A23469CE /* UnitFormatter.swift */,
+			);
+			name = Utilities;
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		723E797B938D17D7A8D4110F /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				0B882DCC60BAD5A6411BE737 /* CalibrationServiceTests.swift */,
+				BDF9F9B73B8EAB76880F28BB /* SafetyInsetCalculatorTests.swift */,
+				6FBE88BD3BF73D1D2CDF3220 /* VolumeCalculatorTests.swift */,
+			);
+			name = Tests;
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		92603ACAB5AF344B373BCC00 /* AR */ = {
+			isa = PBXGroup;
+			children = (
+				3989F9B1ADB64DA1183F1A02 /* ARScanCoordinator.swift */,
+				31F38DE7F3B00484BAB93C46 /* ARScanView.swift */,
+				54B55FCA89CE02499E3396F8 /* ARSessionController.swift */,
+				4421BB5C6C88D39EB3EDA103 /* MarkerEntityFactory.swift */,
+				E22ECE6C7691106FCF955588 /* PointPlacementService.swift */,
+			);
+			name = AR;
+			path = AR;
+			sourceTree = "<group>";
+		};
+		BAF14507A6ADD2F3A6651607 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				9E623B3C79C28D7870966687 /* Info.plist */,
+			);
+			name = Resources;
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		C2EA610265B3B6B22AE359F2 /* GigFit */ = {
+			isa = PBXGroup;
+			children = (
+				92603ACAB5AF344B373BCC00 /* AR */,
+				C532458F8E29C3D8F79E56CB /* Geometry */,
+				462A590731E9F71C8C993A4D /* GigFitApp.swift */,
+				1CF25A45249308832257EECC /* Models */,
+				D9BDAA628C2C2EB9225A63B7 /* Storage */,
+				616CC1B6F25039B482DB208F /* Utilities */,
+				39AA9EEF51689DAD5125058E /* Views */,
+				BAF14507A6ADD2F3A6651607 /* Resources */,
+				723E797B938D17D7A8D4110F /* Tests */,
+			);
+			name = GigFit;
+			path = GigFit;
+			sourceTree = "<group>";
+		};
+		C532458F8E29C3D8F79E56CB /* Geometry */ = {
+			isa = PBXGroup;
+			children = (
+				0B79ACB5F34C54491E42C6AA /* CalibrationService.swift */,
+				59A5016D9538DC7C4C535B6E /* ConfidenceScoring.swift */,
+				4D992493474C154C01D6EF85 /* CoordinateSystemBuilder.swift */,
+				CB9F382970C48EE21372B04F /* DimensionExtractor.swift */,
+				24E404B395708762209FABEE /* HexahedronMeshBuilder.swift */,
+				533E92FBABCDBB33EFFDC479 /* SafetyInsetCalculator.swift */,
+				28CF834359DB0924ECF3BABC /* VolumeCalculator.swift */,
+			);
+			name = Geometry;
+			path = Geometry;
+			sourceTree = "<group>";
+		};
+		D68E12E08035673C3317FCBB = {
+			isa = PBXGroup;
+			children = (
+				48F0B07D8361F6B785622012 /* Products */,
+				230740D829AB03B2D4AB533E /* Frameworks */,
+				C2EA610265B3B6B22AE359F2 /* GigFit */,
+			);
+			sourceTree = "<group>";
+		};
+		D9BDAA628C2C2EB9225A63B7 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				5DB949F8C791D0C4EDCB91A9 /* ScanStore.swift */,
+			);
+			name = Storage;
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		E87BD375B2FD3E9F1A0D2AB2 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				181AC5EC40BA6A4CC237F3CA /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		407BD29153AB4AD7E1AB3A70 /* GigFitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA4752B7B02D1B8E74FC0F8F /* Build configuration list for PBXNativeTarget "GigFitTests" */;
+			buildPhases = (
+				FCA4FB022301399F0542F78B /* Sources */,
+				60A176444303314AE12817BC /* Frameworks */,
+				9CF08AFDDE394C297217171F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B32B4A7AAF520C4374B4F44C /* PBXTargetDependency */,
+			);
+			name = GigFitTests;
+			productName = GigFitTests;
+			productReference = 7CC838144648D425AC3D9749 /* GigFitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		413E2562BDF9EEB13365CD66 /* GigFit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A22962A65ACB49B75B5D4EE2 /* Build configuration list for PBXNativeTarget "GigFit" */;
+			buildPhases = (
+				B676D72EDD38DA104478B501 /* Sources */,
+				211371871E80B5F26344CDA7 /* Frameworks */,
+				48B9F597F6ACCBE1B3214CC2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GigFit;
+			productName = GigFit;
+			productReference = 05FA89498782A18083D1F95C /* GigFit.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6D4D1E271341ACA75003C5BD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 550003E03ED3421B6EEBBA96 /* Build configuration list for PBXProject "GigFit" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D68E12E08035673C3317FCBB;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 48F0B07D8361F6B785622012 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				413E2562BDF9EEB13365CD66 /* GigFit */,
+				407BD29153AB4AD7E1AB3A70 /* GigFitTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		48B9F597F6ACCBE1B3214CC2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9CF08AFDDE394C297217171F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B676D72EDD38DA104478B501 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2BDF9B755044DF972B9D5395 /* ARScanCoordinator.swift in Sources */,
+				9650264079983B8DDC17C784 /* ARScanView.swift in Sources */,
+				CBA03540CBF8CA815FBD75D5 /* ARSessionController.swift in Sources */,
+				4A476CD1A02EB9D9F9B9A2AF /* MarkerEntityFactory.swift in Sources */,
+				DB767D1F21A9E2820CFAF620 /* PointPlacementService.swift in Sources */,
+				3923D6CF614B9C066CAB5397 /* CalibrationService.swift in Sources */,
+				9F99ECDF837CB6FA112F6A88 /* ConfidenceScoring.swift in Sources */,
+				9D4555B9D7798CB35B5D7651 /* CoordinateSystemBuilder.swift in Sources */,
+				2D0F13FDB91485093E9D9A29 /* DimensionExtractor.swift in Sources */,
+				66E3079609C6F93A26D1C7D3 /* HexahedronMeshBuilder.swift in Sources */,
+				9E1C0514213C1BCD471BFB6D /* SafetyInsetCalculator.swift in Sources */,
+				CA4C9A6D61D43FAA7E32EB9A /* VolumeCalculator.swift in Sources */,
+				49706A92617A8EADD16BBDC6 /* GigFitApp.swift in Sources */,
+				BAE715EBDC85F3D00AC4DB8C /* ScanConfidence.swift in Sources */,
+				2B5E0F6F472BDF260DB472AE /* ScanDimensions.swift in Sources */,
+				68ECF2B9BBF036D81D1B4214 /* ScanPoint.swift in Sources */,
+				F2F4757BB6EAB309D7AD46D0 /* ScanSession.swift in Sources */,
+				9E8CC425EF32C7AAD878542D /* ScanStore.swift in Sources */,
+				610A143F07F6D42083E0B1BF /* SIMDHelpers.swift in Sources */,
+				DBA8C46B39716A1E6D7C8E6D /* UnitFormatter.swift in Sources */,
+				D44831016DE19DEBBD7520D1 /* HomeView.swift in Sources */,
+				9CE1B4C773C3BD60D5468470 /* ScanInstructionsView.swift in Sources */,
+				3CCDEEE429E7A6852B21A538 /* ScanReviewView.swift in Sources */,
+				A28902319AE397FA806CF221 /* ScanView.swift in Sources */,
+				B04119FF5865A68E2A2F6B60 /* CalibrationView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCA4FB022301399F0542F78B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F856687BAC8FE8024274B69B /* CalibrationServiceTests.swift in Sources */,
+				AC231B3A52FD881DF4D74F6B /* SafetyInsetCalculatorTests.swift in Sources */,
+				9B3D9A75EF64A9AD30E5B675 /* VolumeCalculatorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B32B4A7AAF520C4374B4F44C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GigFit;
+			target = 413E2562BDF9EEB13365CD66 /* GigFit */;
+			targetProxy = A7DE16D885A198D1EA645365 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		26F64A0563B345C8727435A2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 36R3VCWWUJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.suliemansworld.GigFitTests;
+				PRODUCT_NAME = GigFitTests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GigFit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GigFit";
+			};
+			name = Debug;
+		};
+		95597673320240C030CE5F66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 36R3VCWWUJ;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.suliemansworld.GigFitTests;
+				PRODUCT_NAME = GigFitTests;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GigFit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GigFit";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9B6AF4B5D0874AB58468BBC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 36R3VCWWUJ;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = GigFit/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.suliemansworld.GigFit;
+				PRODUCT_NAME = GigFit;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D0CFEFD1C2BF4C3FD5762735 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		DC49097D0A1CD39E0D4349C3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		FACAD83049F7D44333ACA87C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 36R3VCWWUJ;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = GigFit/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.suliemansworld.GigFit;
+				PRODUCT_NAME = GigFit;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		550003E03ED3421B6EEBBA96 /* Build configuration list for PBXProject "GigFit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DC49097D0A1CD39E0D4349C3 /* Debug */,
+				D0CFEFD1C2BF4C3FD5762735 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A22962A65ACB49B75B5D4EE2 /* Build configuration list for PBXNativeTarget "GigFit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FACAD83049F7D44333ACA87C /* Release */,
+				9B6AF4B5D0874AB58468BBC2 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EA4752B7B02D1B8E74FC0F8F /* Build configuration list for PBXNativeTarget "GigFitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95597673320240C030CE5F66 /* Release */,
+				26F64A0563B345C8727435A2 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6D4D1E271341ACA75003C5BD /* Project object */;
+}

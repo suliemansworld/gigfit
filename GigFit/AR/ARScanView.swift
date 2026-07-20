@@ -26,7 +26,7 @@ struct ARScanView: UIViewRepresentable {
 
     func updateUIView(_ uiView: ARSCNView, context: Context) {}
 
-    static func dismantleUIView(_ uiView: ARSCNView, coordinator: ()) {
+    static func dismantleUIView(_ uiView: ARSCNView, coordinator: ContextCoordinator) {
         uiView.session.pause()
     }
 

@@ -1,0 +1,69 @@
+workflows:
+  gigfit-ci:
+    name: GigFit CI
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: edge
+      vars:
+        XCODE_PROJECT: GigFit.xcodeproj
+        XCODE_SCHEME: GigFit
+        TEST_SCHEME: GigFitTests
+    scripts:
+      - name: Build app for simulator
+        script: |
+          xcodebuild \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
+            build
+      - name: Build tests for simulator
+        script: |
+          xcodebuild \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$TEST_SCHEME" \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
+            build-for-testing
+    artifacts:
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+  gigfit-testflight:
+    name: GigFit TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      xcode: edge
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.suliemansworld.GigFit
+      vars:
+        XCODE_PROJECT: GigFit.xcodeproj
+        XCODE_SCHEME: GigFit
+    scripts:
+      - name: Set build number
+        script: |
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleVersion $CM_BUILD_NUMBER" \
+            "$CM_BUILD_DIR/GigFit/Resources/Info.plist"
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles \
+            --custom-export-options='{"testFlightInternalTestingOnly": true}'
+      - name: Build IPA for TestFlight
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false

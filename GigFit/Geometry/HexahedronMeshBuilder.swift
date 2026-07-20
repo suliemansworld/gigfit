@@ -35,9 +35,6 @@ enum HexahedronMeshBuilder {
         cameraNode.position = SCNVector3(2.5, 1.8, 3.5)
         cameraNode.look(at: SCNVector3Zero)
 
-        // Orbit with touch
-        cameraNode.camera?.allowsCameraControl = true
-
         scene.rootNode.addChildNode(cameraNode)
 
         // Hexahedron
