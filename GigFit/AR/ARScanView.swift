@@ -54,10 +54,8 @@ struct ARScanView: UIViewRepresentable {
 
     private func addCrosshair(to view: ARSCNView) {
         let size: CGFloat = 60
-        let crosshair = UIView(frame: CGRect(x: 0, y: 0, width: size, height: size))
-        crosshair.center = CGPoint(x: view.bounds.midX, y: view.bounds.midY - 80)
-        crosshair.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin,
-                                       .flexibleTopMargin, .flexibleBottomMargin]
+        let crosshair = UIView(frame: .zero)
+        crosshair.translatesAutoresizingMaskIntoConstraints = false
         crosshair.backgroundColor = .clear
         crosshair.isUserInteractionEnabled = false
 
@@ -86,5 +84,11 @@ struct ARScanView: UIViewRepresentable {
 
         crosshair.layer.addSublayer(shape)
         view.addSubview(crosshair)
+        NSLayoutConstraint.activate([
+            crosshair.widthAnchor.constraint(equalToConstant: size),
+            crosshair.heightAnchor.constraint(equalToConstant: size),
+            crosshair.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            crosshair.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -40)
+        ])
     }
 }

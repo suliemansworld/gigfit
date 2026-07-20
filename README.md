@@ -1,6 +1,6 @@
 # GigFit — Scan Space
 
-Native iOS app that measures cargo spaces using ARKit. Place 8 boundary points to create a 3D hexahedron, get accurate volume measurements with tetrahedron decomposition, and save scans for later reference.
+Native iOS app that measures cargo spaces using ARKit and LiDAR when available. Calibrate a floor corner, set width and depth, then raise the phone to expand and lock a 3D volume for review and saving.
 
 ## Architecture
 
@@ -16,10 +16,10 @@ GigFit/
     ARScanView.swift                 — SwiftUI wrapper for ARSCNView
     ARScanCoordinator.swift          — AR session delegate + point placement logic
     ARSessionController.swift        — AR session config management
-    PointPlacementService.swift      — Hit-testing + raycasting for surface points
+    PointPlacementService.swift      — Plane raycasting + LiDAR depth placement
     MarkerEntityFactory.swift        — SceneKit marker + hexahedron wireframe nodes
   Geometry/
-    VolumeCalculator.swift           — 5-tetrahedron decomposition volume
+    VolumeCalculator.swift           — 6-tetrahedron decomposition volume
     DimensionExtractor.swift         — L×W×H from point cloud
     CoordinateSystemBuilder.swift    — Right-handed coordinate system from points
     CalibrationService.swift         — One-distance tape-measure calibration
@@ -31,7 +31,7 @@ GigFit/
   Views/
     HomeView.swift                   — Saved scans list + new scan button
     ScanInstructionsView.swift       — 4-step instruction cards before scanning
-    ScanView.swift                   — AR scanning screen with 8-point guided flow
+    ScanView.swift                   — Floor-calibrated expandable volume workflow
     ScanReviewView.swift             — 3D model + dimensions + confidence + save
   Utilities/
     UnitFormatter.swift              — Imperial/metric display formatting

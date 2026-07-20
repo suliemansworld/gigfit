@@ -1,112 +1,38 @@
 import SwiftUI
 
-/// The main AR scanning view — 8-point guided placement.
+/// Floor-calibrated AR volume measurement with a live expandable wireframe.
 struct ScanView: View {
     @Binding var session: ScanSession
     @ObservedObject var scanStore: ScanStore
     @StateObject private var coordinator = ARScanCoordinator()
     @State private var showingCalibration = false
     @State private var showingReview = false
-    @State private var scanCompleted = false
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack {
-            // AR camera view
             ARScanView(coordinator: coordinator)
                 .ignoresSafeArea()
 
-            // Top instruction banner
-            VStack {
-                HStack(spacing: 12) {
-                    Image(systemName: coordinator.isPlacementEnabled ? "viewfinder" : "checkmark.circle.fill")
-                        .font(.title3)
-                        .foregroundColor(coordinator.isPlacementEnabled ? .blue : .green)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(coordinator.isPlacementEnabled
-                             ? "Point \(coordinator.placedPoints.count + 1) of 8"
-                             : "All points placed")
-                            .font(.subheadline.weight(.semibold))
-                        Text(coordinator.sessionMessage)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                }
-                .padding(14)
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal, 16)
-                .padding(.top, 54)
+            VStack(spacing: 12) {
+                statusPanel
+                    .padding(.horizontal, 12)
+                    .padding(.top, 48)
 
                 Spacer()
 
-                // Bottom controls
-                VStack(spacing: 10) {
-                    // Progress dots
-                    HStack(spacing: 8) {
-                        ForEach(ScanPointLabel.allCases) { label in
-                            Circle()
-                                .fill(pointColor(for: label))
-                                .frame(width: 10, height: 10)
-                        }
-                    }
-
-                    HStack(spacing: 12) {
-                        // Undo button
-                        Button(action: { coordinator.undoLastPoint() }) {
-                            Image(systemName: "arrow.uturn.backward")
-                                .font(.body.weight(.medium))
-                                .foregroundColor(.white)
-                                .padding(14)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Circle())
-                        }
-                        .disabled(coordinator.placedPoints.isEmpty)
-
-                        // Place point button (hidden when complete)
-                        if coordinator.isPlacementEnabled {
-                            Button(action: {}) {
-                                Text("Place Point")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 32)
-                                    .padding(.vertical, 16)
-                                    .background(Color(red: 0.27, green: 0.53, blue: 1.0))
-                                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                            }
-                            .opacity(0) // Hidden — actual tapping is on AR view
-                        }
-
-                        // Done / Continue button
-                        if !coordinator.isPlacementEnabled {
-                            Button(action: { showingCalibration = true }) {
-                                Label("Continue", systemImage: "arrow.right")
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 16)
-                                    .background(Color.green)
-                                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                            }
-                        }
-                    }
-                    .padding(.bottom, 4)
-
-                    Text("Tap anywhere on the AR view to place a point")
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.4))
+                if coordinator.stage.rawValue >= VolumeScanStage.depth.rawValue {
+                    measurementPanel
+                        .padding(.horizontal, 12)
                 }
-                .padding(.bottom, 40)
+
+                controlPanel
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 28)
             }
         }
         .onAppear {
-            coordinator.onPointPlaced = { point in
-                session.upsertPoint(label: point.label, position: point.position.simd, source: point.source)
-            }
-            coordinator.onAllPointsPlaced = {
-                scanCompleted = true
+            coordinator.onPointsChanged = { points in
+                session.points = points
             }
         }
         .sheet(isPresented: $showingCalibration) {
@@ -117,22 +43,198 @@ struct ScanView: View {
         }
     }
 
-    private func pointColor(for label: ScanPointLabel) -> Color {
-        let placed = Set(session.points.map { $0.label })
-        if placed.contains(label) { return .blue }
-        if placeableLabels().contains(label) { return .white.opacity(0.4) }
-        return .white.opacity(0.15)
-    }
+    private var statusPanel: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: stageIcon)
+                    .font(.headline)
+                    .foregroundStyle(stageColor)
 
-    private func placeableLabels() -> Set<ScanPointLabel> {
-        let placed = Set(session.points.map { $0.label })
-        var placeable: Set<ScanPointLabel> = []
-        for label in ScanPointLabel.allCases {
-            if !placed.contains(label) {
-                placeable.insert(label)
-                break
+                Text(coordinator.stage.title)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+
+                Spacer()
+
+                Label(coordinator.isLiDARAvailable ? "LiDAR" : "AR", systemImage: coordinator.isLiDARAvailable ? "sensor.tag.radiowaves.forward" : "camera.viewfinder")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(coordinator.isLiDARAvailable ? Color.cyan : Color.secondary)
+            }
+
+            Text(coordinator.stage.instruction)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(coordinator.sessionMessage)
+                .font(.caption)
+                .foregroundStyle(messageColor)
+                .lineLimit(2)
+
+            HStack(spacing: 6) {
+                ForEach(Array(VolumeScanStage.allCases.prefix(4))) { stage in
+                    VStack(spacing: 4) {
+                        Capsule()
+                            .fill(progressColor(for: stage))
+                            .frame(height: 4)
+                        Text(stage.title.replacingOccurrences(of: "Set the ", with: ""))
+                            .font(.caption2)
+                            .foregroundStyle(stage.rawValue <= coordinator.stage.rawValue ? .primary : .secondary)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
             }
         }
-        return placeable
+        .padding(12)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var measurementPanel: some View {
+        HStack(spacing: 0) {
+            measurement(label: "Width", value: coordinator.liveDimensions.x)
+            Divider().frame(height: 34)
+            measurement(label: "Depth", value: coordinator.liveDimensions.z)
+            Divider().frame(height: 34)
+            measurement(label: "Height", value: coordinator.liveDimensions.y)
+            Divider().frame(height: 34)
+            VStack(spacing: 2) {
+                Text("Volume")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(volumeText)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding(.vertical, 10)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var controlPanel: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Button(action: coordinator.undoLastPoint) {
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 48, height: 48)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.black.opacity(0.55))
+                .disabled(coordinator.stage == .floor)
+                .accessibilityLabel("Undo last measurement")
+
+                switch coordinator.stage {
+                case .floor:
+                    Button(action: coordinator.placeAtCrosshair) {
+                        Label("Set Floor", systemImage: "viewfinder")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.cyan)
+
+                    Button(action: coordinator.calibrateFloorAtDevice) {
+                        Label("Phone on Floor", systemImage: "iphone.gen3")
+                            .frame(minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.yellow)
+                case .width, .depth:
+                    Button(action: coordinator.placeAtCrosshair) {
+                        Label(coordinator.stage == .width ? "Set Width" : "Set Depth", systemImage: "viewfinder")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.cyan)
+                case .height:
+                    Button(action: coordinator.lockHeightAtDevice) {
+                        Label("Lock Height at Phone", systemImage: "arrow.up.and.down")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.yellow)
+
+                    Button(action: coordinator.placeAtCrosshair) {
+                        Image(systemName: "viewfinder")
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.cyan)
+                    .accessibilityLabel("Set height from targeted surface")
+                case .complete:
+                    Button(action: { showingCalibration = true }) {
+                        Label("Review Measurement", systemImage: "cube.transparent")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+                }
+            }
+
+            Text(controlHint)
+                .font(.caption2)
+                .foregroundStyle(.white.opacity(0.75))
+                .multilineTextAlignment(.center)
+        }
+    }
+
+    private func measurement(label: String, value: Float) -> some View {
+        VStack(spacing: 2) {
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(value > 0 ? UnitFormatter.formatFeetAndInches(Double(value)) : "--")
+                .font(.caption.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var volumeText: String {
+        let dimensions = coordinator.liveDimensions
+        let volume = Double(dimensions.x * dimensions.y * dimensions.z)
+        return volume > 0 ? UnitFormatter.formatCubicFeet(volume) : "--"
+    }
+
+    private var stageIcon: String {
+        switch coordinator.stage {
+        case .floor: return "square.bottomhalf.filled"
+        case .width: return "arrow.left.and.right"
+        case .depth: return "arrow.up.left.and.arrow.down.right"
+        case .height: return "arrow.up.and.down"
+        case .complete: return "checkmark.circle.fill"
+        }
+    }
+
+    private var stageColor: Color {
+        switch coordinator.stage {
+        case .floor, .width, .depth: return .cyan
+        case .height: return .yellow
+        case .complete: return .green
+        }
+    }
+
+    private var messageColor: Color {
+        coordinator.surfaceReady ? .green : .orange
+    }
+
+    private func progressColor(for stage: VolumeScanStage) -> Color {
+        if coordinator.stage == .complete || stage.rawValue < coordinator.stage.rawValue { return .green }
+        if stage == coordinator.stage { return stageColor }
+        return Color.secondary.opacity(0.25)
+    }
+
+    private var controlHint: String {
+        switch coordinator.stage {
+        case .floor: return "For phone calibration, place the phone over the first floor corner before tapping."
+        case .width, .depth: return "Use the crosshair button or tap the camera view on the floor boundary."
+        case .height: return "Raise the phone slowly. The wireframe grows with it, then lock the height."
+        case .complete: return "The eight corners are generated from this calibrated rectangular volume."
+        }
     }
 }

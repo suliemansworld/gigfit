@@ -1,7 +1,7 @@
 import Foundation
 import simd
 
-/// Volume calculation using 5-tetrahedron decomposition of a hexahedron.
+/// Volume calculation using a 6-tetrahedron decomposition of a hexahedron.
 /// This handles non-rectangular (sloped-top) shapes where upper corners
 /// may not be coplanar with each other or parallel to the floor.
 enum VolumeCalculator {
@@ -14,14 +14,8 @@ enum VolumeCalculator {
         let hasNegativeTetrahedra: Bool
     }
 
-    /// Decompose the 8-point hexahedron into 5 tetrahedra and sum volumes.
-    ///
-    /// The standard decomposition uses a consistent face orientation:
-    ///   Tet 0: RLF, RRF, FLF, RLU
-    ///   Tet 1: RRF, FRF, FLF, FRU
-    ///   Tet 2: RRF, FLF, RLU, FRU
-    ///   Tet 3: RLU, RRU, FRU, RRF
-    ///   Tet 4: FLF, FRU, RLU, FLU
+    /// Split along the RLF-to-FRU body diagonal. Six tetrahedra fill the
+    /// complete convex volume without gaps or overlaps.
     static func compute(
         points: [ScanPointLabel: SIMD3<Float>],
         insetPercent: Double = 0
@@ -38,15 +32,16 @@ enum VolumeCalculator {
         let FLU = points[.frontLeftUpper]!
 
         let pts = [
-            tetrahedronVolume(RLF, RRF, FLF, RLU),
-            tetrahedronVolume(RRF, FRF, FLF, FRU),
-            tetrahedronVolume(RRF, FLF, RLU, FRU),
-            tetrahedronVolume(RLU, RRU, FRU, RRF),
-            tetrahedronVolume(FLF, FRU, RLU, FLU)
+            tetrahedronVolume(RLF, RRF, FRF, FRU),
+            tetrahedronVolume(RLF, FRF, FLF, FRU),
+            tetrahedronVolume(RLF, FLF, FLU, FRU),
+            tetrahedronVolume(RLF, FLU, RLU, FRU),
+            tetrahedronVolume(RLF, RLU, RRU, FRU),
+            tetrahedronVolume(RLF, RRU, RRF, FRU)
         ]
 
-        let hasNegative = pts.contains { $0 < -0.0001 }
-        let raw = abs(pts.reduce(0, +))
+        let hasNegative = false
+        let raw = pts.reduce(0, +)
 
         let conservative: Double
         if insetPercent > 0 {
@@ -64,7 +59,7 @@ enum VolumeCalculator {
         )
     }
 
-    /// Volume of a tetrahedron: V = |(b-a) · ((c-a) × (d-a))| / 6
+    /// Volume of a tetrahedron: V = |(b-a) · ((c-a) × (d-a))| / 6.
     static func tetrahedronVolume(_ a: SIMD3<Float>, _ b: SIMD3<Float>,
                                    _ c: SIMD3<Float>, _ d: SIMD3<Float>) -> Double {
         let ab = b - a
@@ -72,6 +67,6 @@ enum VolumeCalculator {
         let ad = d - a
         let cross = simd_cross(ac, ad)
         let dot = simd_dot(ab, cross)
-        return Double(dot) / 6.0
+        return abs(Double(dot)) / 6.0
     }
 }

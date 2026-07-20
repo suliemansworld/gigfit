@@ -70,12 +70,14 @@ enum PointSource: String, Codable {
     case existingPlaneGeometry
     case existingPlaneInfinite
     case estimatedPlane
+    case lidarDepth
 
     var displayName: String {
         switch self {
         case .existingPlaneGeometry: return "Detected surface"
         case .existingPlaneInfinite: return "Estimated flat surface"
         case .estimatedPlane:        return "Approximate surface"
+        case .lidarDepth:            return "LiDAR depth"
         }
     }
 }

@@ -1,24 +1,23 @@
 import SwiftUI
 
-/// Pre-scan instructions — guides the user through the 8-point process.
+/// Pre-scan instructions for floor-calibrated volume measurement.
 struct ScanInstructionsView: View {
     @ObservedObject var scanStore: ScanStore
     @State private var currentStep = 0
     @State private var session = ScanSession(name: "Cargo Scan")
     @State private var showingScan = false
-    @State private var showingCalibration = false
 
     private let steps: [(icon: String, title: String, detail: String)] = [
         ("1.circle", "Find your cargo area",
          "Open all doors and clear the space. You'll need a clear view of all corners."),
-        ("2.circle", "Place 4 floor corners",
-         "Tap on each floor corner of your cargo area. Aim the crosshair at the boundary where floor meets wall."),
-        ("3.circle", "Place 4 upper corners",
-         "Now tap on the upper corners — the ceiling of your cargo area at each corner."),
-        ("4.circle", "Optional calibration",
-         "Measure one known distance with a tape measure to improve accuracy, or skip for an approximate result."),
+        ("2.circle", "Calibrate the floor",
+         "Put the phone over the first floor corner, or aim the crosshair at the floor and tap Set Floor."),
+        ("3.circle", "Set the base",
+         "Aim along the floor to set the width and depth. GigFit creates a rectangular base."),
+        ("4.circle", "Raise for height",
+         "Raise the phone to the top of the space. Watch the wireframe expand, then lock the height."),
         ("5.circle", "Review & save",
-         "See your 3D model, check the volume, and save for later reference."),
+         "Check dimensions and volume. You can optionally tape-calibrate one edge before saving."),
     ]
 
     var body: some View {
@@ -58,14 +57,6 @@ struct ScanInstructionsView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
 
-                        Button(action: {
-                            session.name = "Cargo Scan — \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
-                            showingScan = true
-                        }) {
-                            Text("Skip calibration & start")
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.4))
-                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 16)

@@ -78,9 +78,14 @@ enum MarkerEntityFactory {
         return parent
     }
 
+    static func createMeasurementLine(from: SIMD3<Float>, to: SIMD3<Float>) -> SCNNode {
+        createLine(from: SCNVector3FromSIMD(from), to: SCNVector3FromSIMD(to))
+    }
+
     private static func createLine(from: SCNVector3, to: SCNVector3) -> SCNNode {
         let vector = SCNVector3(to.x - from.x, to.y - from.y, to.z - from.z)
         let distance = sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
+        guard distance > 0.0001 else { return SCNNode() }
 
         let cylinder = SCNCylinder(radius: 0.003, height: CGFloat(distance))
         cylinder.firstMaterial?.diffuse.contents = wireframeColor
