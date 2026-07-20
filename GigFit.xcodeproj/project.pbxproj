@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F5C4A3B20123456789ABCDEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E4D3C2B10123456789ABCDEF /* Assets.xcassets */; };
 		2B5E0F6F472BDF260DB472AE /* ScanDimensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FDFAD62811879CE48333443 /* ScanDimensions.swift */; };
 		2BDF9B755044DF972B9D5395 /* ARScanCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3989F9B1ADB64DA1183F1A02 /* ARScanCoordinator.swift */; };
 		2D0F13FDB91485093E9D9A29 /* DimensionExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB9F382970C48EE21372B04F /* DimensionExtractor.swift */; };
@@ -50,6 +51,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E4D3C2B10123456789ABCDEF /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		05FA89498782A18083D1F95C /* GigFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GigFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B79ACB5F34C54491E42C6AA /* CalibrationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalibrationService.swift; sourceTree = "<group>"; };
 		0B882DCC60BAD5A6411BE737 /* CalibrationServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalibrationServiceTests.swift; sourceTree = "<group>"; };
@@ -183,6 +185,7 @@
 		BAF14507A6ADD2F3A6651607 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				E4D3C2B10123456789ABCDEF /* Assets.xcassets */,
 				9E623B3C79C28D7870966687 /* Info.plist */,
 			);
 			name = Resources;
@@ -320,6 +323,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5C4A3B20123456789ABCDEF /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
