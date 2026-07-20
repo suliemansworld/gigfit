@@ -1,5 +1,7 @@
 # GigFit — Scan Space
 
+For architecture, deployment, Apple/TestFlight setup, and agent continuation instructions, see [AGENT_HANDOFF.md](AGENT_HANDOFF.md).
+
 Native iOS app that measures cargo spaces using ARKit and LiDAR when available. Calibrate a floor corner, set width and depth, then raise the phone to expand and lock a 3D volume for review and saving.
 
 ## Architecture
