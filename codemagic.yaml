@@ -35,9 +35,6 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       xcode: edge
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.suliemansworld.GigFit
       groups:
         - app_store_credentials
       vars:
