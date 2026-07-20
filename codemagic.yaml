@@ -44,8 +44,12 @@ workflows:
     scripts:
       - name: Set build number
         script: |
+          : "${BUILD_NUMBER:?BUILD_NUMBER is required}"
           /usr/libexec/PlistBuddy \
-            -c "Set :CFBundleVersion $CM_BUILD_NUMBER" \
+            -c "Set :CFBundleVersion $BUILD_NUMBER" \
+            "$CM_BUILD_DIR/GigFit/Resources/Info.plist"
+          /usr/libexec/PlistBuddy \
+            -c "Print :CFBundleVersion" \
             "$CM_BUILD_DIR/GigFit/Resources/Info.plist"
       - name: Initialize keychain
         script: keychain initialize
