@@ -110,7 +110,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         config.worldAlignment = .gravity
         config.planeDetection = [.horizontal, .vertical]
         config.environmentTexturing = .automatic
-        if ARWorldTrackingConfiguration.supportsSceneReconstruction(.meshWithClassification) {
+        // Mesh reconstruction only in auto mode (expensive)
+        if stage == .auto, ARWorldTrackingConfiguration.supportsSceneReconstruction(.meshWithClassification) {
             config.sceneReconstruction = .meshWithClassification
         }
         if ARWorldTrackingConfiguration.supportsFrameSemantics(.smoothedSceneDepth) {
@@ -870,6 +871,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     }
 
     private func createMeshSCNGeometry(from meshGeometry: ARMeshGeometry) -> SCNGeometry? {
+        guard stage == .auto else { return nil }
         let vertices = meshGeometry.vertices
         let faces = meshGeometry.faces
         let classification = meshGeometry.classification
@@ -889,7 +891,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         var allIndices: [Int32] = []
         var allColors: [SCNVector3] = []
 
-        for faceIdx in 0..<faceCount {
+        let sampleRate = max(1, faceCount / 300)
+        for faceIdx in stride(from: 0, to: faceCount, by: sampleRate) {
             let i0 = Int(faceBuffer[faceIdx * faceStride])
             let i1 = Int(faceBuffer[faceIdx * faceStride + idxStride])
             let i2 = Int(faceBuffer[faceIdx * faceStride + idxStride * 2])
@@ -1248,7 +1251,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
                         // Update crosshair surface detection (throttled)
             if self.sampledFrames % 12 == 0 { self.updateCrosshair(from: frame) }
             // Batched mesh geometry updates (throttled)
-            if self.sampledFrames % 15 == 0, self.isLiDARAvailable {
+            if self.stage == .auto, self.sampledFrames % 15 == 0, self.isLiDARAvailable {
                 for anchor in frame.anchors {
                     if let meshAnchor = anchor as? ARMeshAnchor, let node = self.meshNodes[meshAnchor.identifier] {
                         self.updateMeshNode(node, from: meshAnchor.geometry)
