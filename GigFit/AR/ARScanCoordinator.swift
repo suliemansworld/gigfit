@@ -572,7 +572,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             let vc = geo.vertices.count
             let t = meshAnchor.transform
 
-            for fi in stride(from: 0, to: faceCount, by: max(1, faceCount / 50)) {
+            for fi in stride(from: 0, to: faceCount, by: max(1, faceCount / 30)) {
                 let cls = clsBuf[fi * MemoryLayout<UInt8>.stride]
                 guard cls == 3 else { continue } // ceiling only
 
@@ -647,7 +647,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     // MARK: — Crosshair Surface Detection —
 
     private func updateCrosshair(from frame: ARFrame) {
-        guard let sv = self.sceneView, sv.bounds.width > 0, self.stage != .complete else { return }
+        guard let sv = self.sceneView, sv.bounds.width > 0, self.stage != .complete, self.stage != .auto else { return }
         let point = CGPoint(x: sv.bounds.midX, y: sv.bounds.midY - 40)
         let orientation = sv.window?.windowScene?.interfaceOrientation ?? .portrait
         let alignment: ARRaycastQuery.TargetAlignment = (self.stage == .height || self.stage == .polygonHeight) ? .any : .horizontal
@@ -719,6 +719,9 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             self.crosshairHit = false
             self.crosshairNode?.isHidden = true
             self.removeMeasurementLine()
+            if self.sessionMessage.hasPrefix("Surface found") {
+                self.sessionMessage = self.stage.instruction
+            }
         }
     }
 
@@ -1211,11 +1214,11 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
                 self.crosshairSurfaceFound = PointPlacementService.place(at: cp, in: frame, session: sv.session, viewportSize: sv.bounds.size, orientation: orient, alignment: align) != nil
             }
 
-                        // Update crosshair surface detection
-            self.updateCrosshair(from: frame)
+                        // Update crosshair surface detection (throttled)
+            if self.sampledFrames % 8 == 0 { self.updateCrosshair(from: frame) }
 
-                        // Ceiling detection during height modes
-            if self.stage == .height || self.stage == .polygonHeight {
+                        // Ceiling detection during height modes (throttled)
+            if (self.stage == .height || self.stage == .polygonHeight), self.sampledFrames % 12 == 0 {
                 self.detectCeiling(from: frame)
             }
 
