@@ -78,9 +78,9 @@ struct ScanView: View {
 
                 Spacer()
 
-                Label(coordinator.isLiDARAvailable ? "LiDAR" : "AR", systemImage: coordinator.isLiDARAvailable ? "sensor.tag.radiowaves.forward" : "camera.viewfinder")
+                Label(coordinator.meshActive ? "LiDAR Active" : (coordinator.isLiDARAvailable ? "LiDAR" : "AR"), systemImage: coordinator.meshActive ? "sensor.tag.radiowaves.forward.fill" : (coordinator.isLiDARAvailable ? "sensor.tag.radiowaves.forward" : "camera.viewfinder"))
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(coordinator.isLiDARAvailable ? Color.cyan : Color.secondary)
+                    .foregroundStyle(coordinator.meshActive ? Color.green : (coordinator.isLiDARAvailable ? Color.cyan : Color.secondary))
             }
 
             Text(coordinator.stage.instruction)

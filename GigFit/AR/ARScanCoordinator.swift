@@ -49,6 +49,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     @Published var deviceHeightAboveFloor: Float = 0
     @Published var surfaceReady = false
     @Published var autoRoomReady = false
+    @Published var meshActive = false
 
     var onPointPlaced: ((ScanPoint) -> Void)?
     var onPointsChanged: (([ScanPoint]) -> Void)?
@@ -75,6 +76,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     private var roomMaxBounds: SIMD3<Float>?
     private var sampledFrames: Int = 0
     private var wallDistanceLabels: [SCNNode] = []
+    private var meshNodes: [UUID: SCNNode] = [:]
 
     func attach(to sceneView: ARSCNView) {
         self.sceneView = sceneView
@@ -121,6 +123,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         roomMaxBounds = nil
         sampledFrames = 0
         removeAutoLabels()
+        removeMeshNodes()
         removeVisuals()
         onPointsChanged?([])
         startSession()
@@ -134,6 +137,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         sampledFrames = 0
         autoRoomReady = false
         removeAutoLabels()
+        removeMeshNodes()
         removeVisuals()
         sessionMessage = stage.instruction
     }
@@ -532,6 +536,130 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         guideNode = nil
     }
 
+
+    // MARK: — Mesh Rendering —
+
+    private func removeMeshNodes() {
+        for (_, node) in meshNodes {
+            node.removeFromParentNode()
+        }
+        meshNodes.removeAll()
+    }
+
+    private func updateMeshNode(_ node: SCNNode, from geometry: ARMeshGeometry) {
+        guard let newGeo = createMeshSCNGeometry(from: geometry) else { return }
+        node.geometry = newGeo
+    }
+
+    private func createMeshSCNGeometry(from meshGeometry: ARMeshGeometry) -> SCNGeometry? {
+        let vertices = meshGeometry.vertices
+        let faces = meshGeometry.faces
+        let classification = meshGeometry.classification
+        let vertexCount = vertices.count
+        let faceCount = faces.count
+
+        guard vertexCount > 0, faceCount > 0 else { return nil }
+
+        let vertexBuffer = vertices.buffer.contents().assumingMemoryBound(to: (Float, Float, Float).self)
+        let faceBuffer = faces.buffer.contents().assumingMemoryBound(to: UInt8.self)
+        let idxStride = MemoryLayout<Int32>.stride
+        let faceStride = idxStride * 3
+
+        let clsBuffer = classification?.buffer.contents().assumingMemoryBound(to: UInt8.self)
+
+        var allVertices: [SCNVector3] = []
+        var allIndices: [Int32] = []
+        var allColors: [SCNVector3] = []
+
+        for faceIdx in 0..<faceCount {
+            let i0 = Int(faceBuffer[faceIdx * faceStride])
+            let i1 = Int(faceBuffer[faceIdx * faceStride + idxStride])
+            let i2 = Int(faceBuffer[faceIdx * faceStride + idxStride * 2])
+
+            guard i0 < vertexCount, i1 < vertexCount, i2 < vertexCount else { continue }
+
+            let baseIdx = Int32(allVertices.count)
+            allIndices.append(contentsOf: [baseIdx, baseIdx + 1, baseIdx + 2])
+
+            for i in [i0, i1, i2] {
+                let v = vertexBuffer[i]
+                allVertices.append(SCNVector3(v.0, v.1, v.2))
+            }
+
+            // Color by classification if available
+            var color = SCNVector3(0.6, 0.6, 0.6) // default gray
+            if let clsBuf = clsBuffer {
+                let cls = clsBuf[faceIdx * MemoryLayout<UInt8>.stride]
+                switch cls {
+                case 1: color = SCNVector3(0.4, 0.8, 0.4)  // wall: green
+                case 2: color = SCNVector3(0.3, 0.5, 1.0)  // floor: blue
+                case 3: color = SCNVector3(1.0, 0.4, 0.4)  // ceiling: red
+                default: break
+                }
+            }
+            allColors.append(contentsOf: [color, color, color])
+        }
+
+        guard !allVertices.isEmpty else { return nil }
+
+        let vertData = Data(bytes: allVertices, count: allVertices.count * MemoryLayout<SCNVector3>.stride)
+        let vertexSrc = SCNGeometrySource(data: vertData,
+                                          semantic: .vertex,
+                                          vectorCount: allVertices.count,
+                                          usesFloatComponents: true,
+                                          componentsPerVector: 3,
+                                          bytesPerComponent: MemoryLayout<Float>.stride,
+                                          dataOffset: 0,
+                                          dataStride: MemoryLayout<SCNVector3>.stride)
+
+        let colorData = Data(bytes: allColors, count: allColors.count * MemoryLayout<SCNVector3>.stride)
+        let colorSrc = SCNGeometrySource(data: colorData,
+                                         semantic: .color,
+                                         vectorCount: allColors.count,
+                                         usesFloatComponents: true,
+                                         componentsPerVector: 3,
+                                         bytesPerComponent: MemoryLayout<Float>.stride,
+                                         dataOffset: 0,
+                                         dataStride: MemoryLayout<SCNVector3>.stride)
+
+        let indexData = Data(bytes: allIndices, count: allIndices.count * MemoryLayout<Int32>.stride)
+        let element = SCNGeometryElement(data: indexData,
+                                         primitiveType: .triangles,
+                                         primitiveCount: allIndices.count / 3,
+                                         bytesPerIndex: MemoryLayout<Int32>.stride)
+
+        let geo = SCNGeometry(sources: [vertexSrc, colorSrc], elements: [element])
+        let mat = SCNMaterial()
+        mat.diffuse.contents = UIColor.white
+        mat.lightingModel = .constant
+        mat.isDoubleSided = true
+        mat.transparency = 0.45
+        geo.materials = [mat]
+        return geo
+    }
+
+    func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
+        guard let meshAnchor = anchor as? ARMeshAnchor,
+              let geo = createMeshSCNGeometry(from: meshAnchor.geometry) else { return }
+        let meshNode = SCNNode(geometry: geo)
+        self.meshActive = self.meshNodes.count > 0
+        node.addChildNode(meshNode)
+        meshNodes[meshAnchor.identifier] = meshNode
+    }
+
+    func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        guard let meshAnchor = anchor as? ARMeshAnchor,
+              let existingNode = meshNodes[meshAnchor.identifier] else { return }
+        updateMeshNode(existingNode, from: meshAnchor.geometry)
+    }
+
+    func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
+        guard let meshAnchor = anchor as? ARMeshAnchor else { return }
+        meshNodes[meshAnchor.identifier]?.removeFromParentNode()
+        meshNodes.removeValue(forKey: meshAnchor.identifier)
+        self.meshActive = self.meshNodes.count > 0
+    }
+
     // MARK: — ARSessionDelegate —
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
@@ -543,7 +671,11 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             if self.stage == .auto {
                 // Process auto-room detection every 4th frame for performance
                 self.sampledFrames += 1
-                if self.sampledFrames % 4 == 0 {
+                // Show LiDAR activity
+                if self.meshNodes.count > 0 && self.sampledFrames == 5 {
+                    self.sessionMessage = "LiDAR active — mesh on surfaces. Keep panning."
+                }
+                if self.sampledFrames % 2 == 0 {
                     // Use plane anchors for wall/floor detection
                     for anchor in frame.anchors {
                         if let planeAnchor = anchor as? ARPlaneAnchor {
