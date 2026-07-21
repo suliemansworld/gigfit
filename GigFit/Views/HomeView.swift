@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var scanStore: ScanStore
     @State private var showingNewScan = false
+    @State private var showingRoomPlan = false
 
     var body: some View {
         NavigationStack {
@@ -28,6 +29,9 @@ struct HomeView: View {
             }
             .fullScreenCover(isPresented: $showingNewScan) {
                 ScanInstructionsView(scanStore: scanStore)
+            }
+            .fullScreenCover(isPresented: $showingRoomPlan) {
+                RoomPlanScanView(scanStore: scanStore)
             }
         }
     }
@@ -59,6 +63,16 @@ struct HomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
 
+            Button(action: { showingRoomPlan = true }) {
+                Label("3D Room Scan", systemImage: "cube.transparent.fill")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 14)
+                    .background(Color(red: 0.20, green: 0.70, blue: 0.40))
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+
             Spacer()
         }
     }
@@ -78,6 +92,19 @@ struct HomeView: View {
             }
         }
         .scrollContentBackground(.hidden)
+        .toolbar {
+            ToolbarItem(placement: .bottomBar) {
+                Button(action: { showingRoomPlan = true }) {
+                    Label("3D Room Scan", systemImage: "cube.transparent.fill")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color(red: 0.20, green: 0.70, blue: 0.40))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+            }
+        }
     }
 }
 
@@ -86,7 +113,6 @@ struct ScanRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Confidence indicator
             RoundedRectangle(cornerRadius: 6)
                 .fill(confidenceColor)
                 .frame(width: 4, height: 44)

@@ -38,6 +38,11 @@
 		DBA8C46B39716A1E6D7C8E6D /* UnitFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1ABC2CB3FFFCD2A23469CE /* UnitFormatter.swift */; };
 		F2F4757BB6EAB309D7AD46D0 /* ScanSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C797871B5CAD0600FA61B98F /* ScanSession.swift */; };
 		F856687BAC8FE8024274B69B /* CalibrationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B882DCC60BAD5A6411BE737 /* CalibrationServiceTests.swift */; };
+		C70D281493384DE1B3AAE7AA /* RoomPlan.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D9569D465A40E58489E77D /* RoomPlan.framework */; };
+		0584FD6340D74A9691670440 /* RoomPlanCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA5FF7613AC45909E981A79 /* RoomPlanCaptureController.swift */; };
+		4D19566A45E844A89BFD6FB1 /* RoomPlanCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C814E43465C4122B6CA1522 /* RoomPlanCaptureView.swift */; };
+		1E5296D1A48746A5AB34C7AD /* RoomPlanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3442830683B14C02AE2BDEF1 /* RoomPlanReviewView.swift */; };
+		C960443822F7453B89600F66 /* RoomPlanScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8EB461B0FB0488DBABC1867 /* RoomPlanScanView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +89,11 @@
 		CB9F382970C48EE21372B04F /* DimensionExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DimensionExtractor.swift; sourceTree = "<group>"; };
 		CC129863AF14DC62630258B7 /* ScanPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanPoint.swift; sourceTree = "<group>"; };
 		E22ECE6C7691106FCF955588 /* PointPlacementService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PointPlacementService.swift; sourceTree = "<group>"; };
+		52D9569D465A40E58489E77D /* RoomPlan.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RoomPlan.framework; path = System/Library/Frameworks/RoomPlan.framework; sourceTree = SDKROOT; };
+		EDA5FF7613AC45909E981A79 /* RoomPlanCaptureController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanCaptureController.swift; sourceTree = "<group>"; };
+		9C814E43465C4122B6CA1522 /* RoomPlanCaptureView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanCaptureView.swift; sourceTree = "<group>"; };
+		3442830683B14C02AE2BDEF1 /* RoomPlanReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanReviewView.swift; sourceTree = "<group>"; };
+		C8EB461B0FB0488DBABC1867 /* RoomPlanScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanScanView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,7 +144,8 @@
 				1E36B94D3E898FF126014AE4 /* ScanReviewView.swift */,
 				950F2973D7F3FE81BAA92260 /* ScanView.swift */,
 				7EE9AC4ABF40F834292A00EB /* CalibrationView.swift */,
-			);
+			
+				52D9569D465A40E58489E77D /* RoomPlan.framework */,);
 			name = Views;
 			path = Views;
 			sourceTree = "<group>";
@@ -204,7 +215,8 @@
 				39AA9EEF51689DAD5125058E /* Views */,
 				BAF14507A6ADD2F3A6651607 /* Resources */,
 				723E797B938D17D7A8D4110F /* Tests */,
-			);
+			
+				33C0B8FBBA40442FA62116B9 /* RoomPlan */,);
 			name = GigFit;
 			path = GigFit;
 			sourceTree = "<group>";
@@ -248,6 +260,18 @@
 				181AC5EC40BA6A4CC237F3CA /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		33C0B8FBBA40442FA62116B9 /* RoomPlan */ = {
+			isa = PBXGroup;
+			children = (
+				EDA5FF7613AC45909E981A79 /* RoomPlanCaptureController.swift */,
+				9C814E43465C4122B6CA1522 /* RoomPlanCaptureView.swift */,
+				3442830683B14C02AE2BDEF1 /* RoomPlanReviewView.swift */,
+				C8EB461B0FB0488DBABC1867 /* RoomPlanScanView.swift */,
+			);
+			name = RoomPlan;
+			path = RoomPlan;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -324,7 +348,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5C4A3B20123456789ABCDEF /* Assets.xcassets in Resources */,
-			);
+			
+				C70D281493384DE1B3AAE7AA /* RoomPlan.framework in Frameworks */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		9CF08AFDDE394C297217171F /* Resources */ = {
@@ -366,6 +391,10 @@
 				3CCDEEE429E7A6852B21A538 /* ScanReviewView.swift in Sources */,
 				A28902319AE397FA806CF221 /* ScanView.swift in Sources */,
 				B04119FF5865A68E2A2F6B60 /* CalibrationView.swift in Sources */,
+				0584FD6340D74A9691670440 /* RoomPlanCaptureController.swift in Sources */,
+				4D19566A45E844A89BFD6FB1 /* RoomPlanCaptureView.swift in Sources */,
+				1E5296D1A48746A5AB34C7AD /* RoomPlanReviewView.swift in Sources */,
+				C960443822F7453B89600F66 /* RoomPlanScanView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
