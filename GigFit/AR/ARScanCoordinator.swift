@@ -85,6 +85,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     private var roomMaxBounds: SIMD3<Float>?
     private var sampledFrames: Int = 0
     private var wallDistanceLabels: [SCNNode] = []
+    private var measurementLineNode: SCNNode?
+    private var lastPlacedPosition: SIMD3<Float>?
     private var crosshairNode: SCNNode?
     private var meshNodes: [UUID: SCNNode] = [:]
     private var polygonVertices: [SIMD3<Float>] = []
@@ -137,6 +139,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         sampledFrames = 0
         polygonVertices = []
         polygonClosed = false
+        lastPlacedPosition = nil
+        removeMeasurementLine()
         removeAutoLabels()
         removeCrosshairNode()
         removeMeshNodes()
@@ -153,9 +157,12 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         sampledFrames = 0
         polygonVertices = []
         polygonClosed = false
+        lastPlacedPosition = nil
+        removeMeasurementLine()
         autoRoomReady = false
         removeAutoLabels()
         removeCrosshairNode()
+        removeMeasurementLine()
         removeCrosshairNode()
         removeMeshNodes()
         removeVisuals()
@@ -182,6 +189,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         upperSource = isLiDARAvailable ? .lidarDepth : .existingPlaneGeometry
         liveDimensions = SIMD3<Float>(abs(size.x), size.y, abs(size.z))
 
+        removeMeasurementLine()
         commitVolume(height: size.y)
         removeAutoLabels()
     }
@@ -262,16 +270,20 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         case .height:
             depthVector = nil
             stage = .depth
+            lastPlacedPosition = floorOrigin
             liveDimensions.z = 0
             refreshPreview()
         case .depth:
             widthVector = nil
             stage = .width
+            lastPlacedPosition = floorOrigin
             liveDimensions.x = 0
             refreshPreview()
         case .width:
             floorOrigin = nil
             stage = .floor
+            lastPlacedPosition = nil
+            removeMeasurementLine()
             liveDimensions = .zero
             removeVisuals()
         case .polygonHeight:
@@ -284,6 +296,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             if !polygonVertices.isEmpty {
                 polygonVertices.removeLast()
                 polygonClosed = false
+                lastPlacedPosition = polygonVertices.last
                 refreshPolygonPreview()
             }
             return
@@ -297,6 +310,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         floorOrigin = position
         floorSource = source
         stage = .width
+        lastPlacedPosition = position
         sessionMessage = stage.instruction
         refreshPreview()
     }
@@ -313,6 +327,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         liveDimensions.x = simd_length(vector)
         stage = .depth
         sessionMessage = stage.instruction
+        lastPlacedPosition = position
         refreshPreview()
     }
 
@@ -327,6 +342,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         }
         depthVector = perpendicular * signedDepth
         liveDimensions.z = abs(signedDepth)
+        lastPlacedPosition = position
         stage = .height
         sessionMessage = stage.instruction
         updateLiveHeightFromDevice()
@@ -359,6 +375,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         onPointsChanged?(ordered)
         stage = .complete
         isPlacementEnabled = false
+        removeMeasurementLine()
         sessionMessage = "Volume locked. Continue to review measurements."
         refreshPreview()
         onAllPointsPlaced?()
@@ -587,38 +604,158 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             at: point, in: frame, session: sv.session,
             viewportSize: sv.bounds.size, orientation: orientation, alignment: alignment
         ) {
+            var targetPos = result.worldPosition
+
+            // Axis snapping: snap to cardinal axes from last placed point
+            if let last = self.lastPlacedPosition {
+                let offset = targetPos - last
+                let hLen = sqrt(offset.x * offset.x + offset.z * offset.z)
+                let snapThreshold: Float = 0.08
+
+                if hLen > 0.05 {
+                    // Snap width axis (XZ direction from last point)
+                    let widthDir = self.widthVector.map { simd_normalize(SIMD3<Float>($0.x, 0, $0.z)) }
+                    if let wDir = widthDir, hLen > 0.1 {
+                        let dotW = abs(simd_dot(SIMD3<Float>(offset.x, 0, offset.z) / hLen, wDir))
+                        if dotW > 0.95 {
+                            let proj = last + wDir * simd_dot(offset, wDir)
+                            if simd_distance(proj, targetPos) < snapThreshold {
+                                targetPos = SIMD3<Float>(proj.x, targetPos.y, proj.z)
+                            }
+                        }
+                    }
+                    // Snap perpendicular axis
+                    let perpDir = self.depthVector.map { simd_normalize(SIMD3<Float>($0.x, 0, $0.z)) }
+                    if let pDir = perpDir, hLen > 0.1 {
+                        let dotP = abs(simd_dot(SIMD3<Float>(offset.x, 0, offset.z) / hLen, pDir))
+                        if dotP > 0.95 {
+                            let proj = last + pDir * simd_dot(offset, pDir)
+                            if simd_distance(proj, targetPos) < snapThreshold {
+                                targetPos = SIMD3<Float>(proj.x, targetPos.y, proj.z)
+                            }
+                        }
+                    }
+                }
+            }
+
             self.crosshairHit = true
-            self.crosshairPosition = result.worldPosition
+            self.crosshairPosition = targetPos
             if self.stage != .complete && self.sessionMessage == self.stage.instruction {
                 self.sessionMessage = "Surface found! Tap to place point."
             }
-            let pos = SCNVector3FromSIMD(result.worldPosition)
+            let pos = SCNVector3FromSIMD(targetPos)
+
+            // Smooth animation to target position
             if self.crosshairNode == nil {
                 self.crosshairNode = self.makeCrosshairNode()
                 sv.scene.rootNode.addChildNode(self.crosshairNode!)
+                self.crosshairNode?.position = pos
+            } else if let node = self.crosshairNode {
+                let current = SCNVector3ToSIMD(node.position)
+                let dist = simd_distance(current, targetPos)
+                let duration = min(0.15, max(0.02, TimeInterval(dist * 0.5)))
+                let move = SCNAction.move(to: pos, duration: duration)
+                move.timingMode = .easeOut
+                node.runAction(move)
             }
-            self.crosshairNode?.position = pos
             self.crosshairNode?.isHidden = false
-            // Orient flat (parallel to floor)
             self.crosshairNode?.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
+
+            // Update measurement line
+            self.updateMeasurementLine(to: targetPos)
         } else {
             self.crosshairHit = false
             self.crosshairNode?.isHidden = true
+            self.removeMeasurementLine()
         }
+    }
+
+    private func updateMeasurementLine(to currentPos: SIMD3<Float>) {
+        guard let last = self.lastPlacedPosition else { removeMeasurementLine(); return }
+
+        removeMeasurementLine()
+        let lineNode = SCNNode()
+        lineNode.name = "measurement_line"
+
+        // Dashed line from last placed point to current position
+        let vector = currentPos - last
+        let distance = simd_length(vector)
+        guard distance > 0.01 else { return }
+
+        let dir = simd_normalize(vector)
+        let segmentLength: Float = 0.06
+        let gapLength: Float = 0.04
+        let totalSegment = segmentLength + gapLength
+        var t: Float = 0
+
+        while t < distance {
+            let segEnd = min(t + segmentLength, distance)
+            if segEnd > t {
+                let start = last + dir * t
+                let end = last + dir * segEnd
+                let seg = MarkerEntityFactory.createMeasurementLine(from: start, to: end)
+                seg.name = "dash"
+                lineNode.addChildNode(seg)
+            }
+            t += totalSegment
+        }
+
+        // Distance label at midpoint
+        let mid = last + dir * (distance / 2)
+        let distMeters = Double(distance)
+        let labelText = distMeters < 1
+            ? UnitFormatter.formatInches(distMeters)
+            : UnitFormatter.formatFeetAndInches(distMeters)
+        let label = MarkerEntityFactory.createLabel(text: labelText, at: SCNVector3FromSIMD(mid + SIMD3<Float>(0, 0.05, 0)))
+        label.name = "dist_label"
+        lineNode.addChildNode(label)
+
+        // Start point marker
+        let startMarker = MarkerEntityFactory.createMarker(label: .rearLeftFloor, position: SCNVector3FromSIMD(last))
+        startMarker.name = "start_marker"
+        lineNode.addChildNode(startMarker)
+
+        self.sceneView?.scene.rootNode.addChildNode(lineNode)
+        self.measurementLineNode = lineNode
+    }
+
+    private func removeMeasurementLine() {
+        measurementLineNode?.removeFromParentNode()
+        measurementLineNode = nil
     }
 
     private func makeCrosshairNode() -> SCNNode {
         let parent = SCNNode()
         parent.name = "dynamic_crosshair"
 
-        let ring = SCNTorus(ringRadius: 0.035, pipeRadius: 0.002)
-        ring.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.85)
+        // Outer ring
+        let ring = SCNTorus(ringRadius: 0.04, pipeRadius: 0.0025)
+        ring.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.9)
         ring.firstMaterial?.lightingModel = .constant
         parent.addChildNode(SCNNode(geometry: ring))
 
-        let dot = SCNSphere(radius: 0.007)
+        // Inner cross lines
+        let crossGap: Float = 0.015
+        let crossLen: Float = 0.025
+        let h1 = MarkerEntityFactory.createMeasurementLine(
+            from: SIMD3<Float>(crossGap, 0, 0),
+            to: SIMD3<Float>(crossLen, 0, 0))
+        let h2 = MarkerEntityFactory.createMeasurementLine(
+            from: SIMD3<Float>(-crossGap, 0, 0),
+            to: SIMD3<Float>(-crossLen, 0, 0))
+        let v1 = MarkerEntityFactory.createMeasurementLine(
+            from: SIMD3<Float>(0, 0, crossGap),
+            to: SIMD3<Float>(0, 0, crossLen))
+        let v2 = MarkerEntityFactory.createMeasurementLine(
+            from: SIMD3<Float>(0, 0, -crossGap),
+            to: SIMD3<Float>(0, 0, -crossLen))
+        [h1, h2, v1, v2].forEach { parent.addChildNode($0) }
+
+        // Center dot
+        let dot = SCNSphere(radius: 0.006)
         dot.firstMaterial?.diffuse.contents = UIColor.white
         dot.firstMaterial?.lightingModel = .constant
+        dot.firstMaterial?.emission.contents = UIColor.white.withAlphaComponent(0.3)
         parent.addChildNode(SCNNode(geometry: dot))
 
         return parent
@@ -759,6 +896,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     func startPolygonMode() {
         polygonVertices = []
         polygonClosed = false
+        lastPlacedPosition = nil
+        removeMeasurementLine()
         polygonFloorY = 0
         stage = .polygonFloor
         sessionMessage = stage.instruction
@@ -781,6 +920,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         guard !polygonClosed else { return }
         let snapped = snapToNearestSurface(from: position)
         polygonVertices.append(snapped)
+        lastPlacedPosition = snapped
         if polygonVertices.count == 1 {
             polygonFloorY = snapped.y
         }
@@ -909,6 +1049,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         onPointsChanged?(ordered)
         stage = .complete
         isPlacementEnabled = false
+        removeMeasurementLine()
         sessionMessage = "Volume locked. Continue to review measurements."
         refreshPreview()
         onAllPointsPlaced?()
