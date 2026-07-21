@@ -187,12 +187,20 @@ struct ScanView: View {
                     .tint(.cyan)
                     .accessibilityLabel("Set height from targeted surface")
                 case .complete:
-                    Button(action: { showingCalibration = true }) {
-                        Label("Review Measurement", systemImage: "cube.transparent")
+                    Button(action: skipCalibrationAndReview) {
+                        Label("Quick Review", systemImage: "arrow.right.circle")
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(.green)
+
+                    Button(action: { showingCalibration = true }) {
+                        Image(systemName: "ruler")
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.yellow)
+                    .accessibilityLabel("Tape calibrate before review")
                 }
             }
 
@@ -255,7 +263,33 @@ struct ScanView: View {
         case .floor: return "For phone calibration, place the phone over the first floor corner before tapping."
         case .width, .depth: return "Use the crosshair button or tap the camera view on the floor boundary."
         case .height: return "Raise the phone slowly. The wireframe grows with it, then lock the height."
-        case .complete: return "The eight corners are generated from this calibrated rectangular volume."
+        case .complete: return "Quick Review skips calibration. Use the ruler for tape-measure accuracy."
         }
+    }
+
+    private func skipCalibrationAndReview() {
+        let positions = session.pointPositions()
+        let sources = session.pointSources()
+
+        if let dims = DimensionExtractor.extract(from: positions) {
+            session.dimensions = dims
+        }
+
+        let conf = ConfidenceScoring.assess(points: positions, hasCalibration: false, pointSources: sources)
+        session.confidenceScore = conf.score
+        session.confidenceLevel = conf.level
+
+        if let vol = VolumeCalculator.compute(points: positions, insetPercent: SafetyInsetCalculator.insetPercent(for: conf.score)) {
+            session.volumeResult = ScanSession.VolumeResultData(
+                rawCubicMeters: vol.rawCubicMeters,
+                conservativeCubicMeters: vol.conservativeCubicMeters,
+                hasNegativeTetrahedra: vol.hasNegativeTetrahedra
+            )
+            if var dims = session.dimensions {
+                dims.conservativeVolumeCubicMeters = vol.conservativeCubicMeters
+                session.dimensions = dims
+            }
+        }
+        showingReview = true
     }
 }

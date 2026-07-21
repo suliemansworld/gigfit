@@ -27,8 +27,8 @@ enum ConfidenceScoring {
 
         // No calibration
         if !hasCalibration {
-            score -= 30
-            factors.append(.init(name: "No calibration provided", penalty: -30))
+            score -= 10
+            factors.append(.init(name: "No calibration provided", penalty: -10))
         }
 
         // Estimated points (no detected plane)
