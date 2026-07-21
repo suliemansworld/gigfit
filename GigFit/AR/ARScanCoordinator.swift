@@ -4,6 +4,7 @@ import SceneKit
 import SwiftUI
 
 enum VolumeScanStage: Int, CaseIterable, Identifiable {
+    case auto
     case floor
     case width
     case depth
@@ -14,6 +15,7 @@ enum VolumeScanStage: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
+        case .auto: return "Auto Room Scan"
         case .floor: return "Set the floor"
         case .width: return "Set the width"
         case .depth: return "Set the depth"
@@ -24,6 +26,7 @@ enum VolumeScanStage: Int, CaseIterable, Identifiable {
 
     var instruction: String {
         switch self {
+        case .auto: return "Pan the phone around the room. Walls extend the box automatically."
         case .floor: return "Put the phone over a floor corner, or aim the crosshair at the floor."
         case .width: return "Aim the crosshair along the floor at the opposite side."
         case .depth: return "Aim at the far floor edge. The rectangular base will appear."
@@ -37,7 +40,7 @@ enum VolumeScanStage: Int, CaseIterable, Identifiable {
 final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, ARSessionDelegate {
 
     @Published var placedPoints: [ScanPoint] = []
-    @Published var stage: VolumeScanStage = .floor
+    @Published var stage: VolumeScanStage = .auto
     @Published var isPlacementEnabled = true
     @Published var trackingState: ARCamera.TrackingState = .normal
     @Published var planeCount = 0
@@ -45,6 +48,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     @Published var liveDimensions: SIMD3<Float> = .zero
     @Published var deviceHeightAboveFloor: Float = 0
     @Published var surfaceReady = false
+    @Published var autoRoomReady = false
 
     var onPointPlaced: ((ScanPoint) -> Void)?
     var onPointsChanged: (([ScanPoint]) -> Void)?
@@ -65,6 +69,12 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     private var floorSource: PointSource = .estimatedPlane
     private var upperSource: PointSource = .estimatedPlane
     private var lastPreviewUpdate: TimeInterval = 0
+
+    // Auto-room state
+    private var roomMinBounds: SIMD3<Float>?
+    private var roomMaxBounds: SIMD3<Float>?
+    private var sampledFrames: Int = 0
+    private var wallDistanceLabels: [SCNNode] = []
 
     func attach(to sceneView: ARSCNView) {
         self.sceneView = sceneView
@@ -92,23 +102,64 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         sceneView.session.run(config, options: [.resetTracking, .removeExistingAnchors])
     }
 
-
     func pauseSession() {
         sceneView?.session.pause()
     }
+
     func resetSession() {
         floorOrigin = nil
         widthVector = nil
         depthVector = nil
         lockedHeight = nil
         placedPoints = []
-        stage = .floor
+        stage = .auto
         isPlacementEnabled = true
         liveDimensions = .zero
         deviceHeightAboveFloor = 0
+        autoRoomReady = false
+        roomMinBounds = nil
+        roomMaxBounds = nil
+        sampledFrames = 0
+        removeAutoLabels()
         removeVisuals()
         onPointsChanged?([])
         startSession()
+    }
+
+    /// Switch to manual point-placement mode.
+    func switchToManual() {
+        stage = .floor
+        roomMinBounds = nil
+        roomMaxBounds = nil
+        sampledFrames = 0
+        autoRoomReady = false
+        removeAutoLabels()
+        removeVisuals()
+        sessionMessage = stage.instruction
+    }
+
+    /// Lock the auto-detected room volume.
+    func lockAutoRoom() {
+        guard let minBounds = roomMinBounds,
+              let maxBounds = roomMaxBounds,
+              sampledFrames > 5 else {
+            sessionMessage = "Keep panning — need more wall data before locking."
+            return
+        }
+
+        let center = (minBounds + maxBounds) / 2
+        let size = maxBounds - minBounds
+
+        floorOrigin = SIMD3<Float>(center.x, minBounds.y, center.z)
+        widthVector = SIMD3<Float>(size.x, 0, 0)
+        depthVector = SIMD3<Float>(0, 0, size.z)
+        lockedHeight = size.y
+        floorSource = isLiDARAvailable ? .lidarDepth : .existingPlaneGeometry
+        upperSource = isLiDARAvailable ? .lidarDepth : .existingPlaneGeometry
+        liveDimensions = SIMD3<Float>(abs(size.x), size.y, abs(size.z))
+
+        commitVolume(height: size.y)
+        removeAutoLabels()
     }
 
     func placeAtCrosshair() {
@@ -140,6 +191,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         }
 
         switch stage {
+        case .auto: break
         case .floor:
             setFloor(result.worldPosition, source: result.source)
         case .width:
@@ -153,7 +205,6 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         }
     }
 
-    /// Calibrates the floor from the phone's current physical position.
     func calibrateFloorAtDevice() {
         guard stage == .floor,
               let frame = sceneView?.session.currentFrame,
@@ -195,7 +246,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             stage = .floor
             liveDimensions = .zero
             removeVisuals()
-        case .floor:
+        case .floor, .auto:
             return
         }
         sessionMessage = stage.instruction
@@ -292,6 +343,153 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         ]
     }
 
+    // MARK: — Auto Room Scanning —
+
+    private func expandRoomBounds(worldPoint: SIMD3<Float>) {
+        if roomMinBounds == nil {
+            roomMinBounds = worldPoint
+            roomMaxBounds = worldPoint
+        } else {
+            roomMinBounds = simd_min(roomMinBounds!, worldPoint)
+            roomMaxBounds = simd_max(roomMaxBounds!, worldPoint)
+        }
+    }
+
+    private func expandRoomFromPlane(_ anchor: ARPlaneAnchor) {
+        let transform = anchor.transform
+        let center = SIMD3<Float>(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+        let extent = anchor.extent
+
+        // Sample the 4 corners and center of the plane
+        let halfX = extent.x / 2
+        let halfZ = extent.z / 2
+        let corners: [SIMD3<Float>] = [
+            SIMD3<Float>(center.x + halfX, center.y, center.z + halfZ),
+            SIMD3<Float>(center.x + halfX, center.y, center.z - halfZ),
+            SIMD3<Float>(center.x - halfX, center.y, center.z + halfZ),
+            SIMD3<Float>(center.x - halfX, center.y, center.z - halfZ),
+            center
+        ]
+
+        for corner in corners {
+            // Transform from local to world space
+            let worldPoint = SIMD3<Float>(
+                transform.columns.0.x * corner.x + transform.columns.1.x * corner.y + transform.columns.2.x * corner.z + transform.columns.3.x,
+                transform.columns.0.y * corner.x + transform.columns.1.y * corner.y + transform.columns.2.y * corner.z + transform.columns.3.y,
+                transform.columns.0.z * corner.x + transform.columns.1.z * corner.y + transform.columns.2.z * corner.z + transform.columns.3.z
+            )
+            expandRoomBounds(worldPoint: worldPoint)
+        }
+    }
+
+    private func sampleMeshVertices(from meshAnchor: ARMeshAnchor) {
+        let geometry = meshAnchor.geometry
+        let vertices = geometry.vertices
+        let faces = geometry.faces
+        let classification = geometry.classification
+
+        let vertexCount = vertices.count
+        let faceCount = faces.count
+        guard vertexCount > 0, faceCount > 0 else { return }
+
+        let transform = meshAnchor.transform
+
+        // Access raw vertex buffer
+        let vertexBuffer = vertices.buffer.contents().assumingMemoryBound(to: (Float, Float, Float).self)
+        let faceBuffer = faces.buffer.contents().assumingMemoryBound(to: UInt8.self)
+        let faceStride = MemoryLayout<Int32>.stride * 3
+
+        let classificationBuffer = classification?.buffer.contents().assumingMemoryBound(to: UInt8.self)
+
+        // Sample every Nth face to keep performance reasonable
+        let sampleStride = max(1, faceCount / 200)
+
+        for faceIdx in stride(from: 0, to: faceCount, by: sampleStride) {
+            // Check classification: only expand for wall, floor, ceiling
+            if let classBuf = classificationBuffer {
+                let classByte = classBuf[faceIdx * MemoryLayout<UInt8>.stride]
+                // ARMeshClassification values: 1=wall, 2=floor, 3=ceiling
+                guard classByte >= 1 && classByte <= 3 else { continue }
+            }
+
+            // Get 3 vertex indices for this face
+            let idx0 = Int(faceBuffer[faceIdx * faceStride])
+            let idx1 = Int(faceBuffer[faceIdx * faceStride + MemoryLayout<Int32>.stride])
+            let idx2 = Int(faceBuffer[faceIdx * faceStride + MemoryLayout<Int32>.stride * 2])
+
+            guard idx0 < vertexCount, idx1 < vertexCount, idx2 < vertexCount else { continue }
+
+            for idx in [idx0, idx1, idx2] {
+                let v = vertexBuffer[idx]
+                let localPoint = SIMD4<Float>(v.0, v.1, v.2, 1)
+                let worldPoint4 = transform * localPoint
+                let worldPoint = SIMD3<Float>(worldPoint4.x, worldPoint4.y, worldPoint4.z)
+                expandRoomBounds(worldPoint: worldPoint)
+            }
+        }
+    }
+
+    private func refreshAutoPreview() {
+        previewNode?.removeFromParentNode()
+        previewNode = nil
+
+        guard let minBounds = roomMinBounds,
+              let maxBounds = roomMaxBounds else { return }
+
+        let size = maxBounds - minBounds
+        guard abs(size.x) >= 0.15, abs(size.z) >= 0.15, size.y >= 0.15 else { return }
+
+        liveDimensions = SIMD3<Float>(abs(size.x), size.y, abs(size.z))
+
+        // Build the 8 corners from bounds
+        let origin = SIMD3<Float>(minBounds.x, minBounds.y, minBounds.z)
+        let width = SIMD3<Float>(size.x, 0, 0)
+        let depth = SIMD3<Float>(0, 0, size.z)
+        let height = size.y
+
+        let corners: [ScanPointLabel: SIMD3<Float>] = [
+            .rearLeftFloor: origin,
+            .rearRightFloor: origin + width,
+            .frontRightFloor: origin + width + depth,
+            .frontLeftFloor: origin + depth,
+            .rearLeftUpper: origin + SIMD3<Float>(0, height, 0),
+            .rearRightUpper: origin + width + SIMD3<Float>(0, height, 0),
+            .frontRightUpper: origin + width + depth + SIMD3<Float>(0, height, 0),
+            .frontLeftUpper: origin + depth + SIMD3<Float>(0, height, 0)
+        ]
+
+        let sceneCorners = Dictionary(uniqueKeysWithValues: corners.map { ($0.key, SCNVector3FromSIMD($0.value)) })
+        let node = MarkerEntityFactory.createHexahedronWireframe(corners: sceneCorners)
+        sceneView?.scene.rootNode.addChildNode(node)
+        previewNode = node
+
+        // Wall distance labels
+        removeAutoLabels()
+        let widthFt = UnitFormatter.formatFeetAndInches(Double(abs(size.x)))
+        let depthFt = UnitFormatter.formatFeetAndInches(Double(abs(size.z)))
+        let heightFt = UnitFormatter.formatFeetAndInches(Double(size.y))
+
+        let labels: [(text: String, pos: SIMD3<Float>)] = [
+            (widthFt, origin + width / 2 + SIMD3<Float>(0, size.y / 2, 0)),
+            (depthFt, origin + width + depth / 2 + SIMD3<Float>(0, size.y / 2, 0)),
+            (heightFt, origin + width / 2 + depth / 2 + SIMD3<Float>(0, size.y, 0))
+        ]
+
+        for (text, pos) in labels {
+            let label = MarkerEntityFactory.createLabel(text: text, at: SCNVector3FromSIMD(pos))
+            label.name = "auto_label"
+            sceneView?.scene.rootNode.addChildNode(label)
+            wallDistanceLabels.append(label)
+        }
+    }
+
+    private func removeAutoLabels() {
+        for node in wallDistanceLabels {
+            node.removeFromParentNode()
+        }
+        wallDistanceLabels.removeAll()
+    }
+
     private func updateLiveHeightFromDevice() {
         guard stage == .height,
               let origin = floorOrigin,
@@ -334,12 +532,44 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         guideNode = nil
     }
 
+    // MARK: — ARSessionDelegate —
+
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         let now = frame.timestamp
         DispatchQueue.main.async {
             self.trackingState = frame.camera.trackingState
             self.surfaceReady = self.planeCount > 0 || frame.sceneDepth != nil || frame.smoothedSceneDepth != nil
-            if self.stage == .height, now - self.lastPreviewUpdate > 0.08 {
+
+            if self.stage == .auto {
+                // Process auto-room detection every 4th frame for performance
+                self.sampledFrames += 1
+                if self.sampledFrames % 4 == 0 {
+                    // Use plane anchors for wall/floor detection
+                    for anchor in frame.anchors {
+                        if let planeAnchor = anchor as? ARPlaneAnchor {
+                            if planeAnchor.alignment == .horizontal || planeAnchor.alignment == .vertical {
+                                self.expandRoomFromPlane(planeAnchor)
+                            }
+                        }
+                    }
+
+                    // LiDAR: sample mesh vertices
+                    if self.isLiDARAvailable {
+                        for anchor in frame.anchors {
+                            if let meshAnchor = anchor as? ARMeshAnchor {
+                                self.sampleMeshVertices(from: meshAnchor)
+                            }
+                        }
+                    }
+
+                    self.autoRoomReady = self.roomMinBounds != nil && self.sampledFrames > 10
+                    self.refreshAutoPreview()
+
+                    if self.sampledFrames == 20 {
+                        self.sessionMessage = "Room detected. Pan to expand. Tap Lock when ready."
+                    }
+                }
+            } else if self.stage == .height, now - self.lastPreviewUpdate > 0.08 {
                 self.lastPreviewUpdate = now
                 self.updateLiveHeightFromDevice()
             } else if case .limited(let reason) = frame.camera.trackingState {
@@ -353,8 +583,12 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         DispatchQueue.main.async {
             self.planeCount += added
             self.surfaceReady = self.planeCount > 0 || self.isLiDARAvailable
-            if added > 0, self.stage == .floor {
-                self.sessionMessage = "Floor detected. Set the first corner."
+            if added > 0 {
+                if self.stage == .auto {
+                    self.sessionMessage = "Detecting walls and floor..."
+                } else if self.stage == .floor {
+                    self.sessionMessage = "Floor detected. Set the first corner."
+                }
             }
         }
     }

@@ -21,7 +21,8 @@ struct ScanView: View {
 
                 Spacer()
 
-                if coordinator.stage.rawValue >= VolumeScanStage.depth.rawValue {
+                if coordinator.stage.rawValue >= VolumeScanStage.depth.rawValue
+                    || (coordinator.stage == .auto && coordinator.autoRoomReady) {
                     measurementPanel
                         .padding(.horizontal, 12)
                 }
@@ -92,18 +93,20 @@ struct ScanView: View {
                 .foregroundStyle(messageColor)
                 .lineLimit(2)
 
-            HStack(spacing: 6) {
-                ForEach(Array(VolumeScanStage.allCases.prefix(4))) { stage in
-                    VStack(spacing: 4) {
-                        Capsule()
-                            .fill(progressColor(for: stage))
-                            .frame(height: 4)
-                        Text(stage.title.replacingOccurrences(of: "Set the ", with: ""))
-                            .font(.caption2)
-                            .foregroundStyle(stage.rawValue <= coordinator.stage.rawValue ? .primary : .secondary)
-                            .lineLimit(1)
+            if coordinator.stage != .auto {
+                HStack(spacing: 6) {
+                    ForEach(Array(VolumeScanStage.allCases.filter { $0 != .auto }.prefix(4))) { stage in
+                        VStack(spacing: 4) {
+                            Capsule()
+                                .fill(progressColor(for: stage))
+                                .frame(height: 4)
+                            Text(stage.title.replacingOccurrences(of: "Set the ", with: ""))
+                                .font(.caption2)
+                                .foregroundStyle(stage.rawValue <= coordinator.stage.rawValue ? .primary : .secondary)
+                                .lineLimit(1)
+                        }
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
                 }
             }
         }
@@ -146,10 +149,25 @@ struct ScanView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.black.opacity(0.55))
-                .disabled(coordinator.stage == .floor)
+                .disabled(coordinator.stage == .floor || coordinator.stage == .auto)
                 .accessibilityLabel("Undo last measurement")
 
                 switch coordinator.stage {
+                case .auto:
+                    Button(action: coordinator.lockAutoRoom) {
+                        Label("Lock Room", systemImage: "lock.fill")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+
+                    Button(action: coordinator.switchToManual) {
+                        Image(systemName: "hand.point.up")
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.yellow)
+                    .accessibilityLabel("Switch to manual point placement")
                 case .floor:
                     Button(action: coordinator.placeAtCrosshair) {
                         Label("Set Floor", systemImage: "viewfinder")
@@ -232,6 +250,7 @@ struct ScanView: View {
 
     private var stageIcon: String {
         switch coordinator.stage {
+        case .auto: return "rectangle.expand.vertical"
         case .floor: return "square.bottomhalf.filled"
         case .width: return "arrow.left.and.right"
         case .depth: return "arrow.up.left.and.arrow.down.right"
@@ -242,6 +261,7 @@ struct ScanView: View {
 
     private var stageColor: Color {
         switch coordinator.stage {
+        case .auto: return .mint
         case .floor, .width, .depth: return .cyan
         case .height: return .yellow
         case .complete: return .green
@@ -260,6 +280,7 @@ struct ScanView: View {
 
     private var controlHint: String {
         switch coordinator.stage {
+        case .auto: return "Pan around the room. Walls and floor extend the box automatically."
         case .floor: return "For phone calibration, place the phone over the first floor corner before tapping."
         case .width, .depth: return "Use the crosshair button or tap the camera view on the floor boundary."
         case .height: return "Raise the phone slowly. The wireframe grows with it, then lock the height."
