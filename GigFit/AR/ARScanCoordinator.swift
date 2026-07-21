@@ -57,6 +57,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     @Published var surfaceReady = false
     @Published var autoRoomReady = false
     @Published var meshActive = false
+    @Published var crosshairHit = false
+    @Published var crosshairPosition: SIMD3<Float>? = nil
 
     var onPointPlaced: ((ScanPoint) -> Void)?
     var onPointsChanged: (([ScanPoint]) -> Void)?
@@ -83,6 +85,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     private var roomMaxBounds: SIMD3<Float>?
     private var sampledFrames: Int = 0
     private var wallDistanceLabels: [SCNNode] = []
+    private var crosshairNode: SCNNode?
     private var meshNodes: [UUID: SCNNode] = [:]
     private var polygonVertices: [SIMD3<Float>] = []
     private var polygonClosed = false
@@ -135,6 +138,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         polygonVertices = []
         polygonClosed = false
         removeAutoLabels()
+        removeCrosshairNode()
         removeMeshNodes()
         removeVisuals()
         onPointsChanged?([])
@@ -151,6 +155,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         polygonClosed = false
         autoRoomReady = false
         removeAutoLabels()
+        removeCrosshairNode()
+        removeCrosshairNode()
         removeMeshNodes()
         removeVisuals()
         sessionMessage = stage.instruction
@@ -568,6 +574,62 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     }
 
 
+
+    // MARK: — Crosshair Surface Detection —
+
+    private func updateCrosshair(from frame: ARFrame) {
+        guard let sv = self.sceneView, sv.bounds.width > 0, self.stage != .complete else { return }
+        let point = CGPoint(x: sv.bounds.midX, y: sv.bounds.midY - 40)
+        let orientation = sv.window?.windowScene?.interfaceOrientation ?? .portrait
+        let alignment: ARRaycastQuery.TargetAlignment = (self.stage == .height || self.stage == .polygonHeight) ? .any : .horizontal
+
+        if let result = PointPlacementService.place(
+            at: point, in: frame, session: sv.session,
+            viewportSize: sv.bounds.size, orientation: orientation, alignment: alignment
+        ) {
+            self.crosshairHit = true
+            self.crosshairPosition = result.worldPosition
+            if self.stage != .complete && self.sessionMessage == self.stage.instruction {
+                self.sessionMessage = "Surface found! Tap to place point."
+            }
+            let pos = SCNVector3FromSIMD(result.worldPosition)
+            if self.crosshairNode == nil {
+                self.crosshairNode = self.makeCrosshairNode()
+                sv.scene.rootNode.addChildNode(self.crosshairNode!)
+            }
+            self.crosshairNode?.position = pos
+            self.crosshairNode?.isHidden = false
+            // Orient flat (parallel to floor)
+            self.crosshairNode?.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
+        } else {
+            self.crosshairHit = false
+            self.crosshairNode?.isHidden = true
+        }
+    }
+
+    private func makeCrosshairNode() -> SCNNode {
+        let parent = SCNNode()
+        parent.name = "dynamic_crosshair"
+
+        let ring = SCNTorus(ringRadius: 0.035, pipeRadius: 0.002)
+        ring.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.85)
+        ring.firstMaterial?.lightingModel = .constant
+        parent.addChildNode(SCNNode(geometry: ring))
+
+        let dot = SCNSphere(radius: 0.007)
+        dot.firstMaterial?.diffuse.contents = UIColor.white
+        dot.firstMaterial?.lightingModel = .constant
+        parent.addChildNode(SCNNode(geometry: dot))
+
+        return parent
+    }
+
+    private func removeCrosshairNode() {
+        crosshairNode?.removeFromParentNode()
+        crosshairNode = nil
+        crosshairHit = false
+    }
+
     // MARK: — Mesh Rendering —
 
     private func removeMeshNodes() {
@@ -955,6 +1017,9 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
                 let align: ARRaycastQuery.TargetAlignment = (self.stage == .height || self.stage == .polygonHeight) ? .any : .horizontal
                 self.crosshairSurfaceFound = PointPlacementService.place(at: cp, in: frame, session: sv.session, viewportSize: sv.bounds.size, orientation: orient, alignment: align) != nil
             }
+
+                        // Update crosshair surface detection
+            self.updateCrosshair(from: frame)
 
             if self.stage == .polygonHeight, now - self.lastPreviewUpdate > 0.08 {
                 self.lastPreviewUpdate = now
