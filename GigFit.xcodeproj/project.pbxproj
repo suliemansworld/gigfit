@@ -31,7 +31,6 @@
 		B04119FF5865A68E2A2F6B60 /* CalibrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EE9AC4ABF40F834292A00EB /* CalibrationView.swift */; };
 		BAE715EBDC85F3D00AC4DB8C /* ScanConfidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669F8068E6785FBA9859EE66 /* ScanConfidence.swift */; };
 		CA4C9A6D61D43FAA7E32EB9A /* VolumeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28CF834359DB0924ECF3BABC /* VolumeCalculator.swift */; };
-		CBA03540CBF8CA815FBD75D5 /* ARSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B55FCA89CE02499E3396F8 /* ARSessionController.swift */; };
 		D44831016DE19DEBBD7520D1 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B05E63BC1395291903E21421 /* HomeView.swift */; };
 		D5E4BF9FBB821FB0AA33378F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 181AC5EC40BA6A4CC237F3CA /* Foundation.framework */; };
 		DB767D1F21A9E2820CFAF620 /* PointPlacementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22ECE6C7691106FCF955588 /* PointPlacementService.swift */; };
@@ -73,7 +72,6 @@
 		462A590731E9F71C8C993A4D /* GigFitApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GigFitApp.swift; sourceTree = "<group>"; };
 		4D992493474C154C01D6EF85 /* CoordinateSystemBuilder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoordinateSystemBuilder.swift; sourceTree = "<group>"; };
 		533E92FBABCDBB33EFFDC479 /* SafetyInsetCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SafetyInsetCalculator.swift; sourceTree = "<group>"; };
-		54B55FCA89CE02499E3396F8 /* ARSessionController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ARSessionController.swift; sourceTree = "<group>"; };
 		59A5016D9538DC7C4C535B6E /* ConfidenceScoring.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConfidenceScoring.swift; sourceTree = "<group>"; };
 		5DB949F8C791D0C4EDCB91A9 /* ScanStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanStore.swift; sourceTree = "<group>"; };
 		669F8068E6785FBA9859EE66 /* ScanConfidence.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanConfidence.swift; sourceTree = "<group>"; };
@@ -183,7 +181,6 @@
 			children = (
 				3989F9B1ADB64DA1183F1A02 /* ARScanCoordinator.swift */,
 				31F38DE7F3B00484BAB93C46 /* ARScanView.swift */,
-				54B55FCA89CE02499E3396F8 /* ARSessionController.swift */,
 				4421BB5C6C88D39EB3EDA103 /* MarkerEntityFactory.swift */,
 				E22ECE6C7691106FCF955588 /* PointPlacementService.swift */,
 			);

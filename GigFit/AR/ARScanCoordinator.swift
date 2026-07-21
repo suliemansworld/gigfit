@@ -727,36 +727,20 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
 
     private func updateMeasurementLine(to currentPos: SIMD3<Float>) {
         guard let last = self.lastPlacedPosition else { removeMeasurementLine(); return }
+        let distance = simd_distance(last, currentPos)
+        guard distance > 0.01 else { return }
 
+        // Remove old line
         removeMeasurementLine()
         let lineNode = SCNNode()
         lineNode.name = "measurement_line"
 
-        // Dashed line from last placed point to current position
-        let vector = currentPos - last
-        let distance = simd_length(vector)
-        guard distance > 0.01 else { return }
-
-        let dir = simd_normalize(vector)
-        let segmentLength: Float = 0.06
-        let gapLength: Float = 0.04
-        let totalSegment = segmentLength + gapLength
-        var t: Float = 0
-
-        while t < distance {
-            let segEnd = min(t + segmentLength, distance)
-            if segEnd > t {
-                let start = last + dir * t
-                let end = last + dir * segEnd
-                let seg = MarkerEntityFactory.createMeasurementLine(from: start, to: end)
-                seg.name = "dash"
-                lineNode.addChildNode(seg)
-            }
-            t += totalSegment
-        }
+        // Single solid line (perf: one geometry instead of many dashed segments)
+        let line = MarkerEntityFactory.createMeasurementLine(from: last, to: currentPos)
+        lineNode.addChildNode(line)
 
         // Distance label at midpoint
-        let mid = last + dir * (distance / 2)
+        let mid = last + simd_normalize(currentPos - last) * (distance / 2)
         let distMeters = Double(distance)
         let labelText = distMeters < 1
             ? UnitFormatter.formatInches(distMeters)
@@ -764,11 +748,6 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         let label = MarkerEntityFactory.createLabel(text: labelText, at: SCNVector3FromSIMD(mid + SIMD3<Float>(0, 0.05, 0)))
         label.name = "dist_label"
         lineNode.addChildNode(label)
-
-        // Start point marker
-        let startMarker = MarkerEntityFactory.createMarker(label: .rearLeftFloor, position: SCNVector3FromSIMD(last))
-        startMarker.name = "start_marker"
-        lineNode.addChildNode(startMarker)
 
         self.sceneView?.scene.rootNode.addChildNode(lineNode)
         self.measurementLineNode = lineNode
@@ -935,7 +914,9 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard let meshAnchor = anchor as? ARMeshAnchor,
               let existingNode = meshNodes[meshAnchor.identifier] else { return }
-        updateMeshNode(existingNode, from: meshAnchor.geometry)
+        // Throttle: only update mesh geometry every 3rd call
+        sampledFrames += 1
+        if sampledFrames % 3 == 0 { updateMeshNode(existingNode, from: meshAnchor.geometry) }
     }
 
     func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
