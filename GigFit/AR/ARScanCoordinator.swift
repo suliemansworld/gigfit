@@ -51,6 +51,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     @Published var trackingState: ARCamera.TrackingState = .normal
     @Published var planeCount = 0
     @Published var sessionMessage = "Move the phone slowly so surfaces can be mapped."
+    @Published var crosshairSurfaceFound = false
     @Published var liveDimensions: SIMD3<Float> = .zero
     @Published var deviceHeightAboveFloor: Float = 0
     @Published var surfaceReady = false
@@ -727,26 +728,42 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
 
     private func snapToNearestSurface(from position: SIMD3<Float>) -> SIMD3<Float> {
         guard let frame = sceneView?.session.currentFrame else { return position }
-        var best: SIMD3<Float> = position
-        var bestDist: Float = 0.3
+        var best = position
+        var bestDist: Float = 0.25
 
         for anchor in frame.anchors {
-            if let meshAnchor = anchor as? ARMeshAnchor {
-                let geo = meshAnchor.geometry
-                let verts = geo.vertices
-                let vCount = verts.count
-                guard vCount > 0 else { continue }
-                let buf = verts.buffer.contents().assumingMemoryBound(to: (Float, Float, Float).self)
-                let t = meshAnchor.transform
-                let step = max(1, vCount / 500)
-                for i in stride(from: 0, to: vCount, by: step) {
-                    let v = buf[i]
-                    let wp = SIMD3<Float>(
-                        t.columns.0.x * v.0 + t.columns.1.x * v.1 + t.columns.2.x * v.2 + t.columns.3.x,
-                        t.columns.0.y * v.0 + t.columns.1.y * v.1 + t.columns.2.y * v.2 + t.columns.3.y,
-                        t.columns.0.z * v.0 + t.columns.1.z * v.1 + t.columns.2.z * v.2 + t.columns.3.z)
-                    let d = simd_distance(position, wp)
-                    if d < bestDist { bestDist = d; best = wp }
+            guard let planeAnchor = anchor as? ARPlaneAnchor else { continue }
+            if stage == .polygonFloor && planeAnchor.alignment != .horizontal { continue }
+            let t = planeAnchor.transform
+            let center = SIMD3<Float>(t.columns.3.x, t.columns.3.y, t.columns.3.z)
+            let normal = SIMD3<Float>(t.columns.1.x, t.columns.1.y, t.columns.1.z)
+            let offset = position - center
+            let planeDist = abs(simd_dot(offset, simd_normalize(normal)))
+            if planeDist < bestDist {
+                let projected = position - normal * simd_dot(offset, normal) / simd_length_squared(normal)
+                let extent = planeAnchor.extent
+                if simd_distance(projected, center) < max(extent.x, extent.z) {
+                    bestDist = planeDist
+                    best = SIMD3<Float>(projected.x, position.y, projected.z)
+                }
+            }
+        }
+
+        if bestDist > 0.15 {
+            for anchor in frame.anchors {
+                if let meshAnchor = anchor as? ARMeshAnchor {
+                    let geo = meshAnchor.geometry; let vc = geo.vertices.count
+                    guard vc > 0 else { continue }
+                    let buf = geo.vertices.buffer.contents().assumingMemoryBound(to: (Float, Float, Float).self)
+                    let t = meshAnchor.transform
+                    for i in stride(from: 0, to: vc, by: max(1, vc / 200)) {
+                        let v = buf[i]
+                        let wp = SIMD3<Float>(t.columns.0.x * v.0 + t.columns.1.x * v.1 + t.columns.2.x * v.2 + t.columns.3.x,
+                                              t.columns.0.y * v.0 + t.columns.1.y * v.1 + t.columns.2.y * v.2 + t.columns.3.y,
+                                              t.columns.0.z * v.0 + t.columns.1.z * v.1 + t.columns.2.z * v.2 + t.columns.3.z)
+                        let d = simd_distance(position, wp)
+                        if d < bestDist { bestDist = d; best = wp }
+                    }
                 }
             }
         }
@@ -931,7 +948,15 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
                         self.sessionMessage = "Room detected. Pan to expand. Tap Lock when ready."
                     }
                 }
-            } else if self.stage == .polygonHeight, now - self.lastPreviewUpdate > 0.08 {
+            } else             // Check surface at crosshair every 8th frame
+            if self.sampledFrames % 8 == 0, let sv = self.sceneView, sv.bounds.width > 0, self.stage != .complete {
+                let cp = CGPoint(x: sv.bounds.midX, y: sv.bounds.midY - 40)
+                let orient = sv.window?.windowScene?.interfaceOrientation ?? .portrait
+                let align: ARRaycastQuery.TargetAlignment = (self.stage == .height || self.stage == .polygonHeight) ? .any : .horizontal
+                self.crosshairSurfaceFound = PointPlacementService.place(at: cp, in: frame, session: sv.session, viewportSize: sv.bounds.size, orientation: orient, alignment: align) != nil
+            }
+
+            if self.stage == .polygonHeight, now - self.lastPreviewUpdate > 0.08 {
                 self.lastPreviewUpdate = now
                 let camY = frame.camera.transform.columns.3.y
                 let h = max(0.15, camY - self.polygonFloorY)

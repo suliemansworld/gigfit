@@ -308,7 +308,8 @@ struct ScanView: View {
     }
 
     private var messageColor: Color {
-        coordinator.surfaceReady ? .green : .orange
+        if coordinator.crosshairSurfaceFound { return .green }
+        return coordinator.surfaceReady ? .mint : .orange
     }
 
     private func progressColor(for stage: VolumeScanStage) -> Color {
