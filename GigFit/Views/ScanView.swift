@@ -83,6 +83,11 @@ struct ScanView: View {
 
                 Spacer()
 
+                if coordinator.ceilingDetected {
+                    Label("Ceiling", systemImage: "square.topthird.inset.filled")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.purple)
+                }
                 Label(coordinator.meshActive ? "LiDAR Active" : (coordinator.isLiDARAvailable ? "LiDAR" : "AR"), systemImage: coordinator.meshActive ? "sensor.tag.radiowaves.forward.fill" : (coordinator.isLiDARAvailable ? "sensor.tag.radiowaves.forward" : "camera.viewfinder"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(coordinator.meshActive ? Color.green : (coordinator.isLiDARAvailable ? Color.cyan : Color.secondary))

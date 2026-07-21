@@ -58,6 +58,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     @Published var autoRoomReady = false
     @Published var meshActive = false
     @Published var crosshairHit = false
+    @Published var ceilingDetected = false
     @Published var crosshairPosition: SIMD3<Float>? = nil
 
     var onPointPlaced: ((ScanPoint) -> Void)?
@@ -86,6 +87,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     private var sampledFrames: Int = 0
     private var wallDistanceLabels: [SCNNode] = []
     private var measurementLineNode: SCNNode?
+    private var detectedCeilingHeight: Float?
     private var lastPlacedPosition: SIMD3<Float>?
     private var crosshairNode: SCNNode?
     private var meshNodes: [UUID: SCNNode] = [:]
@@ -266,6 +268,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             lockedHeight = nil
             stage = .height
             isPlacementEnabled = true
+            detectedCeilingHeight = nil
+            ceilingDetected = false
             updateLiveHeightFromDevice()
         case .height:
             depthVector = nil
@@ -548,11 +552,59 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         wallDistanceLabels.removeAll()
     }
 
+    
+    private func detectCeiling(from frame: ARFrame) {
+        guard isLiDARAvailable else { return }
+        var bestY: Float?
+        let floorRefY = stage == .polygonHeight ? polygonFloorY : (floorOrigin?.y ?? 0)
+
+        for anchor in frame.anchors {
+            guard let meshAnchor = anchor as? ARMeshAnchor else { continue }
+            let geo = meshAnchor.geometry
+            let classification = geo.classification
+            guard let clsBuf = classification?.buffer.contents().assumingMemoryBound(to: UInt8.self) else { continue }
+            let faces = geo.faces
+            let faceCount = faces.count
+            let faceBuf = faces.buffer.contents().assumingMemoryBound(to: UInt8.self)
+            let idxStride = MemoryLayout<Int32>.stride
+            let faceStride = idxStride * 3
+            let vertBuf = geo.vertices.buffer.contents().assumingMemoryBound(to: (Float, Float, Float).self)
+            let vc = geo.vertices.count
+            let t = meshAnchor.transform
+
+            for fi in stride(from: 0, to: faceCount, by: max(1, faceCount / 50)) {
+                let cls = clsBuf[fi * MemoryLayout<UInt8>.stride]
+                guard cls == 3 else { continue } // ceiling only
+
+                let i0 = Int(faceBuf[fi * faceStride])
+                guard i0 < vc else { continue }
+                let v = vertBuf[i0]
+                let worldY = t.columns.0.y * v.0 + t.columns.1.y * v.1 + t.columns.2.y * v.2 + t.columns.3.y
+
+                let height = worldY - floorRefY
+                if height > 0.5 && height < 6.0 {
+                    if bestY == nil || height < bestY! { bestY = height }
+                }
+            }
+        }
+
+        if let ceilingH = bestY {
+            self.detectedCeilingHeight = ceilingH
+            self.ceilingDetected = true
+            self.liveDimensions.y = ceilingH
+            self.deviceHeightAboveFloor = ceilingH
+        } else {
+            self.ceilingDetected = false
+            self.detectedCeilingHeight = nil
+        }
+    }
+
     private func updateLiveHeightFromDevice() {
         guard stage == .height,
               let origin = floorOrigin,
               let cameraY = sceneView?.session.currentFrame?.camera.transform.columns.3.y else { return }
-        let height = max(0.15, cameraY - origin.y)
+        let rawHeight = max(0.15, cameraY - origin.y)
+        let height = detectedCeilingHeight ?? rawHeight
         deviceHeightAboveFloor = max(0, cameraY - origin.y)
         liveDimensions.y = height
         refreshPreview(height: height)
@@ -1162,11 +1214,18 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
                         // Update crosshair surface detection
             self.updateCrosshair(from: frame)
 
+                        // Ceiling detection during height modes
+            if self.stage == .height || self.stage == .polygonHeight {
+                self.detectCeiling(from: frame)
+            }
+
             if self.stage == .polygonHeight, now - self.lastPreviewUpdate > 0.08 {
                 self.lastPreviewUpdate = now
                 let camY = frame.camera.transform.columns.3.y
-                let h = max(0.15, camY - self.polygonFloorY)
+                let rawH = max(0.15, camY - self.polygonFloorY)
+                let h = self.detectedCeilingHeight ?? rawH
                 self.deviceHeightAboveFloor = max(0, camY - self.polygonFloorY)
+                if self.detectedCeilingHeight != nil { self.liveDimensions.y = h }
                 self.liveDimensions.y = h
                 self.refreshPolygonPreview()
             } else if self.stage == .height, now - self.lastPreviewUpdate > 0.08 {
