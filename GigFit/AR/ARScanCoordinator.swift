@@ -9,6 +9,8 @@ enum VolumeScanStage: Int, CaseIterable, Identifiable {
     case width
     case depth
     case height
+    case polygonFloor
+    case polygonHeight
     case complete
 
     var id: Int { rawValue }
@@ -20,6 +22,8 @@ enum VolumeScanStage: Int, CaseIterable, Identifiable {
         case .width: return "Set the width"
         case .depth: return "Set the depth"
         case .height: return "Raise to set height"
+        case .polygonFloor: return "Trace the floor"
+        case .polygonHeight: return "Raise to set height"
         case .complete: return "Volume captured"
         }
     }
@@ -31,6 +35,8 @@ enum VolumeScanStage: Int, CaseIterable, Identifiable {
         case .width: return "Aim the crosshair along the floor at the opposite side."
         case .depth: return "Aim at the far floor edge. The rectangular base will appear."
         case .height: return "Raise the phone to the top of the space. The volume expands live."
+        case .polygonFloor: return "Tap along the floor perimeter. Snaps to detected walls."
+        case .polygonHeight: return "Raise the phone to the top of the space. The volume expands live."
         case .complete: return "Review the measured volume, or undo to adjust it."
         }
     }
@@ -77,6 +83,9 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     private var sampledFrames: Int = 0
     private var wallDistanceLabels: [SCNNode] = []
     private var meshNodes: [UUID: SCNNode] = [:]
+    private var polygonVertices: [SIMD3<Float>] = []
+    private var polygonClosed = false
+    private var polygonFloorY: Float = 0
 
     func attach(to sceneView: ARSCNView) {
         self.sceneView = sceneView
@@ -122,6 +131,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         roomMinBounds = nil
         roomMaxBounds = nil
         sampledFrames = 0
+        polygonVertices = []
+        polygonClosed = false
         removeAutoLabels()
         removeMeshNodes()
         removeVisuals()
@@ -135,6 +146,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         roomMinBounds = nil
         roomMaxBounds = nil
         sampledFrames = 0
+        polygonVertices = []
+        polygonClosed = false
         autoRoomReady = false
         removeAutoLabels()
         removeMeshNodes()
@@ -195,6 +208,10 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         }
 
         switch stage {
+        case .polygonFloor:
+            addPolygonVertex(at: result.worldPosition)
+        case .polygonHeight:
+            lockPolygonHeight(worldY: result.worldPosition.y, source: result.source)
         case .auto: break
         case .floor:
             setFloor(result.worldPosition, source: result.source)
@@ -250,6 +267,19 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             stage = .floor
             liveDimensions = .zero
             removeVisuals()
+        case .polygonHeight:
+            polygonClosed = false
+            stage = .polygonFloor
+            liveDimensions = .zero
+            removeVisuals()
+            refreshPolygonPreview()
+        case .polygonFloor:
+            if !polygonVertices.isEmpty {
+                polygonVertices.removeLast()
+                polygonClosed = false
+                refreshPolygonPreview()
+            }
+            return
         case .floor, .auto:
             return
         }
@@ -660,6 +690,206 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         self.meshActive = self.meshNodes.count > 0
     }
 
+
+    // MARK: — Polygon Floor Mode —
+
+    func startPolygonMode() {
+        polygonVertices = []
+        polygonClosed = false
+        polygonFloorY = 0
+        stage = .polygonFloor
+        sessionMessage = stage.instruction
+    }
+
+    func closePolygon() {
+        guard polygonVertices.count >= 3 else {
+            sessionMessage = "Place at least 3 vertices before closing the shape."
+            return
+        }
+        polygonClosed = true
+        stage = .polygonHeight
+        sessionMessage = stage.instruction
+        computePolygonFloorY()
+        updateLiveHeightFromDevice()
+        refreshPolygonPreview()
+    }
+
+    private func addPolygonVertex(at position: SIMD3<Float>) {
+        guard !polygonClosed else { return }
+        let snapped = snapToNearestSurface(from: position)
+        polygonVertices.append(snapped)
+        if polygonVertices.count == 1 {
+            polygonFloorY = snapped.y
+        }
+        sessionMessage = "\(polygonVertices.count) vertices placed. Tap to add more or close the shape."
+        refreshPolygonPreview()
+    }
+
+    private func snapToNearestSurface(from position: SIMD3<Float>) -> SIMD3<Float> {
+        guard let frame = sceneView?.session.currentFrame else { return position }
+        var best: SIMD3<Float> = position
+        var bestDist: Float = 0.3
+
+        for anchor in frame.anchors {
+            if let meshAnchor = anchor as? ARMeshAnchor {
+                let geo = meshAnchor.geometry
+                let verts = geo.vertices
+                let vCount = verts.count
+                guard vCount > 0 else { continue }
+                let buf = verts.buffer.contents().assumingMemoryBound(to: (Float, Float, Float).self)
+                let t = meshAnchor.transform
+                let step = max(1, vCount / 500)
+                for i in stride(from: 0, to: vCount, by: step) {
+                    let v = buf[i]
+                    let wp = SIMD3<Float>(
+                        t.columns.0.x * v.0 + t.columns.1.x * v.1 + t.columns.2.x * v.2 + t.columns.3.x,
+                        t.columns.0.y * v.0 + t.columns.1.y * v.1 + t.columns.2.y * v.2 + t.columns.3.y,
+                        t.columns.0.z * v.0 + t.columns.1.z * v.1 + t.columns.2.z * v.2 + t.columns.3.z)
+                    let d = simd_distance(position, wp)
+                    if d < bestDist { bestDist = d; best = wp }
+                }
+            }
+        }
+        return best
+    }
+
+    private func computePolygonFloorY() {
+        guard !polygonVertices.isEmpty else { return }
+        polygonFloorY = polygonVertices.map { $0.y }.reduce(0, +) / Float(polygonVertices.count)
+    }
+
+    private func lockPolygonHeight(worldY: Float, source: PointSource) {
+        guard polygonClosed else { return }
+        let height = worldY - polygonFloorY
+        guard height >= 0.15 else {
+            sessionMessage = "Raise the phone at least 6 inches above the floor."
+            return
+        }
+        lockedHeight = height
+        upperSource = source
+        liveDimensions.y = height
+        commitPolygonVolume(height: height)
+    }
+
+    private func polygonFloorArea() -> Float {
+        guard polygonVertices.count >= 3 else { return 0 }
+        var area: Float = 0
+        let n = polygonVertices.count
+        for i in 0..<n {
+            let j = (i + 1) % n
+            area += polygonVertices[i].x * polygonVertices[j].z
+            area -= polygonVertices[j].x * polygonVertices[i].z
+        }
+        return abs(area) / 2
+    }
+
+    private func polygonVolumeCorners(height: Float) -> [ScanPointLabel: SIMD3<Float>]? {
+        guard polygonVertices.count >= 3, polygonClosed else { return nil }
+        var result: [ScanPointLabel: SIMD3<Float>] = [:]
+        let floorLabels: [ScanPointLabel] = [.rearLeftFloor, .rearRightFloor, .frontRightFloor, .frontLeftFloor]
+        let upperLabels: [ScanPointLabel] = [.rearLeftUpper, .rearRightUpper, .frontRightUpper, .frontLeftUpper]
+        let up = SIMD3<Float>(0, height, 0)
+
+        for i in 0..<min(4, polygonVertices.count) {
+            result[floorLabels[i]] = polygonVertices[i]
+            result[upperLabels[i]] = polygonVertices[i] + up
+        }
+
+        if result.count < 8 {
+            let bounds = polygonBounds()
+            let extras: [(Float, Float)] = [(bounds.maxX, bounds.maxZ), (bounds.maxX, bounds.minZ), (bounds.minX, bounds.maxZ), (bounds.minX, bounds.minZ)]
+            for (label, (ex, ez)) in zip(floorLabels, extras) {
+                if result[label] == nil {
+                    result[label] = SIMD3<Float>(ex, polygonFloorY, ez)
+                    if let idx = floorLabels.firstIndex(of: label) {
+                        result[upperLabels[idx]] = SIMD3<Float>(ex, polygonFloorY + height, ez)
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    private func polygonBounds() -> (minX: Float, maxX: Float, minZ: Float, maxZ: Float) {
+        var minX = Float.greatestFiniteMagnitude; var maxX = -Float.greatestFiniteMagnitude
+        var minZ = Float.greatestFiniteMagnitude; var maxZ = -Float.greatestFiniteMagnitude
+        for v in polygonVertices { minX = min(minX, v.x); maxX = max(maxX, v.x); minZ = min(minZ, v.z); maxZ = max(maxZ, v.z) }
+        return (minX, maxX, minZ, maxZ)
+    }
+
+    private func commitPolygonVolume(height: Float) {
+        guard let corners = polygonVolumeCorners(height: height) else { return }
+        let ordered = ScanPointLabel.allCases.compactMap { label -> ScanPoint? in
+            guard let position = corners[label] else { return nil }
+            let src = ScanPointLabel.floorLabels.contains(label) ? (isLiDARAvailable ? .lidarDepth : .existingPlaneGeometry) : upperSource
+            return ScanPoint(label: label, position: CodableVector3(position), source: src)
+        }
+        guard ordered.count == 8 else { return }
+        placedPoints = ordered
+        ordered.forEach { onPointPlaced?($0) }
+        onPointsChanged?(ordered)
+        stage = .complete
+        isPlacementEnabled = false
+        sessionMessage = "Volume locked. Continue to review measurements."
+        refreshPreview()
+        onAllPointsPlaced?()
+    }
+
+    private func refreshPolygonPreview() {
+        previewNode?.removeFromParentNode()
+        previewNode = nil
+        guideNode?.removeFromParentNode()
+        guideNode = nil
+        guard !polygonVertices.isEmpty else { return }
+
+        let parent = SCNNode()
+        parent.name = "polygon"
+        let n = polygonVertices.count
+
+        for i in 0..<n {
+            let j = (i + 1) % n
+            if polygonClosed || i < n - 1 {
+                let edge = MarkerEntityFactory.createMeasurementLine(from: polygonVertices[i], to: polygonVertices[j])
+                parent.addChildNode(edge)
+            }
+        }
+
+        for v in polygonVertices {
+            let marker = MarkerEntityFactory.createMarker(label: .rearLeftFloor, position: SCNVector3FromSIMD(v))
+            parent.addChildNode(marker)
+        }
+
+        if polygonClosed, polygonVertices.count >= 3 {
+            let area = polygonFloorArea()
+            let areaSqFt = Double(area) * 10.764
+            let centroid = SIMDHelpers.centroid(of: polygonVertices)
+            let label = MarkerEntityFactory.createLabel(text: String(format: "%.1f sq ft", areaSqFt), at: SCNVector3FromSIMD(centroid))
+            parent.addChildNode(label)
+        }
+
+        sceneView?.scene.rootNode.addChildNode(parent)
+        previewNode = parent
+
+        let bounds = polygonBounds()
+        liveDimensions = SIMD3<Float>(bounds.maxX - bounds.minX, lockedHeight ?? max(liveDimensions.y, 0.15), bounds.maxZ - bounds.minZ)
+
+        if polygonClosed {
+            let camY = sceneView?.session.currentFrame?.camera.transform.columns.3.y ?? polygonFloorY
+            let h = max(0.15, lockedHeight ?? (camY - polygonFloorY))
+            let up = SIMD3<Float>(0, h, 0)
+            for v in polygonVertices {
+                let ve = MarkerEntityFactory.createMeasurementLine(from: v, to: v + up)
+                parent.addChildNode(ve)
+            }
+            for i in 0..<n {
+                let j = (i + 1) % n
+                let ue = MarkerEntityFactory.createMeasurementLine(from: polygonVertices[i] + up, to: polygonVertices[j] + up)
+                parent.addChildNode(ue)
+            }
+        }
+    }
+
+
     // MARK: — ARSessionDelegate —
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
@@ -701,6 +931,13 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
                         self.sessionMessage = "Room detected. Pan to expand. Tap Lock when ready."
                     }
                 }
+            } else if self.stage == .polygonHeight, now - self.lastPreviewUpdate > 0.08 {
+                self.lastPreviewUpdate = now
+                let camY = frame.camera.transform.columns.3.y
+                let h = max(0.15, camY - self.polygonFloorY)
+                self.deviceHeightAboveFloor = max(0, camY - self.polygonFloorY)
+                self.liveDimensions.y = h
+                self.refreshPolygonPreview()
             } else if self.stage == .height, now - self.lastPreviewUpdate > 0.08 {
                 self.lastPreviewUpdate = now
                 self.updateLiveHeightFromDevice()

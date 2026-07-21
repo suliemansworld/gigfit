@@ -4,6 +4,7 @@ import SwiftUI
 struct ScanView: View {
     @Binding var session: ScanSession
     @ObservedObject var scanStore: ScanStore
+    var startMode: VolumeScanStage = .auto
     @Environment(\.dismiss) private var dismissToHome
     @StateObject private var coordinator = ARScanCoordinator()
     @State private var showingCalibration = false
@@ -21,7 +22,8 @@ struct ScanView: View {
 
                 Spacer()
 
-                if coordinator.stage.rawValue >= VolumeScanStage.depth.rawValue
+                if coordinator.stage == .polygonFloor || coordinator.stage == .polygonHeight
+                    || coordinator.stage.rawValue >= VolumeScanStage.depth.rawValue
                     || (coordinator.stage == .auto && coordinator.autoRoomReady) {
                     measurementPanel
                         .padding(.horizontal, 12)
@@ -36,6 +38,9 @@ struct ScanView: View {
         }
         .onAppear {
             coordinator.onPointsChanged = { session.points = $0 }
+            if startMode == .polygonFloor {
+                coordinator.startPolygonMode()
+            }
         }
         .onChange(of: showingReview) {
             showingReview ? coordinator.pauseSession() : coordinator.startSession()
@@ -93,9 +98,9 @@ struct ScanView: View {
                 .foregroundStyle(messageColor)
                 .lineLimit(2)
 
-            if coordinator.stage != .auto {
+            if coordinator.stage != .auto && coordinator.stage != .polygonFloor && coordinator.stage != .polygonHeight {
                 HStack(spacing: 6) {
-                    ForEach(Array(VolumeScanStage.allCases.filter { $0 != .auto }.prefix(4))) { stage in
+                    ForEach(Array(VolumeScanStage.allCases.filter { $0 != .auto && $0 != .polygonFloor && $0 != .polygonHeight }.prefix(4))) { stage in
                         VStack(spacing: 4) {
                             Capsule()
                                 .fill(progressColor(for: stage))
@@ -153,6 +158,36 @@ struct ScanView: View {
                 .accessibilityLabel("Undo last measurement")
 
                 switch coordinator.stage {
+                case .polygonFloor:
+                    Button(action: coordinator.placeAtCrosshair) {
+                        Label("Add Vertex", systemImage: "plus.square")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.orange)
+
+                    Button(action: coordinator.closePolygon) {
+                        Image(systemName: "checkmark.square")
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
+                    .accessibilityLabel("Close polygon shape")
+                case .polygonHeight:
+                    Button(action: coordinator.lockHeightAtDevice) {
+                        Label("Lock Height at Phone", systemImage: "arrow.up.and.down")
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.yellow)
+
+                    Button(action: coordinator.placeAtCrosshair) {
+                        Image(systemName: "viewfinder")
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.cyan)
+                    .accessibilityLabel("Set height from targeted surface")
                 case .auto:
                     Button(action: coordinator.lockAutoRoom) {
                         Label("Lock Room", systemImage: "lock.fill")
@@ -251,6 +286,8 @@ struct ScanView: View {
     private var stageIcon: String {
         switch coordinator.stage {
         case .auto: return "rectangle.expand.vertical"
+        case .polygonFloor: return "skew"
+        case .polygonHeight: return "arrow.up.and.down"
         case .floor: return "square.bottomhalf.filled"
         case .width: return "arrow.left.and.right"
         case .depth: return "arrow.up.left.and.arrow.down.right"
@@ -262,6 +299,8 @@ struct ScanView: View {
     private var stageColor: Color {
         switch coordinator.stage {
         case .auto: return .mint
+        case .polygonFloor: return .orange
+        case .polygonHeight: return .yellow
         case .floor, .width, .depth: return .cyan
         case .height: return .yellow
         case .complete: return .green
@@ -281,6 +320,8 @@ struct ScanView: View {
     private var controlHint: String {
         switch coordinator.stage {
         case .auto: return "Pan around the room. Walls and floor extend the box automatically."
+        case .polygonFloor: return "Tap each corner of the floor shape. Snaps to detected walls. Close shape when done."
+        case .polygonHeight: return "Raise the phone slowly. The wireframe grows with it, then lock the height."
         case .floor: return "For phone calibration, place the phone over the first floor corner before tapping."
         case .width, .depth: return "Use the crosshair button or tap the camera view on the floor boundary."
         case .height: return "Raise the phone slowly. The wireframe grows with it, then lock the height."

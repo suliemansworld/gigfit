@@ -3,7 +3,9 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var scanStore: ScanStore
     @State private var showingNewScan = false
+    @State private var showingPolygon = false
     @State private var showingRoomPlan = false
+    @State private var polygonSession = ScanSession(name: "Polygon Scan")
 
     var body: some View {
         NavigationStack {
@@ -29,6 +31,9 @@ struct HomeView: View {
             }
             .fullScreenCover(isPresented: $showingNewScan) {
                 ScanInstructionsView(scanStore: scanStore)
+            }
+            .fullScreenCover(isPresented: $showingPolygon) {
+                ScanView(session: $polygonSession, scanStore: scanStore, startMode: .polygonFloor)
             }
             .fullScreenCover(isPresented: $showingRoomPlan) {
                 RoomPlanScanView(scanStore: scanStore)
@@ -63,6 +68,16 @@ struct HomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
 
+            Button(action: { showingPolygon = true }) {
+                Label("Polygon Scan", systemImage: "skew")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 14)
+                    .background(Color.orange)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+
             Button(action: { showingRoomPlan = true }) {
                 Label("3D Room Scan", systemImage: "cube.transparent.fill")
                     .font(.headline)
@@ -93,16 +108,22 @@ struct HomeView: View {
         }
         .scrollContentBackground(.hidden)
         .toolbar {
-            ToolbarItem(placement: .bottomBar) {
-                Button(action: { showingRoomPlan = true }) {
-                    Label("3D Room Scan", systemImage: "cube.transparent.fill")
-                        .font(.subheadline.weight(.medium))
+            ToolbarItemGroup(placement: .bottomBar) {
+                Button(action: { showingPolygon = true }) {
+                    Label("Polygon", systemImage: "skew")
+                        .font(.caption.weight(.medium))
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(Color(red: 0.20, green: 0.70, blue: 0.40))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.orange)
+
+                Button(action: { showingRoomPlan = true }) {
+                    Label("3D Room", systemImage: "cube.transparent.fill")
+                        .font(.caption.weight(.medium))
+                        .foregroundColor(.white)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color(red: 0.20, green: 0.70, blue: 0.40))
             }
         }
     }
