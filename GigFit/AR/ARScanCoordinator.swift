@@ -619,10 +619,38 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         guideNode?.removeFromParentNode()
         guideNode = nil
 
-        if let origin = floorOrigin, let width = widthVector, depthVector == nil {
-            let guide = MarkerEntityFactory.createMeasurementLine(from: origin, to: origin + width)
-            sceneView?.scene.rootNode.addChildNode(guide)
-            guideNode = guide
+        if let origin = floorOrigin, let width = widthVector {
+            if depthVector == nil, let crossPos = self.crosshairPosition {
+                // Live rectangle preview: compute depth from crosshair position
+                let widthDirection = simd_normalize(width)
+                let perpendicular = simd_normalize(simd_cross(SIMD3<Float>(0, 1, 0), widthDirection))
+                let signedDepth = simd_dot(crossPos - origin, perpendicular)
+                let liveDepth = perpendicular * signedDepth
+                let right = origin + width
+                let frontLeft = origin + liveDepth
+                let frontRight = right + liveDepth
+
+                // Wireframe edges
+                let edges: [(SIMD3<Float>, SIMD3<Float>)] = [
+                    (origin, right), (origin, frontLeft),
+                    (right, frontRight), (frontLeft, frontRight)
+                ]
+                let parent = SCNNode()
+                parent.name = "live_rect"
+                for (a, b) in edges {
+                    let edge = MarkerEntityFactory.createMeasurementLine(from: a, to: b)
+                    parent.addChildNode(edge)
+                }
+                // Semi-transparent fill
+                let fill = createTransparentQuad(corners: [origin, right, frontRight, frontLeft])
+                parent.addChildNode(fill)
+                sceneView?.scene.rootNode.addChildNode(parent)
+                guideNode = parent
+            } else {
+                let guide = MarkerEntityFactory.createMeasurementLine(from: origin, to: origin + width)
+                sceneView?.scene.rootNode.addChildNode(guide)
+                guideNode = guide
+            }
         } else if let origin = floorOrigin, widthVector == nil {
             let marker = MarkerEntityFactory.createMarker(label: .rearLeftFloor,
                                                            position: SCNVector3FromSIMD(origin))
@@ -636,6 +664,28 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         let node = MarkerEntityFactory.createHexahedronWireframe(corners: sceneCorners)
         sceneView?.scene.rootNode.addChildNode(node)
         previewNode = node
+    }
+
+    
+    private func createTransparentQuad(corners: [SIMD3<Float>]) -> SCNNode {
+        let verts: [SCNVector3] = corners.map { SCNVector3FromSIMD($0) }
+        let indices: [Int32] = [0, 1, 2, 0, 2, 3]
+
+        let vertData = Data(bytes: verts, count: verts.count * MemoryLayout<SCNVector3>.stride)
+        let idxData = Data(bytes: indices, count: indices.count * MemoryLayout<Int32>.stride)
+
+        let vSrc = SCNGeometrySource(data: vertData, semantic: .vertex, vectorCount: verts.count,
+                                      usesFloatComponents: true, componentsPerVector: 3,
+                                      bytesPerComponent: MemoryLayout<Float>.stride,
+                                      dataOffset: 0, dataStride: MemoryLayout<SCNVector3>.stride)
+        let elem = SCNGeometryElement(data: idxData, primitiveType: .triangles,
+                                       primitiveCount: 2, bytesPerIndex: MemoryLayout<Int32>.stride)
+        let geo = SCNGeometry(sources: [vSrc], elements: [elem])
+        geo.firstMaterial?.diffuse.contents = UIColor(red: 0.27, green: 0.53, blue: 1.0, alpha: 0.2)
+        geo.firstMaterial?.isDoubleSided = true
+        geo.firstMaterial?.lightingModel = .constant
+
+        return SCNNode(geometry: geo)
     }
 
     private func removeVisuals() {
@@ -716,8 +766,9 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             self.crosshairNode?.isHidden = false
             self.crosshairNode?.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
 
-            // Update measurement line
+            // Update measurement line and live rectangle preview
             self.updateMeasurementLine(to: targetPos)
+            if self.stage == .depth { self.refreshPreview() }
         } else {
             self.crosshairHit = false
             self.crosshairNode?.isHidden = true
