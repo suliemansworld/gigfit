@@ -572,9 +572,12 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             let vc = geo.vertices.count
             let t = meshAnchor.transform
 
-            for fi in stride(from: 0, to: faceCount, by: max(1, faceCount / 30)) {
+            var sampled = 0
+            for fi in stride(from: 0, to: faceCount, by: max(1, faceCount / 20)) {
                 let cls = clsBuf[fi * MemoryLayout<UInt8>.stride]
-                guard cls == 3 else { continue } // ceiling only
+                guard cls == 3 else { continue }
+                sampled += 1
+                if sampled > 3 { break } // early exit: found enough ceiling samples
 
                 let i0 = Int(faceBuf[fi * faceStride])
                 guard i0 < vc else { continue }
@@ -912,11 +915,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     }
 
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        guard let meshAnchor = anchor as? ARMeshAnchor,
-              let existingNode = meshNodes[meshAnchor.identifier] else { return }
-        // Throttle: only update mesh geometry every 3rd call
-        sampledFrames += 1
-        if sampledFrames % 3 == 0 { updateMeshNode(existingNode, from: meshAnchor.geometry) }
+        // Mesh updates are batched in the frame callback for performance
     }
 
     func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
@@ -1197,6 +1196,15 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
 
                         // Update crosshair surface detection (throttled)
             if self.sampledFrames % 12 == 0 { self.updateCrosshair(from: frame) }
+            // Batched mesh geometry updates (throttled)
+            if self.sampledFrames % 15 == 0, self.isLiDARAvailable {
+                for anchor in frame.anchors {
+                    if let meshAnchor = anchor as? ARMeshAnchor, let node = self.meshNodes[meshAnchor.identifier] {
+                        self.updateMeshNode(node, from: meshAnchor.geometry)
+                    }
+                }
+            }
+
 
                         // Ceiling detection during polygon height only (throttled, mesh data richer here)
             if self.stage == .polygonHeight, self.sampledFrames % 12 == 0 {
