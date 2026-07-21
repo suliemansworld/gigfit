@@ -38,7 +38,6 @@
 		DBA8C46B39716A1E6D7C8E6D /* UnitFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1ABC2CB3FFFCD2A23469CE /* UnitFormatter.swift */; };
 		F2F4757BB6EAB309D7AD46D0 /* ScanSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C797871B5CAD0600FA61B98F /* ScanSession.swift */; };
 		F856687BAC8FE8024274B69B /* CalibrationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B882DCC60BAD5A6411BE737 /* CalibrationServiceTests.swift */; };
-		C70D281493384DE1B3AAE7AA /* RoomPlan.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52D9569D465A40E58489E77D /* RoomPlan.framework */; };
 		0584FD6340D74A9691670440 /* RoomPlanCaptureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA5FF7613AC45909E981A79 /* RoomPlanCaptureController.swift */; };
 		4D19566A45E844A89BFD6FB1 /* RoomPlanCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C814E43465C4122B6CA1522 /* RoomPlanCaptureView.swift */; };
 		1E5296D1A48746A5AB34C7AD /* RoomPlanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3442830683B14C02AE2BDEF1 /* RoomPlanReviewView.swift */; };
@@ -89,7 +88,6 @@
 		CB9F382970C48EE21372B04F /* DimensionExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DimensionExtractor.swift; sourceTree = "<group>"; };
 		CC129863AF14DC62630258B7 /* ScanPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScanPoint.swift; sourceTree = "<group>"; };
 		E22ECE6C7691106FCF955588 /* PointPlacementService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PointPlacementService.swift; sourceTree = "<group>"; };
-		52D9569D465A40E58489E77D /* RoomPlan.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RoomPlan.framework; path = System/Library/Frameworks/RoomPlan.framework; sourceTree = SDKROOT; };
 		EDA5FF7613AC45909E981A79 /* RoomPlanCaptureController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanCaptureController.swift; sourceTree = "<group>"; };
 		9C814E43465C4122B6CA1522 /* RoomPlanCaptureView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanCaptureView.swift; sourceTree = "<group>"; };
 		3442830683B14C02AE2BDEF1 /* RoomPlanReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanReviewView.swift; sourceTree = "<group>"; };
