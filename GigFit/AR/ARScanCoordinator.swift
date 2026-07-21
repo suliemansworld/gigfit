@@ -46,7 +46,7 @@ enum VolumeScanStage: Int, CaseIterable, Identifiable {
 final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, ARSessionDelegate {
 
     @Published var placedPoints: [ScanPoint] = []
-    @Published var stage: VolumeScanStage = .auto
+    @Published var stage: VolumeScanStage = .floor
     @Published var isPlacementEnabled = true
     @Published var trackingState: ARCamera.TrackingState = .normal
     @Published var planeCount = 0
@@ -1215,10 +1215,10 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             }
 
                         // Update crosshair surface detection (throttled)
-            if self.sampledFrames % 8 == 0 { self.updateCrosshair(from: frame) }
+            if self.sampledFrames % 12 == 0 { self.updateCrosshair(from: frame) }
 
-                        // Ceiling detection during height modes (throttled)
-            if (self.stage == .height || self.stage == .polygonHeight), self.sampledFrames % 12 == 0 {
+                        // Ceiling detection during polygon height only (throttled, mesh data richer here)
+            if self.stage == .polygonHeight, self.sampledFrames % 12 == 0 {
                 self.detectCeiling(from: frame)
             }
 
