@@ -2,7 +2,7 @@
 
 For architecture, deployment, Apple/TestFlight setup, and agent continuation instructions, see [AGENT_HANDOFF.md](AGENT_HANDOFF.md).
 
-Native iOS app that measures cargo spaces using ARKit and LiDAR when available. Calibrate a floor corner, set width and depth, then raise the phone to expand and lock a 3D volume for review and saving.
+Native iOS app that measures cargo spaces using ARKit and LiDAR when available, then turns those measurements into persistent live-load capacity tracking for Roadie and other delivery work. Drivers can attach a gig-app screenshot to a package, enter or reuse its measurements, and see remaining cargo volume update as packages are loaded or delivered.
 
 ## Architecture
 
@@ -14,10 +14,10 @@ GigFit/
     ScanDimensions.swift             — L×W×H + volume with unit conversion
     ScanConfidence.swift             — High/Medium/Low with inset percentages
     ScanSession.swift                — Full scan session model (Codable)
+    CargoModels.swift                — Vehicle, load-session, and package models
   AR/
     ARScanView.swift                 — SwiftUI wrapper for ARSCNView
     ARScanCoordinator.swift          — AR session delegate + point placement logic
-    ARSessionController.swift        — AR session config management
     PointPlacementService.swift      — Plane raycasting + LiDAR depth placement
     MarkerEntityFactory.swift        — SceneKit marker + hexahedron wireframe nodes
   Geometry/
@@ -28,13 +28,18 @@ GigFit/
     ConfidenceScoring.swift          — Heuristic quality scoring (0–100)
     SafetyInsetCalculator.swift      — Conservative volume inset by confidence
     HexahedronMeshBuilder.swift      — Standalone SCNScene for 3D review
+    CapacityCalculator.swift         — Remaining-space calculations
   Storage/
     ScanStore.swift                  — JSON persistence in documents directory
+    CargoStore.swift                 — Vehicle profiles and live-load persistence
+    PackageAssetStore.swift          — Package screenshot validation and storage
   Views/
-    HomeView.swift                   — Saved scans list + new scan button
+    HomeView.swift                   — Saved scans, live loads, and entry points
     ScanInstructionsView.swift       — 4-step instruction cards before scanning
     ScanView.swift                   — Floor-calibrated expandable volume workflow
     ScanReviewView.swift             — 3D model + dimensions + confidence + save
+    LiveLoadView.swift               — Capacity dashboard and package status controls
+    PackageEditorView.swift          — Screenshot, notes, quantity, and dimensions
   Utilities/
     UnitFormatter.swift              — Imperial/metric display formatting
     SIMDHelpers.swift                — Centroid, distance, direction utilities
@@ -42,6 +47,7 @@ GigFit/
     VolumeCalculatorTests.swift
     SafetyInsetCalculatorTests.swift
     CalibrationServiceTests.swift
+    CargoLoadTests.swift
 ```
 
 ## Setup on MacBook

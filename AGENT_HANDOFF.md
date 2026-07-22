@@ -49,6 +49,18 @@ Switch from manual mode via the hand icon button. The phone pans around the room
 
 "3D Room Scan" button on home screen. Uses Apple's RoomPlan framework for true 3D room capture with wall/door/window/furniture detection. Exports USDZ. Requires LiDAR iPhone (Pro 12+).
 
+### Roadie Live Load Tracker (v1)
+
+The first usable slice of the original delivery-driver MVP is implemented:
+
+1. Start a load from a saved cargo-space scan or vehicle profile.
+2. Add a package using manual dimensions or a previously measured GigFit scan.
+3. Optionally attach a Roadie or other gig-app screenshot through the system photo picker, add notes, and set quantity.
+4. Track each package as loaded or delivered. Quantity changes, deliveries, deletions, and app relaunches update the remaining-space tally immediately.
+5. The dashboard shows occupied volume, remaining volume, total conservative vehicle capacity, and a large remaining-space percentage (for example, 36% occupied displays 64% space left).
+
+Capacity v1 is an honest volume utilization estimate: `loaded package volume × quantity` is subtracted from the vehicle's conservative measured capacity. It does not yet prove that differently shaped packages can be arranged inside the vehicle. The 3D packing solver and placement guide remain a separate next phase.
+
 ## Architecture
 
 ```
@@ -60,6 +72,7 @@ GigFit/
     ScanDimensions.swift             — L×W×H + volume with unit conversion
     ScanConfidence.swift             — High/Medium/Low with inset percentages
     ScanSession.swift                — Full scan session model (Codable)
+    CargoModels.swift                — Vehicle profiles, load sessions, packages, dimensions, status
   AR/
     ARScanCoordinator.swift          — State machine, crosshair, mesh rendering, all scanning logic
     ARScanView.swift                 — SwiftUI wrapper for ARSCNView + static crosshair
@@ -74,14 +87,19 @@ GigFit/
     ConfidenceScoring.swift          — Heuristic quality scoring (0–100)
     SafetyInsetCalculator.swift      — Conservative volume inset by confidence
     HexahedronMeshBuilder.swift      — Standalone SCNScene for 3D review
+    CapacityCalculator.swift         — Loaded/remaining volume and percentage calculations
   Storage/
     ScanStore.swift                  — JSON persistence in documents directory
+    CargoStore.swift                 — Versioned vehicle/load persistence in gigfit_cargo_v1.json
+    PackageAssetStore.swift          — Validated, resized package screenshot storage
   Views/
-    HomeView.swift                   — Saved scans list + 3 scan mode buttons (New, Polygon, 3D Room)
+    HomeView.swift                   — Saved scans, live loads, and scan/load entry points
     ScanInstructionsView.swift       — 4-step instruction cards before scanning
     ScanView.swift                   — Floor-calibrated expandable volume workflow
     ScanReviewView.swift             — 3D model + dimensions + confidence + save
     CalibrationView.swift            — Optional tape calibration (now has dismissAll hook)
+    LiveLoadView.swift               — Live capacity dashboard and package status controls
+    PackageEditorView.swift          — Screenshot, notes, quantity, and package measurements
   RoomPlan/
     RoomPlanCaptureController.swift  — RoomCaptureSession wrapper
     RoomPlanCaptureView.swift        — SwiftUI RoomCaptureView wrapper
@@ -94,6 +112,7 @@ GigFit/
     VolumeCalculatorTests.swift
     SafetyInsetCalculatorTests.swift
     CalibrationServiceTests.swift
+    CargoLoadTests.swift             — Capacity, persistence, delivery, and image-asset tests
 ```
 
 ## Performance notes
@@ -166,7 +185,7 @@ xcodebuild -quiet \
   CODE_SIGNING_ALLOWED=NO test
 ```
 
-The project currently contains 14 geometry/calibration XCTest methods. The app target and test bundle compile locally. On this Mac, the iOS 17.2 simulator can stall while materializing the hosted test runner, so do not claim the tests executed unless `xcodebuild test` reaches a test summary. ARKit and LiDAR require physical-iPhone testing.
+The project currently contains 24 XCTest methods: 14 geometry/calibration tests and 10 cargo-load tests. On July 21, 2026, the full simulator suite reached the XCTest summary with 24 executed and 0 failures. ARKit and LiDAR behavior still requires physical-iPhone testing.
 
 ## Codemagic
 
@@ -207,20 +226,24 @@ Another app may occupy the only concurrent Codemagic builder. Leave GigFit queue
 - Internal testing does not require external beta-review contact information.
 - Codemagic may report missing Feedback Email and review-contact details after a successful upload. That affects external beta review, not internal testing.
 
-## Roadmap / planned features
+## MVP progress and next phase
 
-The next phase is an **item catalog + 3D bin packing system**:
+Implemented in the Roadie Live Load v1 slice:
 
-- Measure individual items (boxes, furniture, cargo)
-- Measure the containing space
-- App auto-arranges items for optimal fit using a 3D bin packing algorithm
-- Shows utilization: "87% empty, fits 14 more boxes"
-- "Reorganize" button re-solves the layout
-- Screenshots attached to each item measurement
-- Running tally of everything in the space
-- Vehicle profiles that preserve the measured cargo-space model
-- A live loading session for Roadie and other gig drivers: add or remove each package, show occupied and remaining capacity, and keep the tally current while the route is active
-- Placement guidance for the next package plus a reorganization pass when the load changes
+- Individual item dimensions from manual entry or a saved GigFit item scan
+- Saved vehicle profiles from measured cargo spaces
+- Roadie/gig-app screenshots and notes attached to package entries
+- Quantity, loaded/delivered status, removal, and a persistent running tally
+- Live occupied/remaining volume and remaining-space percentage
+
+Still planned for the **3D bin packing and placement phase**:
+
+- A real 3D packing solver that tests orientation and physical arrangement, not only volume
+- A rendered box arrangement inside the measured vehicle model
+- Defensible "fits N more" predictions for a selected package size
+- "Reorganize" to re-solve after packages are added, removed, or delivered
+- Placement guidance for the next package and saved load history/catalog workflows
+- Optional screenshot OCR/import assistance; v1 stores the screenshot but does not infer package dimensions from it
 
 ## Known risks
 

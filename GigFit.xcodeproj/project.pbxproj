@@ -41,6 +41,13 @@
 		4D19566A45E844A89BFD6FB1 /* RoomPlanCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C814E43465C4122B6CA1522 /* RoomPlanCaptureView.swift */; };
 		1E5296D1A48746A5AB34C7AD /* RoomPlanReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3442830683B14C02AE2BDEF1 /* RoomPlanReviewView.swift */; };
 		C960443822F7453B89600F66 /* RoomPlanScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8EB461B0FB0488DBABC1867 /* RoomPlanScanView.swift */; };
+		A1B2C3D4E5F6000000000001 /* CargoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6000000000001 /* CargoModels.swift */; };
+		A1B2C3D4E5F6000000000002 /* CapacityCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6000000000002 /* CapacityCalculator.swift */; };
+		A1B2C3D4E5F6000000000003 /* CargoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6000000000003 /* CargoStore.swift */; };
+		A1B2C3D4E5F6000000000004 /* PackageAssetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6000000000004 /* PackageAssetStore.swift */; };
+		A1B2C3D4E5F6000000000005 /* PackageEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6000000000005 /* PackageEditorView.swift */; };
+		A1B2C3D4E5F6000000000006 /* LiveLoadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6000000000006 /* LiveLoadView.swift */; };
+		A1B2C3D4E5F6000000000007 /* CargoLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6000000000007 /* CargoLoadTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +97,13 @@
 		9C814E43465C4122B6CA1522 /* RoomPlanCaptureView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanCaptureView.swift; sourceTree = "<group>"; };
 		3442830683B14C02AE2BDEF1 /* RoomPlanReviewView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanReviewView.swift; sourceTree = "<group>"; };
 		C8EB461B0FB0488DBABC1867 /* RoomPlanScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RoomPlanScanView.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6000000000001 /* CargoModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CargoModels.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6000000000002 /* CapacityCalculator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CapacityCalculator.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6000000000003 /* CargoStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CargoStore.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6000000000004 /* PackageAssetStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PackageAssetStore.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6000000000005 /* PackageEditorView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PackageEditorView.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6000000000006 /* LiveLoadView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveLoadView.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6000000000007 /* CargoLoadTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CargoLoadTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +129,7 @@
 		1CF25A45249308832257EECC /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				B1C2D3E4F5A6000000000001 /* CargoModels.swift */,
 				669F8068E6785FBA9859EE66 /* ScanConfidence.swift */,
 				0FDFAD62811879CE48333443 /* ScanDimensions.swift */,
 				CC129863AF14DC62630258B7 /* ScanPoint.swift */,
@@ -136,6 +151,8 @@
 			isa = PBXGroup;
 			children = (
 				B05E63BC1395291903E21421 /* HomeView.swift */,
+				B1C2D3E4F5A6000000000006 /* LiveLoadView.swift */,
+				B1C2D3E4F5A6000000000005 /* PackageEditorView.swift */,
 				0FD222CA2DF0BB9B0ED48CB1 /* ScanInstructionsView.swift */,
 				1E36B94D3E898FF126014AE4 /* ScanReviewView.swift */,
 				950F2973D7F3FE81BAA92260 /* ScanView.swift */,
@@ -168,6 +185,7 @@
 		723E797B938D17D7A8D4110F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				B1C2D3E4F5A6000000000007 /* CargoLoadTests.swift */,
 				0B882DCC60BAD5A6411BE737 /* CalibrationServiceTests.swift */,
 				BDF9F9B73B8EAB76880F28BB /* SafetyInsetCalculatorTests.swift */,
 				6FBE88BD3BF73D1D2CDF3220 /* VolumeCalculatorTests.swift */,
@@ -220,6 +238,7 @@
 			isa = PBXGroup;
 			children = (
 				0B79ACB5F34C54491E42C6AA /* CalibrationService.swift */,
+				B1C2D3E4F5A6000000000002 /* CapacityCalculator.swift */,
 				59A5016D9538DC7C4C535B6E /* ConfidenceScoring.swift */,
 				4D992493474C154C01D6EF85 /* CoordinateSystemBuilder.swift */,
 				CB9F382970C48EE21372B04F /* DimensionExtractor.swift */,
@@ -243,6 +262,8 @@
 		D9BDAA628C2C2EB9225A63B7 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
+				B1C2D3E4F5A6000000000003 /* CargoStore.swift */,
+				B1C2D3E4F5A6000000000004 /* PackageAssetStore.swift */,
 				5DB949F8C791D0C4EDCB91A9 /* ScanStore.swift */,
 			);
 			name = Storage;
@@ -361,6 +382,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6000000000001 /* CargoModels.swift in Sources */,
+				A1B2C3D4E5F6000000000002 /* CapacityCalculator.swift in Sources */,
+				A1B2C3D4E5F6000000000003 /* CargoStore.swift in Sources */,
+				A1B2C3D4E5F6000000000004 /* PackageAssetStore.swift in Sources */,
+				A1B2C3D4E5F6000000000005 /* PackageEditorView.swift in Sources */,
+				A1B2C3D4E5F6000000000006 /* LiveLoadView.swift in Sources */,
 				2BDF9B755044DF972B9D5395 /* ARScanCoordinator.swift in Sources */,
 				9650264079983B8DDC17C784 /* ARScanView.swift in Sources */,
 				CBA03540CBF8CA815FBD75D5 /* ARSessionController.swift in Sources */,
@@ -397,6 +424,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6000000000007 /* CargoLoadTests.swift in Sources */,
 				F856687BAC8FE8024274B69B /* CalibrationServiceTests.swift in Sources */,
 				AC231B3A52FD881DF4D74F6B /* SafetyInsetCalculatorTests.swift in Sources */,
 				9B3D9A75EF64A9AD30E5B675 /* VolumeCalculatorTests.swift in Sources */,

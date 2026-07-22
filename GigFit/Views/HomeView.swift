@@ -2,9 +2,13 @@ import SwiftUI
 
 struct HomeView: View {
     @ObservedObject var scanStore: ScanStore
+    @EnvironmentObject private var cargoStore: CargoStore
     @State private var showingNewScan = false
     @State private var showingPolygon = false
     @State private var showingRoomPlan = false
+    @State private var showingStartLoad = false
+    @State private var activeLoad: LoadSession?
+    @State private var loadError: String?
     @State private var polygonSession = ScanSession(name: "Polygon Scan")
 
     var body: some View {
@@ -13,7 +17,7 @@ struct HomeView: View {
                 Color(red: 0.06, green: 0.06, blue: 0.14)
                     .ignoresSafeArea()
 
-                if scanStore.scans.isEmpty {
+                if scanStore.scans.isEmpty && cargoStore.loadSessions.isEmpty {
                     emptyState
                 } else {
                     scanList
@@ -37,6 +41,30 @@ struct HomeView: View {
             }
             .fullScreenCover(isPresented: $showingRoomPlan) {
                 RoomPlanScanView(scanStore: scanStore)
+            }
+            .sheet(isPresented: $showingStartLoad) {
+                StartLoadView(scans: scanStore.scans) { session in
+                    showingStartLoad = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                        activeLoad = session
+                    }
+                }
+            }
+            .fullScreenCover(item: $activeLoad) { session in
+                NavigationStack {
+                    LiveLoadView(sessionID: session.id, scanStore: scanStore)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Close") { activeLoad = nil }
+                            }
+                        }
+                }
+                .environmentObject(cargoStore)
+            }
+            .alert("Could Not Delete Load", isPresented: loadErrorIsPresented) {
+                Button("OK", role: .cancel) { loadError = nil }
+            } message: {
+                Text(loadError ?? "Please try again.")
             }
         }
     }
@@ -68,6 +96,12 @@ struct HomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
 
+            Text("After you save a cargo-space scan, use it to start a live Roadie load and track space left package by package.")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.42))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 36)
+
             Button(action: { showingPolygon = true }) {
                 Label("Polygon Scan", systemImage: "skew")
                     .font(.headline)
@@ -94,15 +128,51 @@ struct HomeView: View {
 
     private var scanList: some View {
         List {
-            ForEach(scanStore.scans) { scan in
-                NavigationLink(destination: ScanReviewView(scan: scan, scanStore: scanStore)) {
-                    ScanRow(scan: scan)
+            Section {
+                Button(action: { showingStartLoad = true }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "truck.box.fill")
+                            .font(.title2)
+                            .foregroundStyle(.green)
+                            .frame(width: 36)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Start Roadie Load")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text("Add packages and track live space left")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(.green)
+                    }
+                    .padding(.vertical, 4)
                 }
-                .listRowBackground(Color.white.opacity(0.05))
+
+                ForEach(cargoStore.loadSessions) { session in
+                    NavigationLink(
+                        destination: LiveLoadView(sessionID: session.id, scanStore: scanStore)
+                    ) {
+                        LiveLoadRow(session: session)
+                    }
+                }
+                .onDelete(perform: deleteLoads)
+            } header: {
+                Text("Live Loads")
             }
-            .onDelete { indexSet in
-                for idx in indexSet {
-                    scanStore.delete(scanStore.scans[idx])
+
+            Section("Cargo Spaces & Item Scans") {
+                ForEach(scanStore.scans) { scan in
+                    NavigationLink(destination: ScanReviewView(scan: scan, scanStore: scanStore)) {
+                        ScanRow(scan: scan)
+                    }
+                    .listRowBackground(Color.white.opacity(0.05))
+                }
+                .onDelete { indexSet in
+                    for idx in indexSet {
+                        scanStore.delete(scanStore.scans[idx])
+                    }
                 }
             }
         }
@@ -126,6 +196,69 @@ struct HomeView: View {
                 .tint(Color(red: 0.20, green: 0.70, blue: 0.40))
             }
         }
+    }
+
+    private func deleteLoads(at offsets: IndexSet) {
+        let sessions = cargoStore.loadSessions
+        for index in offsets where sessions.indices.contains(index) {
+            if case .failure(let error) = cargoStore.deleteLoadSession(id: sessions[index].id) {
+                loadError = error.localizedDescription
+            }
+        }
+    }
+
+    private var loadErrorIsPresented: Binding<Bool> {
+        Binding(
+            get: { loadError != nil },
+            set: { if !$0 { loadError = nil } }
+        )
+    }
+}
+
+private struct LiveLoadRow: View {
+    let session: LoadSession
+
+    var body: some View {
+        let snapshot = CapacityCalculator.calculate(for: session)
+
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .stroke(Color.secondary.opacity(0.18), lineWidth: 5)
+                Circle()
+                    .trim(from: 0, to: max(0.001, min(1, snapshot.remainingPercent / 100)))
+                    .stroke(statusColor(snapshot), style: StrokeStyle(lineWidth: 5, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text("\(Int(snapshot.remainingPercent.rounded()))%")
+                    .font(.caption2.weight(.bold).monospacedDigit())
+            }
+            .frame(width: 48, height: 48)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(session.name)
+                    .font(.body.weight(.semibold))
+                Text("\(session.vehicle.name) • \(session.items.reduce(0) { $0 + $1.quantity }) packages")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text(session.status == .active ? "ACTIVE" : "DONE")
+                .font(.system(size: 9, weight: .bold))
+                .padding(.horizontal, 7)
+                .padding(.vertical, 4)
+                .background((session.status == .active ? Color.blue : Color.green).opacity(0.18))
+                .foregroundStyle(session.status == .active ? Color.blue : Color.green)
+                .clipShape(Capsule())
+        }
+        .padding(.vertical, 3)
+    }
+
+    private func statusColor(_ snapshot: CapacitySnapshot) -> Color {
+        if snapshot.isOverCapacity || snapshot.remainingPercent < 10 { return .red }
+        if snapshot.remainingPercent < 30 { return .orange }
+        return .green
     }
 }
 

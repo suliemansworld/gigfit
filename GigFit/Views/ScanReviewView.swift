@@ -5,8 +5,11 @@ import SceneKit
 struct ScanReviewView: View {
     let scan: ScanSession
     @ObservedObject var scanStore: ScanStore
+    @EnvironmentObject private var cargoStore: CargoStore
     @State private var scene: SCNScene?
     @State private var isSaved = false
+    @State private var activeLoad: LoadSession?
+    @State private var loadError: String?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -98,6 +101,18 @@ struct ScanReviewView: View {
 
                     // Action buttons
                     VStack(spacing: 10) {
+                        if canStartLoad {
+                            Button(action: startRoadieLoad) {
+                                Label("Start Roadie Load", systemImage: "truck.box.fill")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.green)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                            }
+                        }
+
                         Button(action: saveScan) {
                             Label(isSaved ? "Saved" : "Save Scan", systemImage: isSaved ? "checkmark" : "square.and.arrow.down")
                                 .font(.headline)
@@ -134,6 +149,23 @@ struct ScanReviewView: View {
             .onAppear {
                 scene = HexahedronMeshBuilder.buildScene(from: scan.pointPositions(),
                                                           dimensions: scan.dimensions)
+                isSaved = scanStore.scan(by: scan.id) != nil
+            }
+            .fullScreenCover(item: $activeLoad) { session in
+                NavigationStack {
+                    LiveLoadView(sessionID: session.id, scanStore: scanStore)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Close") { activeLoad = nil }
+                            }
+                        }
+                }
+                .environmentObject(cargoStore)
+            }
+            .alert("Could Not Start Load", isPresented: loadErrorIsPresented) {
+                Button("OK", role: .cancel) { loadError = nil }
+            } message: {
+                Text(loadError ?? "Please try again.")
             }
         }
     }
@@ -150,6 +182,31 @@ struct ScanReviewView: View {
     private func saveScan() {
         scanStore.save(scan)
         isSaved = true
+    }
+
+    private var canStartLoad: Bool {
+        guard scan.isComplete, let dimensions = scan.dimensions else { return false }
+        return dimensions.lengthMeters > 0
+            && dimensions.widthMeters > 0
+            && dimensions.heightMeters > 0
+            && dimensions.conservativeVolumeCubicMeters > 0
+    }
+
+    private func startRoadieLoad() {
+        saveScan()
+        switch cargoStore.startLoad(from: scan, vehicleName: scan.name, loadName: "Roadie Load") {
+        case .success(let session):
+            activeLoad = session
+        case .failure(let error):
+            loadError = error.localizedDescription
+        }
+    }
+
+    private var loadErrorIsPresented: Binding<Bool> {
+        Binding(
+            get: { loadError != nil },
+            set: { if !$0 { loadError = nil } }
+        )
     }
 }
 
