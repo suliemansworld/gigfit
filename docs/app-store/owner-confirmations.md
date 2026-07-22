@@ -28,6 +28,12 @@ Sulieman Vidal states that:
 
 This statement corrects the repository handoff's unsupported characterization of 79 MP3 files as free-tier output. It is an owner attestation, not a substitute for a rights review of the exact subscription and terms.
 
+## Original WAV rights and release instruction
+
+After testing TestFlight build 2 on July 22, 2026, Sulieman Vidal directly confirmed that he holds the commercial rights to **all 636 WAV files** in the Echo Cave repository and instructed that those original recordings be restored to the iOS game. This includes 613 narration WAVs under `audio/voice/` and 23 ambience, bed, effect, footstep, friction, and loop WAVs directly under `audio/`.
+
+Build 2 did not preserve those files: its release pipeline converted 610 narration WAVs to M4A and selected MP3 alternatives for the gameplay recordings. The corrected release pipeline must bundle every WAV byte-for-byte and fail verification if any WAV is omitted, renamed, transcoded, or changed. This paragraph records the owner's rights attestation and shipping instruction; the documentary evidence checklist below remains the formal App Store clearance record.
+
 ## Billing evidence received
 
 On July 22, 2026, the owner supplied a screenshot of an ElevenLabs Inc. Stripe credit note. The image identifies a **Creator** subscription priced at **US$22 per month** and a credit-note issue date of **June 16, 2026**. This corroborates the paid-plan attestation and resolves the exact plan/price uncertainty.

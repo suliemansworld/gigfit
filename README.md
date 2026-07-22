@@ -38,11 +38,11 @@ Requirements for an App Store archive:
 
 ```bash
 npm install
-npm run ios:sync       # builds compressed AAC narration and updates Xcode
+npm run ios:sync       # preserves original audio and updates Xcode
 npm run ios:open       # opens ios/App/App.xcodeproj
 ```
 
-The current bundle identifier is `com.suliemansworld.echocave`. `npm run build:ios` converts the 610 WAV narration files into cached 96 kbps AAC outputs without modifying the source recordings. The generated `www/`, native `public/`, and `.build/` directories are intentionally ignored.
+The current bundle identifier is `com.suliemansworld.echocave`. `npm run build:ios` preserves the complete checked-in audio tree byte-for-byte, including all 636 original WAV files. Audio is gameplay in Echo Cave, so release builds must not transcode, substitute, or omit these recordings. The generated `www/` and native `public/` directories are intentionally ignored.
 
 ## File layout
 
@@ -51,7 +51,7 @@ index.html             # ~5,800 lines — game logic, UI, audio pipeline
 sw.js                  # Service worker — precache + runtime voice cache
 manifest.json          # PWA manifest
 capacitor.config.json  # Native app identity and bundled-web configuration
-scripts/build-web.mjs  # Reproducible web/iOS bundle builder + AAC conversion
+scripts/build-web.mjs  # Reproducible web/iOS bundle builder with exact audio preservation
 ios/                   # Xcode project, Swift bridge, privacy manifest, UI tests
 docs/app-store/        # Store copy, review notes, labels, TestFlight/release plans
 audio/
@@ -61,8 +61,8 @@ audio/
   friction-*.wav       # Continuous slide sounds (4 floor textures)
   welcome-music.mp3    # Welcome screen ambient track
   voice/
-    manifest.json      # 689 entries — text → WAV index
-    *.wav / *.mp3      # 689 source voice clips for the corpus
+    manifest.json      # 689 entries — text → original recording index
+    *.wav / *.mp3      # 692 source files; 689 selected corpus recordings
 tests/                 # Static, Chromium, WebKit, E2E, and fuzz suites
 icons/                 # PWA icons (192, 512, 180, maskable-512)
 LICENSE                # Proprietary license; commercial use restricted
@@ -146,7 +146,7 @@ Runtime web code remains framework-free. Exact Capacitor and plugin versions are
 - AudioContext `interrupted` state recovery on visibility change, focus, touch, click
 - Low-vision pinch zoom is permitted; the old forced zoom reset was removed
 - HTTP-context Clipboard API fallback (uses `execCommand('copy')` then textarea-select)
-- Priority plus on-demand narration with a 48 MiB decoded-audio LRU budget
+- Priority plus on-demand narration with a 48 MiB decoded-audio LRU budget, while runtime gameplay recordings warm with bounded concurrency after native launch or the first web gesture
 - Native AVAudioSession interruption recovery and headphone-disconnect pause
 
 ## Accessibility

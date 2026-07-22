@@ -2233,7 +2233,7 @@
   },
   "menu-open": {
     "text": "Menu open.",
-    "wav": "audio/voice/menu-open.mp3"
+    "wav": "audio/voice/menu-open.wav"
   },
   "classic-theme": {
     "text": "Classic theme.",
@@ -2409,7 +2409,7 @@
   },
   "tutorial-tap-begin": {
     "text": "Tap Begin to play, or Audio-only mode.",
-    "wav": "audio/voice/tutorial-tap-begin.mp3"
+    "wav": "audio/voice/tutorial-tap-begin.wav"
   },
   "tutorial-menu-hold": {
     "text": "To open the menu, double-tap and hold.",
@@ -2421,7 +2421,7 @@
   },
   "tutorial-part-2": {
     "text": "Once you do, the cave opens up. To teleport home, tap with both fingers. To open the menu, double-tap and hold. Tap Begin to play, or Audio-only mode.",
-    "wav": "audio/voice/tutorial-part-2.mp3"
+    "wav": "audio/voice/tutorial-part-2.wav"
   },
   "tutorial-teleport-v3": {
     "text": "To teleport home, tap with both fingers, please.",

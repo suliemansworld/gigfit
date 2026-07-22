@@ -6,14 +6,15 @@
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "build": "node scripts/build-web.mjs",
-    "build:ios": "ECHO_TRANSCODE_AUDIO=1 node scripts/build-web.mjs",
+    "build:ios": "node scripts/build-web.mjs",
     "ios:add": "npm run build:ios && npx cap add ios --packagemanager SPM",
     "ios:sync": "npm run build:ios && npx cap sync ios",
     "ios:open": "npx cap open ios",
     "test": "python3 tests/run_tests.py",
     "test:all": "python3 tests/run_tests.py --all",
     "test:browsers": "python3 tests/run_tests.py --browsers chromium,webkit",
-    "test:static": "python3 tests/run_tests.py --static-only"
+    "test:static": "python3 tests/run_tests.py --static-only",
+    "test:ios-audio": "python3 tests/verify_ios_audio_bundle.py"
   },
   "license": "SEE LICENSE IN LICENSE",
   "private": true,

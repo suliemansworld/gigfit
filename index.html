@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Echo Cave">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<script>window.ECHO_BUILD = '20260722-ios1';</script>
+<script>window.ECHO_BUILD = '20260722-audio2';</script>
 <title>Echo Cave</title>
 <meta name="description" content="An audio-first cave exploration game designed for blind and sighted players alike. Memorize your way through the dark.">
 <link rel="icon" href="icons/icon-32.png">
@@ -1709,37 +1709,37 @@
   // ship any subset of these and the rest will sound synthesized.
   const AUDIO_ASSETS = {
     // Friction loops (continuous while finger drags)
-    'friction-stone':  'audio/friction-stone.mp3',
-    'friction-wet':    'audio/friction-wet.mp3',
-    'friction-sand':   'audio/friction-sand.mp3',
-    'friction-gravel': 'audio/friction-gravel.mp3',
+    'friction-stone':  'audio/friction-stone.wav',
+    'friction-wet':    'audio/friction-wet.wav',
+    'friction-sand':   'audio/friction-sand.wav',
+    'friction-gravel': 'audio/friction-gravel.wav',
     // Footstep one-shots (plays on each room entry)
-    'step-stone':      'audio/step-stone.mp3',
-    'step-wet':        'audio/step-wet.mp3',
-    'step-sand':       'audio/step-sand.mp3',
-    'step-gravel':     'audio/step-gravel.mp3',
+    'step-stone':      'audio/step-stone.wav',
+    'step-wet':        'audio/step-wet.wav',
+    'step-sand':       'audio/step-sand.wav',
+    'step-gravel':     'audio/step-gravel.wav',
     // Landmark room loops
-    'landmark-drip':   'audio/drip-loop.mp3',
-    'landmark-wind':   'audio/wind-loop.mp3',
-    'landmark-hum':    'audio/hum-loop.mp3',
-    'landmark-chime':  'audio/chime-loop.mp3',
-    'landmark-echo':   'audio/echo-loop.mp3',
+    'landmark-drip':   'audio/drip-loop.wav',
+    'landmark-wind':   'audio/wind-loop.wav',
+    'landmark-hum':    'audio/hum-loop.wav',
+    'landmark-chime':  'audio/chime-loop.wav',
+    'landmark-echo':   'audio/echo-loop.wav',
     // Welcome screen music — ElevenLabs-generated calm fantasy ambient
     'welcome-music':        'audio/welcome-music.mp3',
     // Per-cave atmospheric beds (real recordings via ElevenLabs)
-    'bed-base-classic':     'audio/bed-base-classic.mp3',
-    'bed-classic-shallow':  'audio/bed-classic-shallow.mp3',
-    'bed-classic-mid':      'audio/bed-classic-mid.mp3',
-    'bed-classic-deep':     'audio/bed-classic-deep.mp3',
-    'bed-base-grotto':      'audio/bed-base-grotto.mp3',
-    'bed-grotto-shallow':   'audio/bed-grotto-shallow.mp3',
-    'bed-grotto-mid':       'audio/bed-grotto-mid.mp3',
-    'bed-grotto-deep':      'audio/bed-grotto-deep.mp3',
+    'bed-base-classic':     'audio/bed-base-classic.wav',
+    'bed-classic-shallow':  'audio/bed-classic-shallow.wav',
+    'bed-classic-mid':      'audio/bed-classic-mid.wav',
+    'bed-classic-deep':     'audio/bed-classic-deep.wav',
+    'bed-base-grotto':      'audio/bed-base-grotto.wav',
+    'bed-grotto-shallow':   'audio/bed-grotto-shallow.wav',
+    'bed-grotto-mid':       'audio/bed-grotto-mid.wav',
+    'bed-grotto-deep':      'audio/bed-grotto-deep.wav',
   };
   const loadedBuffers = {};
   const assetRequests = {};
   const assetLastUsed = {};
-  const MAX_ASSET_CACHE_BYTES = 64 * 1024 * 1024;
+  const MAX_ASSET_CACHE_BYTES = 96 * 1024 * 1024;
   let assetsRequested = false;
   function decodedBytes(buffer){
     return buffer && buffer.length && buffer.numberOfChannels
@@ -1780,21 +1780,46 @@
         trimAssetCache(active);
         return buf;
       })
-      .catch(() => null)
+      .catch(error => {
+        try {
+          if (typeof DIAG !== 'undefined') {
+            DIAG.audioDecodeFailures++;
+            DIAG.lastError = ('asset ' + key + ': ' + (error && error.message || error)).slice(0, 120);
+            diagLog('audio-failed', key, DIAG.lastError);
+          }
+        } catch(_){ }
+        return null;
+      })
       .finally(() => { delete assetRequests[key]; });
     return assetRequests[key];
+  }
+  function preloadAssetBatch(keys, concurrency=4){
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < keys.length){
+        const key = keys[cursor++];
+        await loadAsset(key);
+      }
+    };
+    return Promise.allSettled(
+      Array.from({ length: Math.min(concurrency, keys.length) }, worker)
+    );
   }
   function preloadAssets(){
     if (assetsRequested) return;
     if (!ensureAudio()) return;
     assetsRequested = true;
-    // Warm only the first-screen and common movement sounds. Beds, landmarks,
-    // floor loops, and narration are fetched from the local bundle on demand.
-    // This keeps decoded WebKit memory bounded on older iPhones.
-    ['welcome-music', 'step-stone', 'step-wet', 'step-sand', 'step-gravel',
-      (state.settings.theme || 'classic') === 'grotto' ? 'bed-base-grotto' : 'bed-base-classic']
-      .forEach(key => { loadAsset(key); });
+    // George and the welcome track are the first-run experience. Start them
+    // before the larger gameplay batch, then warm the remaining navigation
+    // recordings with bounded concurrency so a slower phone is not asked to
+    // fetch and decode every bed and loop at once.
     loadVoiceManifest();
+    loadAsset('welcome-music').finally(() => {
+      preloadAssetBatch(
+        Object.keys(AUDIO_ASSETS).filter(key => key !== 'welcome-music'),
+        4
+      );
+    });
   }
   function getRealBuffer(key){
     const buffer = loadedBuffers[key] || null;
@@ -2287,35 +2312,34 @@
   // isn't loaded yet, the welcome screen is silent — silence > synth tone.
   let harmonicNodes = [];
   let harmonicPlaying = false;
+  let welcomeCommitted = false;
   function startWelcomeHarmonic(){
     const c = ensureAudio(); if (!c) return;
     if (harmonicPlaying) return;
     // Kill-switch: ?nomusic and ?safemode skip welcome music entirely.
     if (URL_FLAGS.nomusic || URL_FLAGS.safemode) return;
-    const buf = (typeof getRealBuffer === 'function') ? getRealBuffer('welcome-music') : null;
-    if (!buf){
-      // Music not loaded yet. Try once more in a moment — by 1.5s the
-      // preloader should have fetched it. After that, give up gracefully.
-      setTimeout(() => {
-        if (harmonicPlaying) return;
-        const b2 = (typeof getRealBuffer === 'function') ? getRealBuffer('welcome-music') : null;
-        if (b2) startWelcomeHarmonic();
-      }, 1500);
-      return;
-    }
-    harmonicPlaying = true;
-    const peakMul = state.settings.boostVolume ? 1.4 : 1.0;
-    const TARGET_VOL = 0.22 * peakMul;
-    const FADE_IN = 2.5;  // slow fade — lets the player settle
-    const src = c.createBufferSource();
-    src.buffer = buf;
-    src.loop = true;
-    const g = c.createGain();
-    g.gain.setValueAtTime(0, c.currentTime);
-    g.gain.linearRampToValueAtTime(TARGET_VOL, c.currentTime + FADE_IN);
-    src.connect(g); masterConnect(g);
-    src.start();
-    harmonicNodes.push({ osc: src, gain: g });
+    // Await the existing local fetch/decode instead of guessing that it will
+    // finish within one fixed retry window. This keeps the first click reliable
+    // on slower phones while still starting playback from the unlocked context.
+    loadAsset('welcome-music').then(buf => {
+      if (!buf || harmonicPlaying || welcomeCommitted || URL_FLAGS.nomusic || URL_FLAGS.safemode) return;
+      const welcomePanel = document.getElementById('welcomePanel');
+      if (!welcomePanel || !welcomePanel.classList.contains('show')) return;
+      const activeContext = ensureAudio(); if (!activeContext) return;
+      harmonicPlaying = true;
+      const peakMul = state.settings.boostVolume ? 1.4 : 1.0;
+      const TARGET_VOL = 0.22 * peakMul;
+      const FADE_IN = 2.5;  // slow fade — lets the player settle
+      const src = activeContext.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const g = activeContext.createGain();
+      g.gain.setValueAtTime(0, activeContext.currentTime);
+      g.gain.linearRampToValueAtTime(TARGET_VOL, activeContext.currentTime + FADE_IN);
+      src.connect(g); masterConnect(g);
+      src.start();
+      harmonicNodes.push({ osc: src, gain: g });
+    });
   }
   function fadeOutHarmonic(durSec=2.5){
     const c = ensureAudio(); if (!c || !harmonicPlaying) return;
@@ -2881,7 +2905,9 @@
   // navigation, room descriptions, lore. Anything dynamic falls through.
   // ════════════════════════════════════════════════════════════
   let voiceManifest = null;          // { stem: { text, wav } }
+  let voiceManifestRequest = null;
   let voiceTextIndex = null;          // text → stem (for speak() lookup)
+  let voiceWavPreferenceViolations = null;
   const voiceBuffers = {};            // stem → AudioBuffer | 'pending'
   const voiceRequests = {};
   const voiceLastUsed = {};
@@ -2924,14 +2950,34 @@
     return Promise.allSettled(Array.from({ length: Math.min(concurrency, stems.length) }, worker));
   }
   function loadVoiceManifest(){
-    if (voiceManifest !== null) return;
+    if (voiceManifest && Object.keys(voiceManifest).length) return Promise.resolve(voiceManifest);
+    if (voiceManifestRequest) return voiceManifestRequest;
     voiceManifest = {};
-    fetch('audio/voice/manifest.json?v=' + (window.ECHO_BUILD || '1'), { cache: 'no-cache' })
+    voiceManifestRequest = fetch('audio/voice/manifest.json?v=' + (window.ECHO_BUILD || '1'), { cache: 'no-cache' })
       .then(r => r.ok ? r.json() : Promise.reject('no-manifest'))
       .then(m => {
+        if (!m || Object.keys(m).length !== 689) throw new Error('expected 689 narration entries');
         voiceManifest = m;
         voiceTextIndex = {};
-        for (const stem in m){ voiceTextIndex[m[stem].text.trim().toLowerCase()] = stem; }
+        const textsWithOriginalWav = new Set();
+        for (const stem in m){
+          const normalizedText = m[stem].text.trim().toLowerCase();
+          const previousStem = voiceTextIndex[normalizedText];
+          const previousEntry = previousStem && m[previousStem];
+          const isOriginalWav = /\.wav$/i.test(m[stem].wav || '');
+          const previousIsWav = previousEntry && /\.wav$/i.test(previousEntry.wav || '');
+          if (isOriginalWav) textsWithOriginalWav.add(normalizedText);
+          // Several atomic MP3 phrases duplicate older licensed WAV phrases.
+          // Keep the original WAV reachable regardless of manifest ordering.
+          if (!previousStem || (isOriginalWav && !previousIsWav)) {
+            voiceTextIndex[normalizedText] = stem;
+          }
+        }
+        voiceWavPreferenceViolations = Array.from(textsWithOriginalWav).filter(text => {
+          const selected = m[voiceTextIndex[text]];
+          return !selected || !/\.wav$/i.test(selected.wav || '');
+        }).length;
+        if (voiceWavPreferenceViolations) throw new Error('original WAV preference failed');
         // Warm the opening flow with a small concurrency cap. Everything else
         // is loaded on first use and retained only inside the LRU budget.
         const PRIORITY = [
@@ -2965,8 +3011,25 @@
         ];
         const priorityStems = PRIORITY.filter(stem => m[stem]);
         preloadVoiceBatch(priorityStems, 4);
+        return m;
       })
-      .catch(() => {});
+      .catch(error => {
+        // A transient custom-scheme read must not disable George for the whole
+        // session. Reset to null so the next speak() retries the local manifest.
+        voiceManifest = null;
+        voiceTextIndex = null;
+        voiceWavPreferenceViolations = null;
+        try {
+          if (typeof DIAG !== 'undefined') {
+            DIAG.audioLoadFailures++;
+            DIAG.lastError = ('voice manifest: ' + (error && error.message || error)).slice(0, 120);
+            diagLog('audio-failed', 'voice manifest', DIAG.lastError);
+          }
+        } catch(_){ }
+        return null;
+      })
+      .finally(() => { voiceManifestRequest = null; });
+    return voiceManifestRequest;
   }
   // Promise-returning variant of preloadVoiceClip used by the serial priority
   // phase. Resolves when the buffer is decoded (or fetch fails).
@@ -3130,6 +3193,7 @@
     // Diagnostics → Copy. No data leaves the device unless the player shares it.
     audioCtxResumes: 0,
     audioCtxInterrupts: 0,
+    audioLoadFailures: 0,
     audioDecodeFailures: 0,
     pageErrors: 0,
     sessionStart: Date.now(),
@@ -3167,6 +3231,12 @@
       systemFallback: DIAG.systemFallback,
       silentSkipped: DIAG.silentSkipped,
       waitTimedOut: DIAG.waitTimedOut,
+      welcomeMusicPlaying: harmonicPlaying,
+      assetExpected: Object.keys(AUDIO_ASSETS).length,
+      assetLoaded: Object.keys(loadedBuffers).length,
+      audioLoadFailures: DIAG.audioLoadFailures,
+      audioDecodeFailures: DIAG.audioDecodeFailures,
+      wavPreferenceViolations: voiceWavPreferenceViolations,
       tts: state.settings.tts,
       audioOnly: state.settings.audioOnly,
       effectiveAudioOnly: state.settings.audioOnly && !isEmbedded() && !isNonTouchDevice(),
@@ -3177,6 +3247,27 @@
       lastError: DIAG.lastError,
     };
   }
+  // A narrow, read-only release probe for automated WebKit and on-device
+  // diagnostics. It contains no player data and exposes only audio health.
+  window.ECHO_AUDIO_DIAGNOSTICS = () => {
+    const s = diagSnapshot();
+    return Object.freeze({
+      build: s.build,
+      ctxState: s.ctxState,
+      manifestSize: s.manifestSize,
+      voiceLoaded: s.voiceLoaded,
+      voicePending: s.voicePending,
+      voicePlayed: s.voicePlayed,
+      systemFallback: s.systemFallback,
+      waitTimedOut: s.waitTimedOut,
+      welcomeMusicPlaying: s.welcomeMusicPlaying,
+      assetExpected: s.assetExpected,
+      assetLoaded: s.assetLoaded,
+      audioLoadFailures: s.audioLoadFailures,
+      audioDecodeFailures: s.audioDecodeFailures,
+      wavPreferenceViolations: s.wavPreferenceViolations,
+    });
+  };
   // Programmatic ARIA audit. Verifies that critical interactive elements
   // have either an aria-label, aria-labelledby, or visible text. Catches
   // regressions where a button gets rebuilt without its accessibility name.
@@ -3229,6 +3320,8 @@
       `Embedded   : ${s.embedded}   non-touch: ${s.nonTouch}`,
       `Session    : ${Math.floor((Date.now() - DIAG.sessionStart) / 1000)}s elapsed`,
       `Audio ctx  : ${DIAG.audioCtxResumes} resumes, ${DIAG.audioCtxInterrupts} interrupts`,
+      `Audio files: ${s.assetLoaded}/${s.assetExpected} gameplay assets decoded`,
+      `Load       : ${s.audioLoadFailures} failures`,
       `Decode     : ${DIAG.audioDecodeFailures} failures`,
       `JS errors  : ${DIAG.pageErrors}`,
       `UA         : ${s.ua}`,
@@ -3367,53 +3460,69 @@
       speakWithSystemVoice(text, opts, 'novoice kill-switch');
       return;
     }
-    loadVoiceManifest();
-    const stems = voiceLookup(text);
     const myToken = ++voiceWaitToken;
-    if (stems){
-      const allLoaded = stems.every(s => voiceBuffers[s] && voiceBuffers[s] !== 'pending');
-      if (allLoaded){
-        DIAG.voicePlayed++;
-        diagLog('george', text, stems.length === 1 ? stems[0] : stems.length + ' clips');
-        playVoiceClips(stems, opts);
+    const useFallback = reason => {
+      if (opts.silentIfUnmatched){
+        DIAG.silentSkipped++;
+        diagLog('silent', text, reason + ' · silentIfUnmatched');
+        // Fire onComplete immediately so callers (eg. tutorial gate) don't
+        // hang waiting for speech-end that will never come.
+        if (opts.onComplete) try { opts.onComplete(); } catch(e){}
         return;
       }
-      stems.forEach(preloadVoiceClip);
-      diagLog('waiting', text, stems.filter(s => !voiceBuffers[s] || voiceBuffers[s] === 'pending').length + '/' + stems.length + ' pending');
-      let tries = 0;
-      const waitForBuffers = () => {
-        if (myToken !== voiceWaitToken) return;  // newer speak() superseded us
-        tries++;
-        const ready = stems.every(s => voiceBuffers[s] && voiceBuffers[s] !== 'pending');
-        if (ready){
-          DIAG.voicePlayed++;
-          diagLog('george-late', text, 'waited ' + (tries * 50) + 'ms');
-          playVoiceClips(stems, opts);
+      speakWithSystemVoice(text, opts, reason);
+    };
+    const resolveManifestSpeech = () => {
+      if (myToken !== voiceWaitToken) return;
+      const stems = voiceLookup(text);
+      if (stems){
+        const allLoaded = stems.every(s => voiceBuffers[s] && voiceBuffers[s] !== 'pending');
+        if (allLoaded){
+          if (playVoiceClips(stems, opts)){
+            DIAG.voicePlayed++;
+            diagLog('george', text, stems.length === 1 ? stems[0] : stems.length + ' clips');
+          } else {
+            useFallback('recorded clips could not be scheduled');
+          }
           return;
         }
-        if (tries < 160){ setTimeout(waitForBuffers, 50); return; }
-        DIAG.waitTimedOut++;
-        const stillPending = stems.filter(s => !voiceBuffers[s] || voiceBuffers[s] === 'pending');
-        diagLog('TIMEOUT', text, stillPending.length + ' clips never loaded');
-        if (opts.silentIfUnmatched){
-          if (opts.onComplete) try { opts.onComplete(); } catch(e){}
-        } else {
-          speakWithSystemVoice(text, opts, 'corpus load timeout');
-        }
-      };
-      waitForBuffers();
+        stems.forEach(preloadVoiceClip);
+        diagLog('waiting', text, stems.filter(s => !voiceBuffers[s] || voiceBuffers[s] === 'pending').length + '/' + stems.length + ' pending');
+        let tries = 0;
+        const waitForBuffers = () => {
+          if (myToken !== voiceWaitToken) return;  // newer speak() superseded us
+          tries++;
+          const ready = stems.every(s => voiceBuffers[s] && voiceBuffers[s] !== 'pending');
+          if (ready){
+            if (playVoiceClips(stems, opts)){
+              DIAG.voicePlayed++;
+              diagLog('george-late', text, 'waited ' + (tries * 50) + 'ms');
+            } else {
+              useFallback('recorded clips could not be scheduled');
+            }
+            return;
+          }
+          if (tries < 160){ setTimeout(waitForBuffers, 50); return; }
+          DIAG.waitTimedOut++;
+          const stillPending = stems.filter(s => !voiceBuffers[s] || voiceBuffers[s] === 'pending');
+          diagLog('TIMEOUT', text, stillPending.length + ' clips never loaded');
+          useFallback('corpus load timeout');
+        };
+        waitForBuffers();
+        return;
+      }
+      useFallback('no corpus match');
+    };
+
+    if (voiceTextIndex){
+      resolveManifestSpeech();
       return;
     }
-    // No corpus match → system voice
-    if (opts.silentIfUnmatched){
-      DIAG.silentSkipped++;
-      diagLog('silent', text, 'no corpus match · silentIfUnmatched');
-      // Fire onComplete immediately so callers (eg. tutorial gate) don't
-      // hang waiting for speech-end that will never come.
-      if (opts.onComplete) try { opts.onComplete(); } catch(e){}
-      return;
-    }
-    speakWithSystemVoice(text, opts, 'no corpus match');
+    // If the initial manifest preload failed, wait for this retry before
+    // deciding that George is unavailable. Falling through synchronously here
+    // would replace a recoverable local-file read with the system voice.
+    diagLog('waiting', text, 'voice manifest');
+    loadVoiceManifest().then(resolveManifestSpeech);
   }
 
   // ════════════════════════════════════════════════════════════
@@ -5730,7 +5839,6 @@
     // The harmonic plays idly while welcome is shown. On tap, it fades out
     // smoothly while the next phase begins.
     const welcomeTap = document.getElementById('welcomeTap');
-    let welcomeCommitted = false;
     // `?nogate` URL param skips the welcome-speech gate — used by the test
     // suite so it doesn't have to wait the full 18 seconds. Production users
     // never get this param; the gate stays in place for them.
@@ -5744,7 +5852,7 @@
       welcomeTap.addEventListener('click', () => {
         if (welcomeCommitted) return;
         // Block taps until George finishes "Tap anywhere to enter."
-        // Music has been playing 15s + speech ~3s = ~18s before this opens.
+        // Music has been playing about 10s + speech ~3s before this opens.
         if (!welcomeSpeechDone) return;
         welcomeCommitted = true;
         ensureAudio();
@@ -5798,14 +5906,13 @@
     // to unlock audio — the user reading the welcome screen and any incidental
     // touch will trigger this. Then it idles until they tap to commit.
     let welcomeSpoken = false;
-    function attemptStartHarmonic(){
+    function beginAudibleWelcome(){
       if (welcomeCommitted) return;
       const wp = document.getElementById('welcomePanel');
-      if (!wp || !wp.classList.contains('show')) return;
-      ensureAudio();
-      preloadAssets();
+      const c = ensureAudio();
+      if (!wp || !wp.classList.contains('show') || !c || c.state !== 'running') return;
       startWelcomeHarmonic();
-      // Music plays for ~15 seconds before George greets the player. Sets a
+      // Music plays for ~10 seconds before George greets the player. Sets a
       // calm, atmospheric tone first. After George finishes speaking, the
       // welcomeTap gate flips open so the player can enter.
       if (!welcomeSpoken){
@@ -5818,12 +5925,45 @@
           // browser blocked, etc.), don't trap the user. Auto-unlock after
           // a worst-case 12 seconds post-speak.
           setTimeout(() => { welcomeSpeechDone = true; }, 12000);
-        }, 10000);  // 10 seconds of music before greeting (was 15s)
+        }, 10000);
       }
     }
-    document.addEventListener('touchstart', attemptStartHarmonic, { once:false, passive:true, capture:true });
-    document.addEventListener('mousemove', attemptStartHarmonic, { once:true });
-    document.addEventListener('keydown', attemptStartHarmonic, { once:true });
+    function attemptStartHarmonic(){
+      if (welcomeCommitted) return;
+      const wp = document.getElementById('welcomePanel');
+      if (!wp || !wp.classList.contains('show')) return;
+      const c = ensureAudio();
+      preloadAssets();
+      if (!c) return;
+      if (c.state === 'running'){
+        beginAudibleWelcome();
+        return;
+      }
+      // Capacitor configures its WKWebView so audio is allowed to start without
+      // a gesture. Safari and unusual device states may still suspend Web Audio;
+      // the same promise then completes after the first accessible click.
+      try {
+        const resumed = c.resume();
+        if (resumed && typeof resumed.then === 'function'){
+          resumed.then(beginAudibleWelcome).catch(() => {});
+        }
+      } catch(_){ }
+    }
+    // VoiceOver activates the welcome control as an accessibility click and
+    // may not emit a page-level touchstart. Capture click before the button's
+    // gated handler so that the first double-tap starts music and George.
+    document.addEventListener('click', attemptStartHarmonic, { once:false, capture:true });
+    // The test hook suppresses the legacy gesture listeners so a trusted
+    // Playwright click proves this exact VoiceOver-style click path.
+    if (window.ECHO_TEST_CLICK_ONLY !== true){
+      document.addEventListener('touchstart', attemptStartHarmonic, { once:false, passive:true, capture:true });
+      document.addEventListener('mousemove', attemptStartHarmonic, { once:true });
+      document.addEventListener('keydown', attemptStartHarmonic, { once:true });
+    }
+    // Capacitor 8 sets mediaTypesRequiringUserActionForPlayback to none. Start
+    // the audio-first welcome on app launch; the listeners above remain the
+    // recovery path if a device still leaves its AudioContext suspended.
+    if (IS_NATIVE_APP) setTimeout(attemptStartHarmonic, 0);
     document.getElementById('introSkip').addEventListener('click', () => {
       clearIntroTimers();
       finishIntro(false);

@@ -27,7 +27,7 @@ Apple's app-information reference identifies immutable Bundle ID/SKU fields, req
 - [x] Owner-supplied July 22, 2026 API request log was reviewed and fingerprinted outside Git; it shows successful subscription/usage interface requests but contains no response payloads or historical clip-generation dates, so it does not close the coverage gate.
 - [ ] The associated invoice/account history confirms Creator-plan coverage on the generation dates, and generation history plus applicable terms have been archived and reviewed for all 79 MP3 outputs.
 - [ ] If historical evidence is insufficient and regeneration is used, replacement hashes prove none of the superseded originals remain in the app archive, asset catalog, copy bundle, test fixture, screenshot, or preview.
-- [ ] All 610 referenced narration WAV files have generation dates, plan/tier evidence, voice/model terms, and commercial-use approval; the 3 unreferenced legacy WAVs remain excluded from the build.
+- [ ] All 613 referenced narration WAV files have generation dates, plan/tier evidence, voice/model terms, and commercial-use approval; the release bundle preserves all 613 originals byte-for-byte.
 - [ ] All music, ambience, sound effects, footsteps, friction, and loop assets have provenance and commercial app/marketing rights.
 - [ ] App icon, screenshots, preview, fonts, story text, and third-party code are approved.
 - [ ] Attribution and license-notice obligations are implemented in-app and/or on the support site as required.

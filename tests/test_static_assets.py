@@ -16,6 +16,7 @@ MANIFEST_PATH = ROOT / "manifest.json"
 SERVICE_WORKER_PATH = ROOT / "sw.js"
 BUILD_SCRIPT_PATH = ROOT / "scripts" / "build-web.mjs"
 VOICE_MANIFEST_PATH = ROOT / "audio" / "voice" / "manifest.json"
+BRIDGE_CONTROLLER_PATH = ROOT / "ios" / "App" / "App" / "EchoBridgeViewController.swift"
 
 
 def read_text(path: Path) -> str:
@@ -56,6 +57,8 @@ class StaticBundleTests(unittest.TestCase):
         cls.index = read_text(INDEX_PATH)
         cls.service_worker = read_text(SERVICE_WORKER_PATH)
         cls.build_script = read_text(BUILD_SCRIPT_PATH)
+        cls.bridge_controller = read_text(BRIDGE_CONTROLLER_PATH)
+        cls.package = json.loads(read_text(ROOT / "package.json"))
         cls.manifest = json.loads(read_text(MANIFEST_PATH))
         cls.voice_manifest = json.loads(read_text(VOICE_MANIFEST_PATH))
         cls.precache = extract_precache(cls.service_worker)
@@ -194,6 +197,55 @@ class StaticBundleTests(unittest.TestCase):
             self.build_script,
             r"copy\(['\"]sw\.js['\"]\)",
             "the standalone web bundle must include its registered service worker",
+        )
+
+    def test_ios_build_preserves_original_audio(self) -> None:
+        self.assertEqual(
+            self.package["scripts"]["build:ios"],
+            "node scripts/build-web.mjs",
+        )
+        self.assertRegex(self.build_script, r"copy\(['\"]audio['\"]\)")
+        self.assertNotIn("afconvert", self.build_script)
+        self.assertNotIn(".m4a", self.build_script.lower())
+
+        asset_block = re.search(
+            r"const\s+AUDIO_ASSETS\s*=\s*\{(?P<body>.*?)\n\s*\};",
+            self.index,
+            flags=re.DOTALL,
+        )
+        self.assertIsNotNone(asset_block, "index.html must declare AUDIO_ASSETS")
+        runtime_paths = re.findall(r"['\"](audio/[^'\"]+\.(?:wav|mp3))['\"]", asset_block.group("body"))
+        expected_paths = {
+            "audio/friction-stone.wav", "audio/friction-wet.wav",
+            "audio/friction-sand.wav", "audio/friction-gravel.wav",
+            "audio/step-stone.wav", "audio/step-wet.wav",
+            "audio/step-sand.wav", "audio/step-gravel.wav",
+            "audio/drip-loop.wav", "audio/wind-loop.wav", "audio/hum-loop.wav",
+            "audio/chime-loop.wav", "audio/echo-loop.wav",
+            "audio/welcome-music.mp3",
+            "audio/bed-base-classic.wav", "audio/bed-classic-shallow.wav",
+            "audio/bed-classic-mid.wav", "audio/bed-classic-deep.wav",
+            "audio/bed-base-grotto.wav", "audio/bed-grotto-shallow.wav",
+            "audio/bed-grotto-mid.wav", "audio/bed-grotto-deep.wav",
+        }
+        self.assertEqual(set(runtime_paths), expected_paths)
+        self.assertEqual(len(runtime_paths), len(expected_paths))
+        self.assertEqual(runtime_paths.count("audio/welcome-music.mp3"), 1)
+        self.assertTrue(
+            all(path.endswith(".wav") for path in runtime_paths if path != "audio/welcome-music.mp3"),
+            "all gameplay recordings except the MP3-only welcome music must use original WAVs",
+        )
+        self.assertIn("textsWithOriginalWav", self.index)
+        self.assertIn("voiceWavPreferenceViolations", self.index)
+
+    def test_native_welcome_can_start_before_first_tap(self) -> None:
+        self.assertIn(
+            "configuration.mediaTypesRequiringUserActionForPlayback = []",
+            self.bridge_controller,
+        )
+        self.assertRegex(
+            self.index,
+            r"if\s*\(IS_NATIVE_APP\)\s*setTimeout\(attemptStartHarmonic,\s*0\)",
         )
 
 

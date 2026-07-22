@@ -31,8 +31,10 @@ workflows:
       - name: Build and synchronize the offline iOS bundle
         script: npm run ios:sync
 
-      - name: Run static release checks
-        script: npm run test:static
+      - name: Verify source and native audio bundle
+        script: |
+          npm run test:static
+          npm run test:ios-audio -- --afinfo ios/App/App/public/audio
 
       - name: Initialize signing keychain
         script: keychain initialize
@@ -86,6 +88,7 @@ workflows:
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$INFO_PLIST")" = "false"
           test -f "$APP_PATH/PrivacyInfo.xcprivacy"
           test -f "$APP_PATH/public/index.html"
+          python3 tests/verify_ios_audio_bundle.py --afinfo "$APP_PATH/public/audio"
 
     artifacts:
       - build/ios/ipa/*.ipa

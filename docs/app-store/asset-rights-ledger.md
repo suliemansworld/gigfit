@@ -129,8 +129,9 @@ These groups also need evidence; do not infer rights from their presence in the 
 
 | Asset group | Count/scope | Known source | Evidence needed | Status |
 | --- | --- | --- | --- | --- |
-| Narration WAV files | 610 referenced files plus 3 unreferenced legacy files in `audio/voice/` | Sulieman Vidal attests that he generated the Echo Cave clips under the same paid ElevenLabs subscription; exact account, plan, voice terms, and dates are not recorded here | Generation history/dates, account and subscription evidence, model/voice usage terms, commercial grant, input ownership, file hashes | `PENDING` |
-| Root ambience, beds, effects, footsteps, friction, loops, welcome music | All `.wav`/`.mp3` files directly under `audio/` | Not fully documented | Original recordings/project files or supplier URLs/receipts/licenses; allowed app and marketing uses; attribution; modifications; territory/term | `PENDING` |
+| Narration WAV files | 613 referenced files in `audio/voice/` | Sulieman Vidal directly confirms that he holds commercial rights to every repository WAV and attests that he generated the Echo Cave narration under the same paid ElevenLabs subscription; exact account, plan, voice terms, and dates are not recorded here | Generation history/dates, account and subscription evidence, model/voice usage terms, commercial grant, input ownership, file hashes | `PENDING — owner commercial-rights attestation received` |
+| Root ambience, beds, effects, footsteps, friction, and loops | 23 WAV files directly under `audio/` | Sulieman Vidal directly confirms that he holds commercial rights to every repository WAV | Preserve the owner-controlled license/source record, allowed app and marketing uses, attribution requirements, modifications, territory, and term | `PENDING — owner commercial-rights attestation received` |
+| Root MP3 files, including welcome music and alternate encodes | 24 MP3 files directly under `audio/` | Not fully documented in the release record | Original/project source or supplier/license evidence; allowed app and marketing uses; attribution; modifications; territory/term | `PENDING` |
 | App/PWA icons | `icons/` and final iOS AppIcon set | Not fully documented | Designer/source, editable original, font/stock inputs, commercial assignment/license, generated-art terms if applicable | `PENDING` |
 | App copy and story text | `index.html`, manifest narration text, native resources | Sulieman Vidal/project | Author confirmation and any collaborator assignment | `PENDING` |
 | Fonts | Final archive and screenshots | System font intended | Confirm only Apple system fonts or record embedded font license | `PENDING` |
@@ -192,7 +193,7 @@ Do not commit API keys, invoices containing payment details, identity documents,
 | --- | --- |
 | Paid-plan owner attestation recorded | Sulieman Vidal / July 22, 2026 |
 | All 79 MP3s supported by reviewed historical evidence or replaced |  |
-| All 610 referenced narration WAVs approved |  |
+| All 613 referenced narration WAVs approved |  |
 | All ambience, SFX, loops, footsteps, beds, and music approved |  |
 | Icons, fonts, copy, screenshots, and preview approved |  |
 | Third-party code licenses/notices complete |  |

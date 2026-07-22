@@ -5,7 +5,7 @@ Exercises every major feature path, captures screenshots, reports issues.
 import asyncio
 import sys
 from playwright.async_api import async_playwright
-from test_support import GAME_URL, install_touch_test_helper, launch_browser
+from test_support import BASE_URL, GAME_URL, install_touch_test_helper, launch_browser
 
 ISSUES = []
 PASSES = []
@@ -373,15 +373,41 @@ async def run():
         await pg.click("#settingsClose"); await pg.wait_for_timeout(300)
 
         print("\n══════════ TEST 14: All audio files served ══════════")
-        for filename in ['friction-stone.mp3','friction-wet.mp3','friction-sand.mp3','friction-gravel.mp3',
-                         'step-stone.mp3','step-wet.mp3','step-sand.mp3','step-gravel.mp3',
-                         'drip-loop.mp3','wind-loop.mp3','hum-loop.mp3','chime-loop.mp3','echo-loop.mp3',
-                         'welcome-music.mp3','bed-base-classic.mp3','bed-classic-shallow.mp3',
-                         'bed-classic-mid.mp3','bed-classic-deep.mp3','bed-base-grotto.mp3',
-                         'bed-grotto-shallow.mp3','bed-grotto-mid.mp3','bed-grotto-deep.mp3']:
+        runtime_audio = ['friction-stone.wav','friction-wet.wav','friction-sand.wav','friction-gravel.wav',
+                         'step-stone.wav','step-wet.wav','step-sand.wav','step-gravel.wav',
+                         'drip-loop.wav','wind-loop.wav','hum-loop.wav','chime-loop.wav','echo-loop.wav',
+                         'welcome-music.mp3','bed-base-classic.wav','bed-classic-shallow.wav',
+                         'bed-classic-mid.wav','bed-classic-deep.wav','bed-base-grotto.wav',
+                         'bed-grotto-shallow.wav','bed-grotto-mid.wav','bed-grotto-deep.wav']
+        for filename in runtime_audio:
             r = await pg.evaluate(f"async () => {{ const r = await fetch('audio/{filename}', {{method:'HEAD'}}); return r.status; }}")
             if r == 200: passt(f"{filename}: 200")
             else: issue(f"{filename}: {r}")
+
+        decode_probe = await pg.evaluate("""async () => {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          const ctx = new AudioCtx();
+          const files = [
+            'audio/voice/welcome-greeting-full.wav',
+            'audio/step-stone.wav',
+            'audio/friction-stone.wav',
+            'audio/drip-loop.wav',
+            'audio/bed-base-classic.wav',
+            'audio/welcome-music.mp3'
+          ];
+          const decoded = [];
+          for (const file of files) {
+            const response = await fetch(file, {cache: 'no-cache'});
+            const buffer = await ctx.decodeAudioData(await response.arrayBuffer());
+            decoded.push({file, duration: buffer.duration});
+          }
+          await ctx.close();
+          return decoded;
+        }""")
+        if len(decode_probe) == 6 and all(item['duration'] > 0 for item in decode_probe):
+            passt("George, footsteps, friction, landmark, bed, and music decode through Web Audio")
+        else:
+            issue(f"Representative audio decode failed: {decode_probe}")
 
         print("\n══════════ TEST 14b: Cancelled sharing never writes to the clipboard ══════════")
         await pg.click("#menuBtn")
@@ -446,7 +472,53 @@ async def run():
         await pg.click("#menuDailyBtn")
         await pg.wait_for_timeout(300)
 
-        print("\n══════════ TEST 15: Console errors check ══════════")
+        print("\n══════════ TEST 15: Production welcome click starts George ══════════")
+        welcome_pg = await ctx.new_page()
+        await welcome_pg.add_init_script("window.ECHO_TEST_CLICK_ONLY = true;")
+        await welcome_pg.goto(f"{BASE_URL}?fresh=1", wait_until="networkidle", timeout=20000)
+        await welcome_pg.click("#welcomeTap")
+        try:
+            await welcome_pg.wait_for_function(
+                "() => window.ECHO_AUDIO_DIAGNOSTICS && window.ECHO_AUDIO_DIAGNOSTICS().manifestSize === 689",
+                timeout=5000,
+            )
+            manifest_ready = True
+        except Exception:
+            manifest_ready = False
+        try:
+            await welcome_pg.wait_for_function(
+                """() => {
+                  const d = window.ECHO_AUDIO_DIAGNOSTICS && window.ECHO_AUDIO_DIAGNOSTICS();
+                  return d && d.voicePlayed > 0 && d.ctxState === 'running';
+                }""",
+                timeout=16000,
+            )
+        except Exception:
+            pass
+        welcome_audio = await welcome_pg.evaluate(
+            "() => window.ECHO_AUDIO_DIAGNOSTICS && window.ECHO_AUDIO_DIAGNOSTICS()"
+        )
+        if manifest_ready: passt("Accessible click loaded all 689 narration entries")
+        else: issue("Accessible click did not load the narration manifest")
+        if welcome_audio and welcome_audio['voicePlayed'] > 0 and welcome_audio['systemFallback'] == 0:
+            passt("Production welcome scheduled the recorded George greeting")
+        else:
+            issue(f"Production welcome did not use George: {welcome_audio}")
+        if welcome_audio and welcome_audio['ctxState'] == 'running' and welcome_audio['welcomeMusicPlaying']:
+            passt("Click-only welcome path unlocked Web Audio and started the welcome music")
+        else:
+            issue(f"Click-only welcome did not start audible music: {welcome_audio}")
+        if welcome_audio and welcome_audio['wavPreferenceViolations'] == 0:
+            passt("Duplicate narration text prefers the original WAV recording")
+        else:
+            issue(f"Narration WAV preference failed: {welcome_audio}")
+        if welcome_audio and welcome_audio['audioLoadFailures'] == 0 and welcome_audio['audioDecodeFailures'] == 0:
+            passt("Production welcome reported no audio load/decode failures")
+        else:
+            issue(f"Production welcome audio failures: {welcome_audio}")
+        await welcome_pg.close()
+
+        print("\n══════════ TEST 16: Console errors check ══════════")
         if not js_errors: passt("No JS pageerror events")
         else:
             for e in js_errors: issue(f"JS error: {e}")

@@ -1,39 +1,38 @@
 // Echo Cave — Service Worker
 // Build tag must match window.ECHO_BUILD in index.html.
 // Changing BUILD invalidates the old cache and re-fetches everything on next visit.
-const BUILD = '20260722-ios1';
+const BUILD = '20260722-audio2';
 const CACHE_PREFIX = 'echo-cave-';
 const CACHE = `${CACHE_PREFIX}${BUILD}`;
 
-// Core assets pre-cached on install. Compressed gameplay audio keeps the
-// initial offline cache small; voice clips are runtime-cached on demand —
-// after one full playthrough the game is completely offline.
+// Core gameplay recordings are pre-cached in their original WAV format.
+// Voice clips are runtime-cached on demand; the native app bundles all of them.
 const PRECACHE = [
   'index.html',
   'manifest.json',
   'audio/voice/manifest.json',
   'audio/welcome-music.mp3',
-  'audio/friction-stone.mp3',
-  'audio/friction-wet.mp3',
-  'audio/friction-sand.mp3',
-  'audio/friction-gravel.mp3',
-  'audio/step-stone.mp3',
-  'audio/step-wet.mp3',
-  'audio/step-sand.mp3',
-  'audio/step-gravel.mp3',
-  'audio/drip-loop.mp3',
-  'audio/wind-loop.mp3',
-  'audio/hum-loop.mp3',
-  'audio/chime-loop.mp3',
-  'audio/echo-loop.mp3',
-  'audio/bed-base-classic.mp3',
-  'audio/bed-classic-shallow.mp3',
-  'audio/bed-classic-mid.mp3',
-  'audio/bed-classic-deep.mp3',
-  'audio/bed-base-grotto.mp3',
-  'audio/bed-grotto-shallow.mp3',
-  'audio/bed-grotto-mid.mp3',
-  'audio/bed-grotto-deep.mp3',
+  'audio/friction-stone.wav',
+  'audio/friction-wet.wav',
+  'audio/friction-sand.wav',
+  'audio/friction-gravel.wav',
+  'audio/step-stone.wav',
+  'audio/step-wet.wav',
+  'audio/step-sand.wav',
+  'audio/step-gravel.wav',
+  'audio/drip-loop.wav',
+  'audio/wind-loop.wav',
+  'audio/hum-loop.wav',
+  'audio/chime-loop.wav',
+  'audio/echo-loop.wav',
+  'audio/bed-base-classic.wav',
+  'audio/bed-classic-shallow.wav',
+  'audio/bed-classic-mid.wav',
+  'audio/bed-classic-deep.wav',
+  'audio/bed-base-grotto.wav',
+  'audio/bed-grotto-shallow.wav',
+  'audio/bed-grotto-mid.wav',
+  'audio/bed-grotto-deep.wav',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/icon-180.png',
