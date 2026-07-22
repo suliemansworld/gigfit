@@ -22,9 +22,12 @@ DOUBLE_TAP_GAP = 100  # within DOUBLE_TAP_MAX_GAP of 320
 
 DISPATCH = """async (params) => {
   const stage = document.querySelector('.stage') || document.body;
+  const rotor = document.getElementById('rotorIndicator');
   const r = stage.getBoundingClientRect();
   const cx = r.left + r.width/2;
   const startY = r.top + r.height/2;
+  const initiallyHiddenFromAT = rotor.getAttribute('aria-hidden') === 'true' &&
+    rotor.hasAttribute('inert');
   const tap = async (x, y, downMs) => {
     const t = window.echoTestTouch.point(stage, x, y);
     window.echoTestTouch.dispatch(stage, 'touchstart', [t], [t]);
@@ -41,7 +44,9 @@ DISPATCH = """async (params) => {
   window.echoTestTouch.dispatch(stage, 'touchstart', [t], [t]);
   // Wait for hold timer to fire
   await new Promise(r => setTimeout(r, params.hold));
-  const rotorOpened = document.getElementById('rotorIndicator').classList.contains('show');
+  const rotorOpened = rotor.classList.contains('show');
+  const openToAT = rotor.getAttribute('aria-hidden') === 'false' &&
+    !rotor.hasAttribute('inert');
 
   // Drag down to advance N steps
   let lastIdx = null;
@@ -60,10 +65,20 @@ DISPATCH = """async (params) => {
   const tEnd = window.echoTestTouch.point(stage, cx, startY + params.steps * params.stepPx);
   window.echoTestTouch.dispatch(stage, 'touchend', [], [tEnd]);
   await new Promise(r => setTimeout(r, 200));
-  const rotorClosed = !document.getElementById('rotorIndicator').classList.contains('show');
+  const rotorClosed = !rotor.classList.contains('show');
+  const closedHiddenFromAT = rotor.getAttribute('aria-hidden') === 'true' &&
+    rotor.hasAttribute('inert');
   const panelAfter = Array.from(document.querySelectorAll('.panel.show')).map(p => p.id);
 
-  return { rotorOpened, advances, rotorClosed, panelAfter };
+  return {
+    initiallyHiddenFromAT,
+    rotorOpened,
+    openToAT,
+    advances,
+    rotorClosed,
+    closedHiddenFromAT,
+    panelAfter
+  };
 }"""
 
 async def run(iterations):
@@ -98,8 +113,14 @@ async def run(iterations):
             except Exception as e:
                 failures.append({'iter':i, 'err':str(e)[:200]})
                 continue
+            if not result['initiallyHiddenFromAT']:
+                failures.append({'iter':i, 'reason':'closed rotor exposed to assistive technology before opening'})
+                continue
             if not result['rotorOpened']:
                 failures.append({'iter':i, 'reason':'rotor did not open', 'params':params})
+                continue
+            if not result['openToAT']:
+                failures.append({'iter':i, 'reason':'open rotor hidden from assistive technology', 'params':params})
                 continue
             opens += 1
             # Check that index advanced as expected
@@ -112,6 +133,9 @@ async def run(iterations):
                 advanced += 1
             if not result['rotorClosed']:
                 failures.append({'iter':i, 'reason':'rotor stayed open after release', 'params':params})
+                continue
+            if not result['closedHiddenFromAT']:
+                failures.append({'iter':i, 'reason':'closed rotor remained exposed to assistive technology', 'params':params})
                 continue
             closes += 1
             # Reset state — close any panel that opened

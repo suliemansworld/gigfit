@@ -569,7 +569,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- Rotor menu (double-tap-and-hold) -->
-<div class="rotor" id="rotorIndicator" role="dialog" aria-live="polite" aria-modal="false">
+<div class="rotor" id="rotorIndicator" role="dialog" aria-live="polite" aria-modal="false" aria-hidden="true" inert>
   <div class="rotor-num" id="rotorNum">1 / 5</div>
   <div class="rotor-label" id="rotorLabel">Inventory</div>
   <div class="rotor-hint">Drag up or down · Release to open</div>
@@ -5264,7 +5264,10 @@
       rotorIdx = 0;
       rotorStartY = startY;
       updateRotorView();
-      document.getElementById('rotorIndicator').classList.add('show');
+      const rotorIndicator = document.getElementById('rotorIndicator');
+      rotorIndicator.removeAttribute('inert');
+      rotorIndicator.setAttribute('aria-hidden', 'false');
+      rotorIndicator.classList.add('show');
       tone(523, 0.1, 'triangle', 0.16);
       setTimeout(() => tone(659, 0.1, 'triangle', 0.14), 90);
       haptic('teleport');
@@ -5301,7 +5304,10 @@
     function closeRotor(commit){
       if (!rotorOpen) return;
       rotorOpen = false;
-      document.getElementById('rotorIndicator').classList.remove('show');
+      const rotorIndicator = document.getElementById('rotorIndicator');
+      rotorIndicator.classList.remove('show');
+      rotorIndicator.setAttribute('aria-hidden', 'true');
+      rotorIndicator.setAttribute('inert', '');
       if (commit){
         const opt = activeRotor[rotorIdx];
         if (opt.toggle){
