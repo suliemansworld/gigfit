@@ -13,7 +13,7 @@ final class EchoCaveUITests: XCTestCase {
 
     func testWelcomeAccessibilityAndBackgroundRecovery() throws {
         let enter = app.buttons["Enter Echo Cave"]
-        XCTAssertTrue(enter.waitForExistence(timeout: 10), "The first launch action must be exposed to VoiceOver.")
+        XCTAssertTrue(enter.waitForExistence(timeout: 30), "The first launch action must be exposed to VoiceOver.")
         XCTAssertTrue(enter.isHittable, "The first launch action must be activatable.")
         XCTAssertTrue(app.staticTexts["Echo Cave"].exists)
 

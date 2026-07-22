@@ -1740,7 +1740,7 @@
   const assetRequests = {};
   const assetLastUsed = {};
   const MAX_ASSET_CACHE_BYTES = 96 * 1024 * 1024;
-  let assetsRequested = false;
+  let gameplayAssetsRequested = false;
   function decodedBytes(buffer){
     return buffer && buffer.length && buffer.numberOfChannels
       ? buffer.length * buffer.numberOfChannels * 4
@@ -1805,15 +1805,19 @@
       Array.from({ length: Math.min(concurrency, keys.length) }, worker)
     );
   }
-  function preloadAssets(){
-    if (assetsRequested) return;
+  function preloadWelcomeAssets(){
     if (!ensureAudio()) return;
-    assetsRequested = true;
-    // George and the welcome track are the first-run experience. Start them
-    // before the larger gameplay batch, then warm the remaining navigation
-    // recordings with bounded concurrency so a slower phone is not asked to
-    // fetch and decode every bed and loop at once.
     loadVoiceManifest();
+    loadAsset('welcome-music');
+  }
+  function preloadAssets(){
+    preloadWelcomeAssets();
+    if (gameplayAssetsRequested) return;
+    if (!ensureAudio()) return;
+    gameplayAssetsRequested = true;
+    // After the first interaction, warm navigation recordings with bounded
+    // concurrency. Native launch itself loads only George and welcome music so
+    // the accessibility tree is never delayed by every bed and loop decoding.
     loadAsset('welcome-music').finally(() => {
       preloadAssetBatch(
         Object.keys(AUDIO_ASSETS).filter(key => key !== 'welcome-music'),
@@ -5928,12 +5932,13 @@
         }, 10000);
       }
     }
-    function attemptStartHarmonic(){
+    function attemptStartHarmonic(event){
       if (welcomeCommitted) return;
       const wp = document.getElementById('welcomePanel');
       if (!wp || !wp.classList.contains('show')) return;
       const c = ensureAudio();
-      preloadAssets();
+      if (event) preloadAssets();
+      else preloadWelcomeAssets();
       if (!c) return;
       if (c.state === 'running'){
         beginAudibleWelcome();
@@ -5963,7 +5968,7 @@
     // Capacitor 8 sets mediaTypesRequiringUserActionForPlayback to none. Start
     // the audio-first welcome on app launch; the listeners above remain the
     // recovery path if a device still leaves its AudioContext suspended.
-    if (IS_NATIVE_APP) setTimeout(attemptStartHarmonic, 0);
+    if (IS_NATIVE_APP) setTimeout(() => attemptStartHarmonic(null), 0);
     document.getElementById('introSkip').addEventListener('click', () => {
       clearIntroTimers();
       finishIntro(false);

@@ -245,7 +245,7 @@ class StaticBundleTests(unittest.TestCase):
         )
         self.assertRegex(
             self.index,
-            r"if\s*\(IS_NATIVE_APP\)\s*setTimeout\(attemptStartHarmonic,\s*0\)",
+            r"if\s*\(IS_NATIVE_APP\)\s*setTimeout\(\(\)\s*=>\s*attemptStartHarmonic\(null\),\s*0\)",
         )
 
 

@@ -472,7 +472,39 @@ async def run():
         await pg.click("#menuDailyBtn")
         await pg.wait_for_timeout(300)
 
-        print("\n══════════ TEST 15: Production welcome click starts George ══════════")
+        print("\n══════════ TEST 15: Native no-tap welcome stays accessible ══════════")
+        native_pg = await ctx.new_page()
+        await native_pg.add_init_script(
+            "window.Capacitor = { isNativePlatform: () => true };"
+        )
+        await native_pg.goto(f"{BASE_URL}?fresh=1", wait_until="networkidle", timeout=20000)
+        try:
+            await native_pg.wait_for_function(
+                """() => {
+                  const d = window.ECHO_AUDIO_DIAGNOSTICS && window.ECHO_AUDIO_DIAGNOSTICS();
+                  return d && d.manifestSize === 689 && d.assetLoaded === 1;
+                }""",
+                timeout=8000,
+            )
+        except Exception:
+            pass
+        native_audio = await native_pg.evaluate(
+            "() => window.ECHO_AUDIO_DIAGNOSTICS && window.ECHO_AUDIO_DIAGNOSTICS()"
+        )
+        native_enter = await native_pg.get_by_role("button", name="Enter Echo Cave").count()
+        if (
+            await native_pg.evaluate("window.ECHO_NATIVE_APP")
+            and native_enter == 1
+            and native_audio
+            and native_audio['manifestSize'] == 689
+            and native_audio['assetLoaded'] == 1
+        ):
+            passt("Native no-tap launch keeps Enter accessible and limits preload to welcome audio")
+        else:
+            issue(f"Native no-tap welcome readiness failed: button={native_enter}, audio={native_audio}")
+        await native_pg.close()
+
+        print("\n══════════ TEST 15b: Production welcome click starts George ══════════")
         welcome_pg = await ctx.new_page()
         await welcome_pg.add_init_script("window.ECHO_TEST_CLICK_ONLY = true;")
         await welcome_pg.goto(f"{BASE_URL}?fresh=1", wait_until="networkidle", timeout=20000)
