@@ -33,6 +33,19 @@ async def run():
         sub = await pg.evaluate("() => document.querySelector('#welcomePanel .welcome-sub').textContent")
         if 'Tap' in sub: passt(f"Welcome sub: '{sub}'")
         else: issue(f"Welcome sub bad: '{sub}'")
+        welcome_a11y = await pg.evaluate("""() => ({
+          descriptions: document.getElementById('welcomeTap').getAttribute('aria-describedby'),
+          instructionsHidden: document.getElementById('welcomeInstructions').getAttribute('aria-hidden') === 'true',
+          setupNoteHidden: document.getElementById('welcomeSetupNote').getAttribute('aria-hidden') === 'true'
+        })""")
+        if welcome_a11y['descriptions'] == 'welcomeInstructions welcomeSetupNote':
+            passt("Welcome action includes the visible instructions in its accessible description")
+        else:
+            issue("Welcome action is missing its accessible description")
+        if welcome_a11y['instructionsHidden'] and welcome_a11y['setupNoteHidden']:
+            passt("Duplicate welcome captions are hidden as separate VoiceOver elements")
+        else:
+            issue("Welcome captions remain separately exposed to VoiceOver")
 
         print("\n══════════ TEST 2: Tap → harmonic + intro ══════════")
         await pg.click("#welcomeTap")

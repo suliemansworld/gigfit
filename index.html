@@ -581,10 +581,10 @@
   <div class="welcome-inner">
     <div class="ember" aria-hidden="true"></div>
     <h2 id="wTitle">Echo Cave</h2>
-    <p class="welcome-sub">Tap anywhere to enter the cave.</p>
-    <p class="welcome-mini">Best with headphones · Sound &amp; haptics on</p>
+    <p class="welcome-sub" id="welcomeInstructions" aria-hidden="true">Tap anywhere to enter the cave.</p>
+    <p class="welcome-mini" id="welcomeSetupNote" aria-hidden="true">Best with headphones · Sound &amp; haptics on</p>
   </div>
-  <button class="welcome-tap" id="welcomeTap" aria-label="Enter Echo Cave"></button>
+  <button class="welcome-tap" id="welcomeTap" aria-label="Enter Echo Cave" aria-describedby="welcomeInstructions welcomeSetupNote"></button>
 </div>
 
 <!-- Intro cinematic — runs after welcome tap, before game -->
