@@ -15,7 +15,7 @@ Sulieman Vidal confirmed these values for the App Store project. The bundle iden
 
 The local keychain contains valid Apple development and distribution identities, and all three installed Xcode-managed provisioning profiles identify Apple Team `36R3VCWWUJ`. The Xcode app and UI-test targets preselect that team for automatic signing.
 
-The installed profiles do not specifically cover `com.suliemansworld.echocave`, and no App Store Connect API key was present. Before archive upload, confirm the team in the owner's Apple account, register the final App ID, create or let Xcode manage the required Echo Cave profiles, and validate a signed archive with Xcode 26 or later.
+Codemagic subsequently resolved or created the App Store distribution profile for `com.suliemansworld.echocave`, signed version 1.0 build 2 with Xcode 26.6, and uploaded it successfully. Apple processed the build to **Internal — Ready to Test**. See [testflight-build-evidence.md](testflight-build-evidence.md).
 
 ## ElevenLabs narration attestation
 

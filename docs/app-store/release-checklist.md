@@ -8,9 +8,9 @@ Use this checklist against one immutable release candidate. Record evidence link
 - [ ] App Store Connect users have only the roles needed for build upload, TestFlight, metadata, review, and release.
 - [x] Version 1 scope is documented as iPhone only; Xcode `TARGETED_DEVICE_FAMILY` is `1` and no iPad screenshots or accessibility claims are submitted.
 - [x] Minimum deployment target is iOS 15.0.
-- [ ] App name availability is confirmed before creating the app record.
+- [x] App name availability was confirmed when Apple created the `Echo Cave` app record on July 22, 2026; see [testflight-build-evidence.md](testflight-build-evidence.md).
 - [x] Product owner confirmed bundle ID `com.suliemansworld.echocave`, and it exactly matches Xcode. Reconfirm uniqueness while creating the App Store record; it cannot be changed after a build is uploaded.
-- [ ] SKU is final before the app record is created; it cannot be changed later.
+- [x] SKU `echo-cave-ios-1` was finalized before the app record was created; it cannot be changed later.
 - [ ] Primary language is English (U.S.); primary category is Games and subcategory is Adventure.
 - [ ] Distribution countries/regions are intentionally selected and any local regulatory requirements are reviewed.
 - [ ] Digital Services Act trader/non-trader status and any required public contact information are completed by the Account Holder.
@@ -53,20 +53,20 @@ Apple requires a privacy-policy link in App Store Connect and inside the app, wi
 
 ## 4. Build and archive
 
-- [ ] Use Xcode 26 or later with an iOS 26 SDK or later. Apple has required this for uploads since April 28, 2026. [Apple upcoming requirements](https://developer.apple.com/news/upcoming-requirements/)
-- [ ] Build on a supported macOS host. Xcode 26 requires macOS Sequoia 15.6 or later; verify the exact selected Xcode version against [Apple's current Xcode system requirements](https://developer.apple.com/xcode/system-requirements/).
+- [x] Codemagic build 2 used Xcode 26.6 and produced an Apple-processed TestFlight upload; see [testflight-build-evidence.md](testflight-build-evidence.md). Apple has required an iOS 26 SDK or later for uploads since April 28, 2026. [Apple upcoming requirements](https://developer.apple.com/news/upcoming-requirements/)
+- [x] Build 2 ran on Codemagic's supported `mac_mini_m2` macOS image with Xcode 26.6; see [testflight-build-evidence.md](testflight-build-evidence.md) and [Apple's current Xcode system requirements](https://developer.apple.com/xcode/system-requirements/).
 - [x] Xcode app and UI-test targets preselect Apple Team `36R3VCWWUJ`, as identified by the installed signing identities and Xcode-managed profiles.
-- [ ] Release configuration resolves an Echo Cave distribution profile for Apple Team `36R3VCWWUJ`, the final Bundle ID, and intended entitlements only; validate this on the Xcode 26 archive host.
-- [ ] Marketing version is `1.0`; build number is unique and increasing.
-- [ ] Deployment target is iOS 15.0 and Supported Destinations is iPhone only.
+- [x] Release configuration resolved the Echo Cave App Store distribution profile for the final Bundle ID on the Xcode 26.6 archive host; Codemagic signing and Apple processing passed.
+- [x] The processed TestFlight build has marketing version `1.0` and unique build number `2`.
+- [x] The processed build reports minimum iOS 15.0 and Supported Destinations is iPhone only.
 - [ ] App icon set is complete, opaque where required, and renders correctly in light/dark/tinted system contexts where applicable.
-- [ ] Display name is `Echo Cave` and no placeholder product/module name appears on device.
+- [x] IPA verification and App Store Connect identify the display/app name as `Echo Cave`.
 - [ ] Launch experience has no blank, web-server, or debug screen and becomes VoiceOver-ready immediately.
 - [ ] All required audio appears in Copy Bundle Resources exactly once; obsolete duplicate formats are intentionally excluded.
 - [ ] Release archive size and on-device installed size are reviewed; audio decoding/streaming stays within tested memory limits.
 - [ ] App Transport Security exceptions, background modes, microphone, location, camera, contacts, Bluetooth, notifications, and other capabilities are absent unless used and documented.
 - [ ] Export-compliance answers match the actual encryption use. Set `ITSAppUsesNonExemptEncryption` only after the signing owner confirms the correct determination. Apple requires an encryption determination for each version. [Apple export-compliance overview](https://developer.apple.com/help/app-store-connect/manage-app-information/overview-of-export-compliance)
-- [ ] Archive validation passes with no actionable warning.
+- [x] Signed IPA verification and the App Store Connect upload completed with no errors; Apple processed build 2 to **Ready to Test**.
 - [ ] The exact `.xcarchive`, dSYM, export/options record, commit, dependency state, and asset manifest/hash are retained.
 
 ## 5. Functional and resilience QA
@@ -106,6 +106,7 @@ Apple says VoiceOver support can be indicated only when all common tasks work us
 
 ## 7. TestFlight
 
+- [x] Version `1.0` build `2` is marked **Internal — Ready to Test** in App Store Connect; see [testflight-build-evidence.md](testflight-build-evidence.md).
 - [ ] Internal group `Echo Cave — Engineering` exists and the selected build passes Ring 0.
 - [ ] External group `Echo Cave — Blind Accessibility RC` exists; email invitations are used for the focused cohort.
 - [ ] Beta App Description, What to Test, feedback email, review contact, and notes are complete.

@@ -17,7 +17,7 @@ The store copy and operational plans are ready to use, but the app is **not read
 - [ ] Blind testers can complete every common task with VoiceOver and Screen Curtain without sighted help. See [testflight-blind-test-plan.md](testflight-blind-test-plan.md).
 - [ ] App metadata claims have been reconciled against the exact submitted build, including screenshots, privacy answers, age rating, and accessibility labels.
 - [x] Privacy, support, and pre-release accessibility pages are public over HTTPS, and the app includes direct privacy/support links and contact email. Add the accessibility URL to App Store Connect only after blind-player sign-off.
-- [ ] The final archive is built with Xcode 26 or later and an iOS 26 SDK or later. Apple has required that toolchain for uploads since April 28, 2026.
+- [x] TestFlight build 2 was built with Xcode 26.6, uploaded successfully, and processed by Apple to **Internal — Ready to Test**. See [testflight-build-evidence.md](testflight-build-evidence.md).
 
 Apple requires final builds, complete metadata, working URLs, and on-device testing under App Review Guideline 2.1. Metadata must accurately reflect the submitted build under Guideline 2.3. [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
 
@@ -35,6 +35,7 @@ Apple requires final builds, complete metadata, working URLs, and on-device test
 | [asset-rights-ledger.md](asset-rights-ledger.md) | Rights evidence template and ElevenLabs documentation gate |
 | [owner-confirmations.md](owner-confirmations.md) | Confirmed app identity and paid-plan narration attestation |
 | [release-checklist.md](release-checklist.md) | End-to-end TestFlight and App Store submission checklist |
+| [testflight-build-evidence.md](testflight-build-evidence.md) | Immutable source, CI, signing, upload, and Apple processing evidence for build 2 |
 | [`../../PRIVACY.md`](../../PRIVACY.md) | Public privacy policy source |
 | [`../../SUPPORT.md`](../../SUPPORT.md) | Public support-page source |
 
