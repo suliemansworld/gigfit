@@ -11,24 +11,18 @@ final class EchoCaveUITests: XCTestCase {
         app.launch()
     }
 
-    func testWelcomeIsOperableWithoutSightedAssistance() throws {
+    func testWelcomeAccessibilityAndBackgroundRecovery() throws {
         let enter = app.buttons["Enter Echo Cave"]
         XCTAssertTrue(enter.waitForExistence(timeout: 10), "The first launch action must be exposed to VoiceOver.")
         XCTAssertTrue(enter.isHittable, "The first launch action must be activatable.")
         XCTAssertTrue(app.staticTexts["Echo Cave"].exists)
-    }
 
-    func testInitialScreenPassesSystemAccessibilityAudit() throws {
-        if #available(iOS 17.0, *) {
-            try app.performAccessibilityAudit()
-        }
-    }
-
-    func testReturningFromBackgroundKeepsTheEntryAction() throws {
-        let enter = app.buttons["Enter Echo Cave"]
-        XCTAssertTrue(enter.waitForExistence(timeout: 10))
         XCUIDevice.shared.press(.home)
         app.activate()
         XCTAssertTrue(enter.waitForExistence(timeout: 5))
+
+        if #available(iOS 17.0, *) {
+            try app.performAccessibilityAudit()
+        }
     }
 }
