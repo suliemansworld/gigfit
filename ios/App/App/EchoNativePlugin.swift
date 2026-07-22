@@ -6,7 +6,7 @@ import UIKit
 public final class EchoNativePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "EchoNativePlugin"
     public let jsName = "EchoNative"
-    public let pluginMethods = [
+    public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "configureAudioSession", returnType: CAPPluginReturnPromise),
     ]
 
