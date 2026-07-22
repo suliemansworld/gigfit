@@ -13,8 +13,8 @@ This is the operational handoff for another coding agent working on GigFit.
 - Codemagic app ID: `6a5e8d6ad0ba9e4019350389`
 - TestFlight group: `GigFit Internal` with automatic distribution enabled
 - Internal tester: `haidari.sulieman@gmail.com`
-- Latest verified build: #19 (commit `8250d4d`, tag `testflight-nofreeze-20260721-1`)
-- Build 19: `https://codemagic.io/app/6a5e8d6ad0ba9e4019350389/build/6a6003d435e862fa7d2eb790`
+- Latest verified build: #21 (commit `c3df9fb`, tag `testflight-roadieload-20260721-1`)
+- Build 21: `https://codemagic.io/app/6a5e8d6ad0ba9e4019350389/build/6a6027ef35765eb29d51b8f5`
 
 ## Product behavior
 
@@ -224,6 +224,7 @@ Another app may occupy the only concurrent Codemagic builder. Leave GigFit queue
 - `GigFit/Resources/Info.plist` declares `ITSAppUsesNonExemptEncryption = false`. Apple should therefore record **No non-exempt encryption** from each uploaded binary without asking the questionnaire again, including for internal TestFlight builds.
 - If App Store Connect shows **Missing Compliance** again, inspect the archived app's compiled `Info.plist` and verify that `ITSAppUsesNonExemptEncryption` is present as a Boolean `false` before changing the App Store Connect answer manually.
 - Internal testing does not require external beta-review contact information.
+- Build #21 uploaded successfully and App Store Connect finished processing it. Codemagic's later `422 External testing is not supported for build` message is only its attempted external beta-review submission being rejected for an internal-only binary; it is not an IPA upload or internal TestFlight failure.
 - Codemagic may report missing Feedback Email and review-contact details after a successful upload. That affects external beta review, not internal testing.
 
 ## MVP progress and next phase
