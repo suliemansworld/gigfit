@@ -1,0 +1,103 @@
+workflows:
+  echo-cave-testflight:
+    name: Echo Cave TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 120
+    environment:
+      groups:
+        - app_store_credentials
+      vars:
+        BUNDLE_ID: com.suliemansworld.echocave
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        XCODE_SCHEME: App
+        TARGET_MARKETING_VERSION: '1.0'
+      node: 24.17.0
+      xcode: 26.6
+    scripts:
+      - name: Validate release inputs
+        script: |
+          set -euo pipefail
+          : "${BUILD_NUMBER:?BUILD_NUMBER is required}"
+          : "${APP_STORE_CONNECT_ISSUER_ID:?App Store Connect issuer ID is required}"
+          : "${APP_STORE_CONNECT_KEY_IDENTIFIER:?App Store Connect key ID is required}"
+          : "${APP_STORE_CONNECT_PRIVATE_KEY:?App Store Connect private key is required}"
+          test "$BUNDLE_ID" = "com.suliemansworld.echocave"
+          test "$TARGET_MARKETING_VERSION" = "1.0"
+          test -f "$CM_BUILD_DIR/$XCODE_PROJECT/project.pbxproj"
+
+      - name: Install locked JavaScript dependencies
+        script: npm ci --ignore-scripts
+
+      - name: Build and synchronize the offline iOS bundle
+        script: npm run ios:sync
+
+      - name: Run static release checks
+        script: npm run test:static
+
+      - name: Initialize signing keychain
+        script: keychain initialize
+
+      - name: Fetch or create App Store signing files
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Add signing certificate to keychain
+        script: keychain add-certificates
+
+      - name: Configure internal TestFlight signing
+        script: |
+          xcode-project use-profiles \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --custom-export-options='{"testFlightInternalTestingOnly": true}'
+
+      - name: Build signed IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --archive-xcargs="CURRENT_PROJECT_VERSION=$BUILD_NUMBER MARKETING_VERSION=$TARGET_MARKETING_VERSION"
+
+      - name: Verify signed IPA
+        script: |
+          set -euo pipefail
+          IPA_PATH="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -type f -print -quit)"
+          if [ -z "$IPA_PATH" ]; then
+            echo "No signed IPA was produced"
+            exit 1
+          fi
+
+          VERIFY_DIR="$CM_BUILD_DIR/build/verified-ipa"
+          rm -rf "$VERIFY_DIR"
+          mkdir -p "$VERIFY_DIR"
+          unzip -q "$IPA_PATH" -d "$VERIFY_DIR"
+          APP_PATH="$(find "$VERIFY_DIR/Payload" -maxdepth 1 -name '*.app' -type d -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "The IPA does not contain an app bundle"
+            exit 1
+          fi
+
+          INFO_PLIST="$APP_PATH/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$INFO_PLIST")" = "$BUNDLE_ID"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$INFO_PLIST")" = "$TARGET_MARKETING_VERSION"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$INFO_PLIST")" = "$BUILD_NUMBER"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$INFO_PLIST")" = "Echo Cave"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$INFO_PLIST")" = "false"
+          test -f "$APP_PATH/PrivacyInfo.xcprivacy"
+          test -f "$APP_PATH/public/index.html"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        # The internal-only archive is uploaded for TestFlight internal testing.
+        # Do not request external beta or App Store review from this workflow.
+        submit_to_testflight: false
+        submit_to_app_store: false
