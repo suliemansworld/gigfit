@@ -54,7 +54,8 @@ Apple requires a privacy-policy link in App Store Connect and inside the app, wi
 
 - [ ] Use Xcode 26 or later with an iOS 26 SDK or later. Apple has required this for uploads since April 28, 2026. [Apple upcoming requirements](https://developer.apple.com/news/upcoming-requirements/)
 - [ ] Build on a supported macOS host. Xcode 26 requires macOS Sequoia 15.6 or later; verify the exact selected Xcode version against [Apple's current Xcode system requirements](https://developer.apple.com/xcode/system-requirements/).
-- [ ] Release configuration uses the distribution signing team, final Bundle ID, and intended entitlements only.
+- [x] Xcode app and UI-test targets preselect Apple Team `36R3VCWWUJ`, as identified by the installed signing identities and Xcode-managed profiles.
+- [ ] Release configuration resolves an Echo Cave distribution profile for Apple Team `36R3VCWWUJ`, the final Bundle ID, and intended entitlements only; validate this on the Xcode 26 archive host.
 - [ ] Marketing version is `1.0`; build number is unique and increasing.
 - [ ] Deployment target is iOS 15.0 and Supported Destinations is iPhone only.
 - [ ] App icon set is complete, opaque where required, and renders correctly in light/dark/tinted system contexts where applicable.

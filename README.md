@@ -34,7 +34,7 @@ Requirements for an App Store archive:
 
 - Node 22+
 - Xcode 26+ on a supported Mac
-- An Apple Developer team and App Store Connect record
+- Active access to Apple Team `36R3VCWWUJ` and an App Store Connect record; the Xcode targets preselect that team for automatic signing
 
 ```bash
 npm install
