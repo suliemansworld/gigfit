@@ -85,6 +85,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     private var roomMinBounds: SIMD3<Float>?
     private var roomMaxBounds: SIMD3<Float>?
     private var sampledFrames: Int = 0
+    private var manualFrameCounter: Int = 0
     private var wallDistanceLabels: [SCNNode] = []
     private var measurementLineNode: SCNNode?
     private var detectedCeilingHeight: Float?
@@ -106,6 +107,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
 
     func startSession() {
         guard let sceneView else { return }
+        manualFrameCounter = 0
         let config = ARWorldTrackingConfiguration()
         config.worldAlignment = .gravity
         config.planeDetection = [.horizontal, .vertical]
@@ -209,7 +211,9 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
               let sceneView,
               let frame = sceneView.session.currentFrame else { return }
 
-        let alignment: ARRaycastQuery.TargetAlignment = stage == .height ? .any : .horizontal
+        let alignment: ARRaycastQuery.TargetAlignment = (stage == .height || stage == .polygonHeight)
+            ? .any
+            : .horizontal
         let orientation = sceneView.window?.windowScene?.interfaceOrientation ?? .portrait
         guard let result = PointPlacementService.place(
             at: point,
@@ -256,9 +260,15 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
     }
 
     func lockHeightAtDevice() {
-        guard stage == .height,
+        guard stage == .height || stage == .polygonHeight,
               let frame = sceneView?.session.currentFrame else { return }
-        lockHeight(worldY: frame.camera.transform.columns.3.y, source: isLiDARAvailable ? .lidarDepth : .estimatedPlane)
+        let source: PointSource = isLiDARAvailable ? .lidarDepth : .estimatedPlane
+        let worldY = frame.camera.transform.columns.3.y
+        if stage == .polygonHeight {
+            lockPolygonHeight(worldY: worldY, source: source)
+        } else {
+            lockHeight(worldY: worldY, source: source)
+        }
     }
 
     func undoLastPoint() {
@@ -381,6 +391,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         stage = .complete
         isPlacementEnabled = false
         removeMeasurementLine()
+        removeCrosshairNode()
         sessionMessage = "Volume locked. Continue to review measurements."
         refreshPreview()
         onAllPointsPlaced?()
@@ -745,25 +756,21 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             }
 
             self.crosshairHit = true
+            self.crosshairSurfaceFound = true
             self.crosshairPosition = targetPos
             if self.stage != .complete && self.sessionMessage == self.stage.instruction {
                 self.sessionMessage = "Surface found! Tap to place point."
             }
             let pos = SCNVector3FromSIMD(targetPos)
 
-            // Smooth animation to target position
+            // Keep only the current hit. Queuing animated moves makes the
+            // world-space reticle chase stale targets and visibly fly away.
             if self.crosshairNode == nil {
                 self.crosshairNode = self.makeCrosshairNode()
                 sv.scene.rootNode.addChildNode(self.crosshairNode!)
-                self.crosshairNode?.position = pos
-            } else if let node = self.crosshairNode {
-                let current = SCNVector3ToSIMD(node.position)
-                let dist = simd_distance(current, targetPos)
-                let duration = min(0.15, max(0.02, TimeInterval(dist * 0.5)))
-                let move = SCNAction.move(to: pos, duration: duration)
-                move.timingMode = .easeOut
-                node.runAction(move)
             }
+            self.crosshairNode?.removeAllActions()
+            self.crosshairNode?.position = pos
             self.crosshairNode?.isHidden = false
             self.crosshairNode?.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
 
@@ -772,6 +779,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
             if self.stage == .depth { self.refreshPreview() }
         } else {
             self.crosshairHit = false
+            self.crosshairSurfaceFound = false
+            self.crosshairPosition = nil
             self.crosshairNode?.isHidden = true
             self.removeMeasurementLine()
             if self.sessionMessage.hasPrefix("Surface found") {
@@ -854,6 +863,8 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         crosshairNode?.removeFromParentNode()
         crosshairNode = nil
         crosshairHit = false
+        crosshairSurfaceFound = false
+        crosshairPosition = nil
     }
 
     // MARK: — Mesh Rendering —
@@ -1139,6 +1150,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         stage = .complete
         isPlacementEnabled = false
         removeMeasurementLine()
+        removeCrosshairNode()
         sessionMessage = "Volume locked. Continue to review measurements."
         refreshPreview()
         onAllPointsPlaced?()
@@ -1206,6 +1218,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
         DispatchQueue.main.async {
             self.trackingState = frame.camera.trackingState
             self.surfaceReady = self.planeCount > 0 || frame.sceneDepth != nil || frame.smoothedSceneDepth != nil
+            self.manualFrameCounter = (self.manualFrameCounter + 1) % 60
 
             if self.stage == .auto {
                 // Process auto-room detection every 4th frame for performance
@@ -1240,16 +1253,16 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
                         self.sessionMessage = "Room detected. Pan to expand. Tap Lock when ready."
                     }
                 }
-            } else             // Check surface at crosshair every 8th frame
-            if self.sampledFrames % 8 == 0, let sv = self.sceneView, sv.bounds.width > 0, self.stage != .complete {
-                let cp = CGPoint(x: sv.bounds.midX, y: sv.bounds.midY - 40)
-                let orient = sv.window?.windowScene?.interfaceOrientation ?? .portrait
-                let align: ARRaycastQuery.TargetAlignment = (self.stage == .height || self.stage == .polygonHeight) ? .any : .horizontal
-                self.crosshairSurfaceFound = PointPlacementService.place(at: cp, in: frame, session: sv.session, viewportSize: sv.bounds.size, orientation: orient, alignment: align) != nil
             }
 
-                        // Update crosshair surface detection (throttled)
-            if self.sampledFrames % 12 == 0 { self.updateCrosshair(from: frame) }
+            // One placement query drives both the surface state and the live
+            // target. Ten updates/second stays responsive without doing ARKit
+            // raycasts and depth reads on every camera frame.
+            if self.stage != .auto,
+               self.stage != .complete,
+               self.manualFrameCounter % 6 == 0 {
+                self.updateCrosshair(from: frame)
+            }
             // Batched mesh geometry updates (throttled)
             if self.stage == .auto, self.sampledFrames % 15 == 0, self.isLiDARAvailable {
                 for anchor in frame.anchors {
@@ -1261,7 +1274,7 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
 
 
                         // Ceiling detection during polygon height only (throttled, mesh data richer here)
-            if self.stage == .polygonHeight, self.sampledFrames % 12 == 0 {
+            if self.stage == .polygonHeight, self.manualFrameCounter % 12 == 0 {
                 self.detectCeiling(from: frame)
             }
 
@@ -1317,8 +1330,4 @@ final class ARScanCoordinator: NSObject, ObservableObject, ARSCNViewDelegate, AR
 
 func SCNVector3FromSIMD(_ vector: SIMD3<Float>) -> SCNVector3 {
     SCNVector3(vector.x, vector.y, vector.z)
-}
-
-func SCNVector3ToSIMD(_ vector: SCNVector3) -> SIMD3<Float> {
-    SIMD3<Float>(vector.x, vector.y, vector.z)
 }

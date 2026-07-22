@@ -102,7 +102,7 @@ The app had recurrent freezing issues caused by heavy LiDAR mesh processing. The
 
 | Component | Control |
 |---|---|
-| Crosshair surface detection | Every 12th frame (~5fps), only in manual/height modes |
+| Crosshair targeting | One shared placement query every 6th frame (~10fps), only in manual/height modes |
 | Ceiling detection | Only in polygon height mode, early-exits after 3 samples |
 | Mesh rendering (sceneReconstruction) | Only enabled in `.auto` stage |
 | Mesh geometry creation | Only in auto mode, sampled at 1/300th of faces |
@@ -111,6 +111,14 @@ The app had recurrent freezing issues caused by heavy LiDAR mesh processing. The
 | Default stage | `.floor` (manual) — not `.auto` |
 
 **Never re-enable sceneReconstruction globally.** It floods the main thread with ARMeshAnchor callbacks. If mesh rendering is needed, it must stay scoped to `.auto` mode only.
+
+### Crosshair stability fix (July 21, 2026)
+
+- `ARFrame.raycastQuery` requires normalized captured-image coordinates. Screen coordinates are now converted through the inverse ARKit display transform before every plane raycast and LiDAR depth lookup.
+- Target priority is bounded plane geometry → visible LiDAR depth → estimated plane → infinite plane fallback. Hits outside 8 meters are rejected.
+- Manual scanning uses its own advancing frame counter. The old auto-only counter stayed at zero in manual mode, causing two placement queries every camera frame despite the intended throttle.
+- One placement result now drives both the surface-found UI and world target. The dynamic reticle is positioned directly instead of accumulating SceneKit movement actions.
+- Polygon height targeting and the "Lock Height at Phone" control now use the polygon-height path correctly.
 
 ## VolumeScanStage enum
 
@@ -158,7 +166,7 @@ xcodebuild -quiet \
   CODE_SIGNING_ALLOWED=NO test
 ```
 
-All 12 tests pass. ARKit and LiDAR require physical-iPhone testing.
+The project currently contains 14 geometry/calibration XCTest methods. The app target and test bundle compile locally. On this Mac, the iOS 17.2 simulator can stall while materializing the hosted test runner, so do not claim the tests executed unless `xcodebuild test` reaches a test summary. ARKit and LiDAR require physical-iPhone testing.
 
 ## Codemagic
 
@@ -209,6 +217,9 @@ The next phase is an **item catalog + 3D bin packing system**:
 - "Reorganize" button re-solves the layout
 - Screenshots attached to each item measurement
 - Running tally of everything in the space
+- Vehicle profiles that preserve the measured cargo-space model
+- A live loading session for Roadie and other gig drivers: add or remove each package, show occupied and remaining capacity, and keep the tally current while the route is active
+- Placement guidance for the next package plus a reorganization pass when the load changes
 
 ## Known risks
 

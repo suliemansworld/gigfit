@@ -5,6 +5,9 @@ import simd
 /// Produces real-world positions from detected planes or LiDAR depth.
 enum PointPlacementService {
 
+    private static let minimumPlacementDistanceMeters: Float = 0.08
+    private static let maximumPlacementDistanceMeters: Float = 8
+
     struct PlacementResult {
         let worldPosition: SIMD3<Float>
         let source: PointSource
@@ -20,58 +23,74 @@ enum PointPlacementService {
         orientation: UIInterfaceOrientation,
         alignment: ARRaycastQuery.TargetAlignment
     ) -> PlacementResult? {
-        let targets: [(ARRaycastQuery.Target, PointSource)] = [
-            (.existingPlaneGeometry, .existingPlaneGeometry),
+        guard let imagePoint = normalizedImagePoint(
+            from: screenPoint,
+            frame: frame,
+            viewportSize: viewportSize,
+            orientation: orientation
+        ) else { return nil }
+
+        // Prefer a real detected plane, then the visible LiDAR surface. An
+        // infinite plane is only a last resort because its intersection can be
+        // far away from the package or tabletop under the crosshair.
+        if let planeResult = raycast(
+            at: imagePoint,
+            session: session,
+            allowing: .existingPlaneGeometry,
+            alignment: alignment,
+            source: .existingPlaneGeometry,
+            frame: frame
+        ) {
+            return planeResult
+        }
+
+        if let depthPosition = depthPosition(
+            at: imagePoint,
+            frame: frame
+        ) {
+            return result(position: depthPosition, source: .lidarDepth, anchor: nil, frame: frame)
+        }
+
+        let fallbackTargets: [(ARRaycastQuery.Target, PointSource)] = [
+            (.estimatedPlane, .estimatedPlane),
             (.existingPlaneInfinite, .existingPlaneInfinite)
         ]
-
-        for (target, source) in targets {
-            if let result = raycast(
-                at: screenPoint,
+        for (target, source) in fallbackTargets {
+            if let fallback = raycast(
+                at: imagePoint,
                 session: session,
                 allowing: target,
                 alignment: alignment,
                 source: source,
                 frame: frame
             ) {
-                return result
+                return fallback
             }
         }
 
-        if let depthPosition = depthPosition(
-            at: screenPoint,
-            frame: frame,
-            viewportSize: viewportSize,
-            orientation: orientation
-        ) {
-            return result(position: depthPosition, source: .lidarDepth, anchor: nil, frame: frame)
-        }
-
-        return raycast(
-            at: screenPoint,
-            session: session,
-            allowing: .estimatedPlane,
-            alignment: alignment,
-            source: .estimatedPlane,
-            frame: frame
-        )
+        return nil
     }
 
     private static func raycast(
-        at point: CGPoint,
+        at imagePoint: CGPoint,
         session: ARSession,
         allowing target: ARRaycastQuery.Target,
         alignment: ARRaycastQuery.TargetAlignment,
         source: PointSource,
         frame: ARFrame
     ) -> PlacementResult? {
-        let query = frame.raycastQuery(from: point, allowing: target, alignment: alignment)
+        // ARFrame expects normalized captured-image coordinates, not UIKit
+        // view coordinates. Passing screen points here creates an invalid ray.
+        let query = frame.raycastQuery(from: imagePoint, allowing: target, alignment: alignment)
         guard let first = session.raycast(query).first else { return nil }
 
         let position = SIMD3<Float>(first.worldTransform.columns.3.x,
                                     first.worldTransform.columns.3.y,
                                     first.worldTransform.columns.3.z)
-        return result(position: position, source: source, anchor: first.anchor, frame: frame)
+        let placement = result(position: position, source: source, anchor: first.anchor, frame: frame)
+        guard placement.distanceMeters >= minimumPlacementDistanceMeters,
+              placement.distanceMeters <= maximumPlacementDistanceMeters else { return nil }
+        return placement
     }
 
     private static func result(
@@ -90,21 +109,10 @@ enum PointPlacementService {
     }
 
     private static func depthPosition(
-        at point: CGPoint,
-        frame: ARFrame,
-        viewportSize: CGSize,
-        orientation: UIInterfaceOrientation
+        at imagePoint: CGPoint,
+        frame: ARFrame
     ) -> SIMD3<Float>? {
-        guard viewportSize.width > 0,
-              viewportSize.height > 0,
-              let depthData = frame.smoothedSceneDepth ?? frame.sceneDepth else { return nil }
-
-        let viewPoint = CGPoint(x: point.x / viewportSize.width,
-                                y: point.y / viewportSize.height)
-        let imagePoint = viewPoint.applying(
-            frame.displayTransform(for: orientation, viewportSize: viewportSize).inverted()
-        )
-        guard (0...1).contains(imagePoint.x), (0...1).contains(imagePoint.y) else { return nil }
+        guard let depthData = frame.smoothedSceneDepth ?? frame.sceneDepth else { return nil }
 
         let depthMap = depthData.depthMap
         CVPixelBufferLockBaseAddress(depthMap, .readOnly)
@@ -118,7 +126,9 @@ enum PointPlacementService {
         let depthY = min(depthHeight - 1, max(0, Int(imagePoint.y * CGFloat(depthHeight))))
         let row = baseAddress.advanced(by: depthY * rowBytes).assumingMemoryBound(to: Float32.self)
         let depth = row[depthX]
-        guard depth.isFinite, depth > 0.08, depth < 8 else { return nil }
+        guard depth.isFinite,
+              depth > minimumPlacementDistanceMeters,
+              depth < maximumPlacementDistanceMeters else { return nil }
 
         let imageResolution = frame.camera.imageResolution
         let pixel = SIMD3<Float>(Float(imagePoint.x * imageResolution.width),
@@ -128,5 +138,27 @@ enum PointPlacementService {
         let cameraPoint = SIMD4<Float>(ray.x * depth, -ray.y * depth, -depth, 1)
         let worldPoint = frame.camera.transform * cameraPoint
         return SIMD3<Float>(worldPoint.x, worldPoint.y, worldPoint.z)
+    }
+
+    private static func normalizedImagePoint(
+        from screenPoint: CGPoint,
+        frame: ARFrame,
+        viewportSize: CGSize,
+        orientation: UIInterfaceOrientation
+    ) -> CGPoint? {
+        guard viewportSize.width > 0, viewportSize.height > 0 else { return nil }
+
+        let normalizedViewPoint = CGPoint(
+            x: screenPoint.x / viewportSize.width,
+            y: screenPoint.y / viewportSize.height
+        )
+        let imagePoint = normalizedViewPoint.applying(
+            frame.displayTransform(for: orientation, viewportSize: viewportSize).inverted()
+        )
+        guard imagePoint.x.isFinite,
+              imagePoint.y.isFinite,
+              (0...1).contains(imagePoint.x),
+              (0...1).contains(imagePoint.y) else { return nil }
+        return imagePoint
     }
 }
