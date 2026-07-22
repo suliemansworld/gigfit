@@ -195,14 +195,15 @@ Tags matching `testflight-*` trigger the workflow automatically. Manual triggeri
 8. Wait through IPA build, Publishing, and App Store distribution.
 9. Verify in App Store Connect/TestFlight.
 10. Add build to `GigFit Internal` group.
-11. Answer export compliance: "No encryption" (GigFit uses no non-exempt encryption).
+11. Confirm App Store Connect accepted the bundled export-compliance declaration; no manual encryption questionnaire should appear.
 12. Open TestFlight on iPhone with `haidari.sulieman@gmail.com` and update GigFit.
 
 Another app may occupy the only concurrent Codemagic builder. Leave GigFit queued instead of canceling unrelated work.
 
 ## Apple/TestFlight notes
 
-- GigFit uses no non-exempt encryption. Answer **No** when asked about encryption.
+- `GigFit/Resources/Info.plist` declares `ITSAppUsesNonExemptEncryption = false`. Apple should therefore record **No non-exempt encryption** from each uploaded binary without asking the questionnaire again, including for internal TestFlight builds.
+- If App Store Connect shows **Missing Compliance** again, inspect the archived app's compiled `Info.plist` and verify that `ITSAppUsesNonExemptEncryption` is present as a Boolean `false` before changing the App Store Connect answer manually.
 - Internal testing does not require external beta-review contact information.
 - Codemagic may report missing Feedback Email and review-contact details after a successful upload. That affects external beta review, not internal testing.
 
