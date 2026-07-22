@@ -14,7 +14,7 @@ Reports any iteration where the rotor failed to open, advance, or close.
 """
 import asyncio, sys, random, time, argparse
 from playwright.async_api import async_playwright
-from test_support import GAME_URL, launch_browser
+from test_support import GAME_URL, install_touch_test_helper, launch_browser
 
 HOLD_DURATION = 220  # matches index.html
 ROTOR_STEP = 36
@@ -25,14 +25,11 @@ DISPATCH = """async (params) => {
   const r = stage.getBoundingClientRect();
   const cx = r.left + r.width/2;
   const startY = r.top + r.height/2;
-  const Touch = window.Touch;
-  const TouchEvent = window.TouchEvent;
-
   const tap = async (x, y, downMs) => {
-    const t = new Touch({identifier:1, target:stage, clientX:x, clientY:y, radiusX:1, radiusY:1, force:1});
-    stage.dispatchEvent(new TouchEvent('touchstart', {touches:[t], changedTouches:[t], targetTouches:[t], bubbles:true, cancelable:true}));
+    const t = window.echoTestTouch.point(stage, x, y);
+    window.echoTestTouch.dispatch(stage, 'touchstart', [t], [t]);
     await new Promise(r => setTimeout(r, downMs));
-    stage.dispatchEvent(new TouchEvent('touchend', {touches:[], changedTouches:[t], targetTouches:[], bubbles:true, cancelable:true}));
+    window.echoTestTouch.dispatch(stage, 'touchend', [], [t]);
   };
 
   // Tap 1
@@ -40,8 +37,8 @@ DISPATCH = """async (params) => {
   // gap
   await new Promise(r => setTimeout(r, params.gap));
   // Tap 2 - finger goes down and STAYS down
-  const t = new Touch({identifier:1, target:stage, clientX:cx, clientY:startY, radiusX:1, radiusY:1, force:1});
-  stage.dispatchEvent(new TouchEvent('touchstart', {touches:[t], changedTouches:[t], targetTouches:[t], bubbles:true, cancelable:true}));
+  const t = window.echoTestTouch.point(stage, cx, startY);
+  window.echoTestTouch.dispatch(stage, 'touchstart', [t], [t]);
   // Wait for hold timer to fire
   await new Promise(r => setTimeout(r, params.hold));
   const rotorOpened = document.getElementById('rotorIndicator').classList.contains('show');
@@ -51,8 +48,8 @@ DISPATCH = """async (params) => {
   const advances = [];
   for (let step = 1; step <= params.steps; step++){
     const y = startY + step * params.stepPx;
-    const t2 = new Touch({identifier:1, target:stage, clientX:cx, clientY:y, radiusX:1, radiusY:1, force:1});
-    stage.dispatchEvent(new TouchEvent('touchmove', {touches:[t2], changedTouches:[t2], targetTouches:[t2], bubbles:true, cancelable:true}));
+    const t2 = window.echoTestTouch.point(stage, cx, y);
+    window.echoTestTouch.dispatch(stage, 'touchmove', [t2], [t2]);
     await new Promise(r => setTimeout(r, 25));
     const lbl = document.getElementById('rotorLabel')?.textContent;
     const num = document.getElementById('rotorNum')?.textContent;
@@ -60,8 +57,8 @@ DISPATCH = """async (params) => {
   }
 
   // Release
-  const tEnd = new Touch({identifier:1, target:stage, clientX:cx, clientY:startY + params.steps * params.stepPx, radiusX:1, radiusY:1, force:1});
-  stage.dispatchEvent(new TouchEvent('touchend', {touches:[], changedTouches:[tEnd], targetTouches:[], bubbles:true, cancelable:true}));
+  const tEnd = window.echoTestTouch.point(stage, cx, startY + params.steps * params.stepPx);
+  window.echoTestTouch.dispatch(stage, 'touchend', [], [tEnd]);
   await new Promise(r => setTimeout(r, 200));
   const rotorClosed = !document.getElementById('rotorIndicator').classList.contains('show');
   const panelAfter = Array.from(document.querySelectorAll('.panel.show')).map(p => p.id);
@@ -74,6 +71,7 @@ async def run(iterations):
         b = await launch_browser(p)
         ctx = await b.new_context(viewport={'width':390,'height':844}, has_touch=True, is_mobile=True)
         pg = await ctx.new_page()
+        await install_touch_test_helper(pg)
         errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.on('console', lambda m: errs.append(f"err:{m.text}") if m.type=='error' else None)

@@ -11,7 +11,7 @@ Usage:
 """
 import asyncio, sys, random, time, argparse, json
 from playwright.async_api import async_playwright
-from test_support import GAME_URL, launch_browser
+from test_support import GAME_URL, install_touch_test_helper, launch_browser
 
 # Action weights — relative probabilities
 ACTIONS = [
@@ -49,6 +49,7 @@ async def run(minutes):
             has_touch=True, is_mobile=True
         )
         pg = await ctx.new_page()
+        await install_touch_test_helper(pg)
 
         # Capture errors
         page_errors = []
@@ -120,13 +121,13 @@ async def run(minutes):
                       const cx = r.left + r.width/2, cy = r.top + r.height/2;
                       const dx = '{direction}' === 'left' ? -90 : '{direction}' === 'right' ? 90 : 0;
                       const dy = '{direction}' === 'up' ? -90 : '{direction}' === 'down' ? 90 : 0;
-                      const t1 = new Touch({{ identifier:1, target:stage, clientX:cx, clientY:cy, radiusX:1, radiusY:1, force:1 }});
-                      stage.dispatchEvent(new TouchEvent('touchstart', {{ touches:[t1], changedTouches:[t1], targetTouches:[t1], bubbles:true, cancelable:true }}));
+                      const t1 = window.echoTestTouch.point(stage, cx, cy);
+                      window.echoTestTouch.dispatch(stage, 'touchstart', [t1], [t1]);
                       await new Promise(r => setTimeout(r, 30));
-                      const t2 = new Touch({{ identifier:1, target:stage, clientX:cx+dx, clientY:cy+dy, radiusX:1, radiusY:1, force:1 }});
-                      stage.dispatchEvent(new TouchEvent('touchmove', {{ touches:[t2], changedTouches:[t2], targetTouches:[t2], bubbles:true, cancelable:true }}));
+                      const t2 = window.echoTestTouch.point(stage, cx + dx, cy + dy);
+                      window.echoTestTouch.dispatch(stage, 'touchmove', [t2], [t2]);
                       await new Promise(r => setTimeout(r, 30));
-                      stage.dispatchEvent(new TouchEvent('touchend', {{ touches:[], changedTouches:[t2], targetTouches:[], bubbles:true, cancelable:true }}));
+                      window.echoTestTouch.dispatch(stage, 'touchend', [], [t2]);
                     }}""")
                     await pg.wait_for_timeout(random.randint(80, 250))
 
@@ -180,10 +181,10 @@ async def run(minutes):
                       const stage = document.querySelector('.stage');
                       if (!stage) return;
                       const r = stage.getBoundingClientRect();
-                      const t1 = new Touch({ identifier:1, target:stage, clientX:r.left + r.width/2, clientY:r.top + r.height/2, radiusX:1, radiusY:1, force:1 });
-                      stage.dispatchEvent(new TouchEvent('touchstart', { touches:[t1], changedTouches:[t1], targetTouches:[t1], bubbles:true, cancelable:true }));
+                      const t1 = window.echoTestTouch.point(stage, r.left + r.width/2, r.top + r.height/2);
+                      window.echoTestTouch.dispatch(stage, 'touchstart', [t1], [t1]);
                       await new Promise(r => setTimeout(r, 1100));
-                      stage.dispatchEvent(new TouchEvent('touchend', { touches:[], changedTouches:[t1], targetTouches:[], bubbles:true, cancelable:true }));
+                      window.echoTestTouch.dispatch(stage, 'touchend', [], [t1]);
                     }""")
                     await pg.wait_for_timeout(300)
 

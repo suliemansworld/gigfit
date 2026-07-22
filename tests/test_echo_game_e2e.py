@@ -2,7 +2,7 @@
 import asyncio
 import sys
 from playwright.async_api import async_playwright
-from test_support import GAME_URL, launch_browser
+from test_support import GAME_URL, install_touch_test_helper, launch_browser
 
 PASSES = []
 ISSUES = []
@@ -14,6 +14,7 @@ async def run():
         b = await launch_browser(p)
         ctx = await b.new_context(viewport={"width":390,"height":844}, is_mobile=True, has_touch=True)
         pg = await ctx.new_page()
+        await install_touch_test_helper(pg)
         errs = []
         pg.on("pageerror", lambda e: errs.append(("pageerror", str(e))))
         pg.on("console", lambda m: errs.append(("console.error", m.text)) if m.type == "error" else None)
@@ -33,17 +34,17 @@ async def run():
           const stage = document.querySelector('.stage');
           const r = stage.getBoundingClientRect();
           const cx = r.left + r.width/2, cy = r.top + r.height/2;
-          function makeTouch(x, y){ return new Touch({ identifier:1, target:stage, clientX:x, clientY:y, radiusX:1, radiusY:1, force:1 }); }
+          function makeTouch(x, y){ return window.echoTestTouch.point(stage, x, y); }
           const SWIPE = { up:[0,-90], down:[0,90], left:[-90,0], right:[90,0] };
           async function swipe(dir){
             const [dx, dy] = SWIPE[dir];
             const t1 = makeTouch(cx, cy);
-            stage.dispatchEvent(new TouchEvent('touchstart', { touches:[t1], changedTouches:[t1], targetTouches:[t1], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchstart', [t1], [t1]);
             await new Promise(r=>setTimeout(r,30));
             const t2 = makeTouch(cx+dx, cy+dy);
-            stage.dispatchEvent(new TouchEvent('touchmove', { touches:[t2], changedTouches:[t2], targetTouches:[t2], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchmove', [t2], [t2]);
             await new Promise(r=>setTimeout(r,30));
-            stage.dispatchEvent(new TouchEvent('touchend', { touches:[], changedTouches:[t2], targetTouches:[], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchend', [], [t2]);
             await new Promise(r=>setTimeout(r,400));
           }
           let currentId = cave.rootId;
@@ -113,17 +114,17 @@ async def run():
           const stage = document.querySelector('.stage');
           const rr = stage.getBoundingClientRect();
           const cx = rr.left + rr.width/2, cy = rr.top + rr.height/2;
-          function makeTouch(x, y){ return new Touch({ identifier:1, target:stage, clientX:x, clientY:y, radiusX:1, radiusY:1, force:1 }); }
+          function makeTouch(x, y){ return window.echoTestTouch.point(stage, x, y); }
           const SWIPE = { up:[0,-90], down:[0,90], left:[-90,0], right:[90,0] };
           async function swipe(dir){
             const [dx, dy] = SWIPE[dir];
             const t1 = makeTouch(cx, cy);
-            stage.dispatchEvent(new TouchEvent('touchstart', { touches:[t1], changedTouches:[t1], targetTouches:[t1], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchstart', [t1], [t1]);
             await new Promise(r=>setTimeout(r,25));
             const t2 = makeTouch(cx+dx, cy+dy);
-            stage.dispatchEvent(new TouchEvent('touchmove', { touches:[t2], changedTouches:[t2], targetTouches:[t2], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchmove', [t2], [t2]);
             await new Promise(r=>setTimeout(r,25));
-            stage.dispatchEvent(new TouchEvent('touchend', { touches:[], changedTouches:[t2], targetTouches:[], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchend', [], [t2]);
             await new Promise(r=>setTimeout(r,350));
           }
           for (const dir of path){ await swipe(dir); }
@@ -169,17 +170,17 @@ async def run():
           const stage = document.querySelector('.stage');
           const rr = stage.getBoundingClientRect();
           const cx = rr.left + rr.width/2, cy = rr.top + rr.height/2;
-          function makeTouch(x, y){ return new Touch({ identifier:1, target:stage, clientX:x, clientY:y, radiusX:1, radiusY:1, force:1 }); }
+          function makeTouch(x, y){ return window.echoTestTouch.point(stage, x, y); }
           const SWIPE = { up:[0,-90], down:[0,90], left:[-90,0], right:[90,0] };
           async function swipe(dir){
             const [dx, dy] = SWIPE[dir];
             const t1 = makeTouch(cx, cy);
-            stage.dispatchEvent(new TouchEvent('touchstart', { touches:[t1], changedTouches:[t1], targetTouches:[t1], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchstart', [t1], [t1]);
             await new Promise(r=>setTimeout(r,25));
             const t2 = makeTouch(cx+dx, cy+dy);
-            stage.dispatchEvent(new TouchEvent('touchmove', { touches:[t2], changedTouches:[t2], targetTouches:[t2], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchmove', [t2], [t2]);
             await new Promise(r=>setTimeout(r,25));
-            stage.dispatchEvent(new TouchEvent('touchend', { touches:[], changedTouches:[t2], targetTouches:[], bubbles:true, cancelable:true }));
+            window.echoTestTouch.dispatch(stage, 'touchend', [], [t2]);
             await new Promise(r=>setTimeout(r,350));
           }
           for (const dir of path){ await swipe(dir); }
