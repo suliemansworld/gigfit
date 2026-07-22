@@ -188,7 +188,9 @@ struct CalibrationView: View {
             }
         }
 
-        session.name = "Cargo Scan — \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+        if session.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            session.name = "Cargo Scan — \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+        }
         dismiss()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
             showingReview = true

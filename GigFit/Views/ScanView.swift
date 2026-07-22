@@ -5,7 +5,8 @@ struct ScanView: View {
     @Binding var session: ScanSession
     @ObservedObject var scanStore: ScanStore
     var startMode: VolumeScanStage = .auto
-    @Environment(\.dismiss) private var dismissToHome
+    var onExit: (() -> Void)? = nil
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var coordinator = ARScanCoordinator()
     @State private var showingCalibration = false
     @State private var showingReview = false
@@ -46,7 +47,7 @@ struct ScanView: View {
             showingReview ? coordinator.pauseSession() : coordinator.startSession()
         }
         .sheet(isPresented: $showingCalibration) {
-            CalibrationView(session: $session, scanStore: scanStore, showingReview: $showingReview, dismissAll: { dismissToHome() })
+            CalibrationView(session: $session, scanStore: scanStore, showingReview: $showingReview, dismissAll: exitScan)
         }
         .sheet(isPresented: $showingReview) {
             ScanReviewView(scan: session, scanStore: scanStore)
@@ -56,17 +57,31 @@ struct ScanView: View {
     private var closeButton: some View {
         VStack {
             HStack {
-                Button(action: { dismissToHome() }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(.white.opacity(0.75))
+                Button(action: exitScan) {
+                    Label("Cancel", systemImage: "xmark")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: 44)
+                        .background(.black.opacity(0.55))
+                        .clipShape(Capsule())
                 }
                 .accessibilityLabel("Close and return home")
+                .accessibilityIdentifier("scan.cancelButton")
                 Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
             Spacer()
+        }
+    }
+
+    private func exitScan() {
+        coordinator.pauseSession()
+        if let onExit {
+            onExit()
+        } else {
+            dismiss()
         }
     }
 

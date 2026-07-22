@@ -36,9 +36,9 @@ GigFit/
     PackageAssetStore.swift          — Package screenshot validation and storage
   Views/
     HomeView.swift                   — Saved scans, live loads, and entry points
-    ScanInstructionsView.swift       — 4-step instruction cards before scanning
+    ScanInstructionsView.swift       — Named-scan setup and instruction cards
     ScanView.swift                   — Floor-calibrated expandable volume workflow
-    ScanReviewView.swift             — 3D model + dimensions + confidence + save
+    ScanReviewView.swift             — 3D review, editable scan name, and save/update
     LiveLoadView.swift               — Capacity dashboard and package status controls
     PackingPlanView.swift            — Packing summary, diagrams, steps, and re-solve UI
     PackageEditorView.swift          — Screenshot, notes, quantity, and dimensions
@@ -61,7 +61,7 @@ The live-load dashboard shows placed/unplaced status and how many additional pla
 
 This is a conservative rectangular estimate, not a guarantee or proof of optimal packing. Irregular vehicle geometry such as wheel wells and curved trim is not modeled, and neither are weight distribution, tie-downs, package fragility, stacking strength, door clearance, or safe driver visibility. Verify the real load before driving.
 
-The project contains 34 XCTest methods, including 10 focused packing-solver tests for rotations, quantity handling, spatial failures, support, bounds, overlap, mobile limits, fit counts, and determinism.
+The project contains 36 XCTest methods, including 10 focused packing-solver tests plus scan-name persistence and vehicle-profile rename coverage.
 
 ## Setup on MacBook
 

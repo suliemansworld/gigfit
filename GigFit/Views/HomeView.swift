@@ -34,10 +34,18 @@ struct HomeView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingNewScan) {
-                ScanInstructionsView(scanStore: scanStore)
+                ScanInstructionsView(
+                    scanStore: scanStore,
+                    onExit: { showingNewScan = false }
+                )
             }
             .fullScreenCover(isPresented: $showingPolygon) {
-                ScanView(session: $polygonSession, scanStore: scanStore, startMode: .polygonFloor)
+                ScanView(
+                    session: $polygonSession,
+                    scanStore: scanStore,
+                    startMode: .polygonFloor,
+                    onExit: { showingPolygon = false }
+                )
             }
             .fullScreenCover(isPresented: $showingRoomPlan) {
                 RoomPlanScanView(scanStore: scanStore)

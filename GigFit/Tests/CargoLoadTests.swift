@@ -215,6 +215,56 @@ final class CargoLoadTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: fileURL), originalData)
     }
 
+    func testRenamedScanReplacesExistingRecordAndPersists() throws {
+        let root = temporaryDirectory(named: "scan-rename")
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let fileURL = root.appendingPathComponent("scans.json")
+        let store = ScanStore(fileURL: fileURL, loadImmediately: false)
+        var scan = ScanSession(name: "Cargo Scan")
+
+        store.save(scan)
+        scan.name = "Honda CR-V trunk"
+        store.save(scan)
+
+        XCTAssertEqual(store.scans.count, 1)
+        XCTAssertEqual(store.scan(by: scan.id)?.name, "Honda CR-V trunk")
+
+        let reloaded = ScanStore(fileURL: fileURL)
+        XCTAssertEqual(reloaded.scans.count, 1)
+        XCTAssertEqual(reloaded.scan(by: scan.id)?.name, "Honda CR-V trunk")
+    }
+
+    func testRenamedScanRefreshesReusableVehicleWithoutRewritingExistingLoad() throws {
+        let root = temporaryDirectory(named: "vehicle-rename")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = CargoStore(
+            fileURL: root.appendingPathComponent("cargo.json"),
+            assetStore: PackageAssetStore(directoryURL: root.appendingPathComponent("assets")),
+            loadImmediately: false
+        )
+        var scan = makeCompleteScan(name: "Cargo Scan")
+        let originalProfile = try store.saveVehicleProfile(from: scan).get()
+        let existingLoad = try store.startLoad(
+            vehicleProfileID: originalProfile.id,
+            name: "Existing route"
+        ).get()
+
+        scan.name = "Sprinter rear cargo"
+        let refreshedProfile = try store.saveVehicleProfile(from: scan, name: scan.name).get()
+
+        XCTAssertEqual(refreshedProfile.id, originalProfile.id)
+        XCTAssertEqual(store.vehicleProfile(id: originalProfile.id)?.name, "Sprinter rear cargo")
+        XCTAssertEqual(store.loadSession(id: existingLoad.id)?.vehicle.name, "Cargo Scan")
+
+        let reloaded = CargoStore(
+            fileURL: store.fileURL,
+            assetStore: store.assetStore
+        )
+        XCTAssertEqual(reloaded.vehicleProfile(id: originalProfile.id)?.name, "Sprinter rear cargo")
+        XCTAssertEqual(reloaded.loadSession(id: existingLoad.id)?.vehicle.name, "Cargo Scan")
+    }
+
     func testPackageAssetStoreSavesReadsAndDeletesValidImageInInjectedDirectory() throws {
         let root = temporaryDirectory(named: "valid-image")
         defer { try? FileManager.default.removeItem(at: root) }
@@ -270,6 +320,30 @@ final class CargoLoadTests: XCTestCase {
             ),
             conservativeCapacityCubicMeters: capacity
         )
+    }
+
+    private func makeCompleteScan(name: String) -> ScanSession {
+        var scan = ScanSession(name: name)
+        for (index, label) in ScanPointLabel.allCases.enumerated() {
+            scan.upsertPoint(
+                label: label,
+                position: SIMD3<Float>(Float(index), 0, 0),
+                source: .existingPlaneGeometry
+            )
+        }
+        scan.dimensions = ScanDimensions(
+            lengthMeters: 3,
+            widthMeters: 2,
+            heightMeters: 1.5,
+            rawVolumeCubicMeters: 9,
+            conservativeVolumeCubicMeters: 8
+        )
+        scan.volumeResult = ScanSession.VolumeResultData(
+            rawCubicMeters: 9,
+            conservativeCubicMeters: 8,
+            hasNegativeTetrahedra: false
+        )
+        return scan
     }
 
     private func temporaryDirectory(named name: String) -> URL {

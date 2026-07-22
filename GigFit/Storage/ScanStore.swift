@@ -4,15 +4,19 @@ import Foundation
 final class ScanStore: ObservableObject {
     @Published var scans: [ScanSession] = []
 
-    private let filename = "gigfit_scans.json"
+    private let fileURL: URL
 
-    private var fileURL: URL {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return docs.appendingPathComponent(filename)
-    }
-
-    init() {
-        load()
+    init(
+        fileURL: URL? = nil,
+        fileManager: FileManager = .default,
+        loadImmediately: Bool = true
+    ) {
+        let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? fileManager.temporaryDirectory
+        self.fileURL = fileURL ?? documents.appendingPathComponent("gigfit_scans.json")
+        if loadImmediately {
+            load()
+        }
     }
 
     func load() {

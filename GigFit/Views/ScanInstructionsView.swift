@@ -3,8 +3,9 @@ import SwiftUI
 /// Pre-scan instructions for floor-calibrated volume measurement.
 struct ScanInstructionsView: View {
     @ObservedObject var scanStore: ScanStore
+    let onExit: () -> Void
     @State private var currentStep = 0
-    @State private var session = ScanSession(name: "Cargo Scan")
+    @State private var session = ScanSession(name: "")
     @State private var showingScan = false
 
     private let steps: [(icon: String, title: String, detail: String)] = [
@@ -47,7 +48,22 @@ struct ScanInstructionsView: View {
 
                     // Bottom bar
                     VStack(spacing: 12) {
-                        Button(action: { showingScan = true }) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Cargo space or item name")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.white.opacity(0.65))
+
+                            TextField("e.g. Honda CR-V trunk", text: $session.name)
+                                .textInputAutocapitalization(.words)
+                                .submitLabel(.continue)
+                                .padding(.horizontal, 12)
+                                .frame(minHeight: 44)
+                                .background(Color.white.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .accessibilityIdentifier("scanInstructions.nameField")
+                        }
+
+                        Button(action: startScanning) {
                             Label("Start Scanning", systemImage: "camera.fill")
                                 .font(.headline)
                                 .foregroundColor(.white)
@@ -56,6 +72,9 @@ struct ScanInstructionsView: View {
                                 .background(Color(red: 0.27, green: 0.53, blue: 1.0))
                                 .clipShape(RoundedRectangle(cornerRadius: 14))
                         }
+                        .disabled(normalizedName.isEmpty)
+                        .opacity(normalizedName.isEmpty ? 0.5 : 1)
+                        .accessibilityIdentifier("scanInstructions.startButton")
 
                     }
                     .padding(.horizontal, 20)
@@ -67,13 +86,24 @@ struct ScanInstructionsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { showingScan = false }
+                    Button("Cancel", action: onExit)
+                        .accessibilityIdentifier("scanInstructions.cancelButton")
                 }
             }
             .fullScreenCover(isPresented: $showingScan) {
-                ScanView(session: $session, scanStore: scanStore)
+                ScanView(session: $session, scanStore: scanStore, onExit: onExit)
             }
         }
+    }
+
+    private var normalizedName: String {
+        session.name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func startScanning() {
+        guard !normalizedName.isEmpty else { return }
+        session.name = normalizedName
+        showingScan = true
     }
 }
 

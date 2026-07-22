@@ -13,8 +13,9 @@ This is the operational handoff for another coding agent working on GigFit.
 - Codemagic app ID: `6a5e8d6ad0ba9e4019350389`
 - TestFlight group: `GigFit Internal` with automatic distribution enabled
 - Internal tester: `haidari.sulieman@gmail.com`
-- Latest verified build: #21 (commit `c3df9fb`, tag `testflight-roadieload-20260721-1`)
-- Build 21: `https://codemagic.io/app/6a5e8d6ad0ba9e4019350389/build/6a6027ef35765eb29d51b8f5`
+- Latest verified build: #22 (commit `f14bb71`, tag `testflight-packing-20260721-1`)
+- Build 22: `https://codemagic.io/app/6a5e8d6ad0ba9e4019350389/build/6a603f12d74bf456ea073fb5`
+- Build #23 (commit `5ff990f`, tag `testflight-packing-20260721-2`) was canceled while queued after build-22 scan-flow blockers were reported; it was never uploaded.
 
 ## Product behavior
 
@@ -30,6 +31,8 @@ This is the primary workflow — measure any object by placing corners:
 4. Tap to set depth. The 3D wireframe base locks in.
 5. Raise the phone; the wireframe expands live. Lock height at the phone or target an upper surface.
 6. Tap **Quick Review** to skip calibration and see the 3D model + measurements. The tape calibrate button is still available as a secondary option.
+
+The pre-scan screen requires a user-entered cargo-space or item name. Scan Review keeps that name editable, so older generic `Cargo Scan` records can be renamed without creating a duplicate. Both the pre-scan Cancel action and the in-camera Cancel button exit the entire scan flow directly to Home.
 
 The coordinator generates 8 corners from floor origin + width + depth vectors. Do not reintroduce independent eight-dot placement.
 
@@ -63,7 +66,7 @@ Capacity v1 remains an honest volume utilization estimate: `loaded package volum
 
 ### Rectangular Packing Plan (v2)
 
-The next Roadie-focused packing slice is implemented locally:
+The next Roadie-focused packing slice is implemented:
 
 1. `PackingSolver` expands loaded package quantities, excludes delivered entries, and tries all unique 90-degree box rotations inside a conservative rectangular vehicle envelope.
 2. The bounded, deterministic extreme-point heuristic rejects out-of-bounds and overlapping placements and requires supported stacking surfaces. It tries several item orderings and keeps the best plan found. It analyzes up to 72 loaded package copies on-device and labels any remainder as not analyzed.
@@ -199,7 +202,7 @@ xcodebuild -quiet \
   CODE_SIGNING_ALLOWED=NO test
 ```
 
-The project currently contains 34 XCTest methods: 14 geometry/calibration tests, 10 cargo-load tests, and 10 packing-solver tests. On July 21, 2026, the full simulator suite reached the XCTest summary with 34 executed and 0 failures after the packing phase was added. The unsigned Release device build also completed locally. ARKit and LiDAR behavior still requires physical-iPhone testing.
+The project currently contains 36 XCTest methods: 14 geometry/calibration tests, 12 cargo/load-and-scan-persistence tests, and 10 packing-solver tests. On July 21, 2026, the full simulator suite reached the XCTest summary with 36 executed and 0 failures after the scan exit/name fixes were added. The unsigned Release device build also completed locally. ARKit and LiDAR behavior still requires physical-iPhone testing.
 
 ## Codemagic
 
@@ -214,7 +217,9 @@ Never commit or print their values. The App Store Connect key is locally stored 
 
 An older unusable key named `GigFit Codemagic`, ID `75YD58U4CV`, has a lost one-time download. Revoke it only with the owner's explicit approval.
 
-Tags matching `testflight-*` trigger the workflow automatically. Manual triggering (`Start new build` → branch `main` → `GigFit TestFlight`) is the fallback.
+Tags matching `testflight-*` trigger the workflow automatically. Manual triggering (`Start new build` → pushed release tag → `GigFit TestFlight`) is the fallback.
+
+The workflow deliberately exports an internal-only TestFlight archive and sets `submit_to_testflight: false`. App Store Connect publishing still uploads the IPA, while the `GigFit Internal` group's automatic distribution makes it available to internal testers. Do not turn `submit_to_testflight` back on unless the archive is changed to support external testing; that flag requests beta review and Apple rejects it for internal-only builds.
 
 ## Release procedure
 
@@ -223,7 +228,7 @@ Tags matching `testflight-*` trigger the workflow automatically. Manual triggeri
 3. Commit and push `main`.
 4. Tag with `testflight-<desc>-<date>-<n>` and push.
 5. In Codemagic, click **Start new build** (or wait for webhook).
-6. Select branch `main` and workflow `GigFit TestFlight`.
+6. Select the pushed release tag and workflow `GigFit TestFlight`.
 7. Start without SSH/VNC unless debugging needs it.
 8. Wait through IPA build, Publishing, and App Store distribution.
 9. Verify in App Store Connect/TestFlight.
@@ -238,7 +243,8 @@ Another app may occupy the only concurrent Codemagic builder. Leave GigFit queue
 - `GigFit/Resources/Info.plist` declares `ITSAppUsesNonExemptEncryption = false`. Apple should therefore record **No non-exempt encryption** from each uploaded binary without asking the questionnaire again, including for internal TestFlight builds.
 - If App Store Connect shows **Missing Compliance** again, inspect the archived app's compiled `Info.plist` and verify that `ITSAppUsesNonExemptEncryption` is present as a Boolean `false` before changing the App Store Connect answer manually.
 - Internal testing does not require external beta-review contact information.
-- Build #21 uploaded successfully and App Store Connect finished processing it. Codemagic's later `422 External testing is not supported for build` message is only its attempted external beta-review submission being rejected for an internal-only binary; it is not an IPA upload or internal TestFlight failure.
+- Build #22 uploaded successfully and App Store Connect finished processing it. Codemagic's later `422 External testing is not supported for build` message was only its attempted external beta-review submission being rejected for an internal-only binary; it was not an IPA upload or internal TestFlight failure.
+- Commit `5ff990f` disables that incompatible beta-review request while preserving App Store Connect upload and the internal-only archive. Build #23 was canceled before a machine became available because it did not yet contain the later scan exit/name fixes.
 - Codemagic may report missing Feedback Email and review-contact details after a successful upload. That affects external beta review, not internal testing.
 
 ## MVP progress and next phase
@@ -246,6 +252,7 @@ Another app may occupy the only concurrent Codemagic builder. Leave GigFit queue
 Implemented in the Roadie Live Load and rectangular packing slices:
 
 - Individual item dimensions from manual entry or a saved GigFit item scan
+- User-entered scan names before scanning, with rename/update support for existing saved scans
 - Saved vehicle profiles from measured cargo spaces
 - Roadie/gig-app screenshots and notes attached to package entries
 - Quantity, loaded/delivered status, removal, and a persistent running tally
