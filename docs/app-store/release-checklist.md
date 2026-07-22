@@ -24,6 +24,7 @@ Apple's app-information reference identifies immutable Bundle ID/SKU fields, req
 - [ ] Every shipping asset appears in [asset-rights-ledger.md](asset-rights-ledger.md).
 - [x] Product owner's July 22, 2026 paid-plan ElevenLabs attestation is recorded in [owner-confirmations.md](owner-confirmations.md).
 - [x] Owner-supplied June 16, 2026 Stripe credit note corroborates an ElevenLabs Creator subscription at US$22/month; the sensitive image remains outside Git and its SHA-256 is recorded.
+- [x] Owner-supplied July 22, 2026 API request log was reviewed and fingerprinted outside Git; it shows successful subscription/usage interface requests but contains no response payloads or historical clip-generation dates, so it does not close the coverage gate.
 - [ ] The associated invoice/account history confirms Creator-plan coverage on the generation dates, and generation history plus applicable terms have been archived and reviewed for all 79 MP3 outputs.
 - [ ] If historical evidence is insufficient and regeneration is used, replacement hashes prove none of the superseded originals remain in the app archive, asset catalog, copy bundle, test fixture, screenshot, or preview.
 - [ ] All 610 referenced narration WAV files have generation dates, plan/tier evidence, voice/model terms, and commercial-use approval; the 3 unreferenced legacy WAVs remain excluded from the build.

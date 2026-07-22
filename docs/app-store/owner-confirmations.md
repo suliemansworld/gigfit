@@ -38,6 +38,16 @@ The screenshot contains an account email and billing identifiers, so it is inten
 
 The credit note alone does not establish the subscription coverage dates for every clip. Preserve the original image and retrieve the associated invoice or account billing history showing that the Creator plan covered the relevant generation dates.
 
+## API request-log evidence received
+
+On July 22, 2026, the owner also supplied an ElevenLabs API request-log CSV containing 19 successful requests between **02:31:22 and 02:33:17 (UTC-7)**. The export includes one successful `GET /v1/user/subscription`, four successful usage-analytics requests, and voice/model metadata requests.
+
+The CSV records request metadata only. It contains no response bodies, subscription-plan value, invoice period, generation endpoint, clip identifier, or historical clip-generation date. It corroborates access to an ElevenLabs account and its subscription/analytics interfaces on July 22, 2026, but it does **not** establish that the Creator plan covered the shipping clips when they were generated.
+
+The CSV contains user, event, and trace identifiers, so it is intentionally excluded from Git. Its SHA-256 is:
+
+`19a1e0e01e6cc223581672be1ab5120ad42c188b735ec868d535d999054650ef`
+
 ## Evidence still to preserve outside Git
 
 Before App Store submission, retain these items in an access-controlled, owner-controlled folder and add a stable reference to [asset-rights-ledger.md](asset-rights-ledger.md):
