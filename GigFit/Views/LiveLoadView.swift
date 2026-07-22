@@ -10,6 +10,14 @@ struct LiveLoadView: View {
     @State private var showingAddPackage = false
     @State private var selectedScreenshot: PackageEntry?
     @State private var errorMessage: String?
+    @State private var packingPlan: PackingPlan?
+    @State private var selectedFitPackageID: UUID?
+    @State private var packingFitCount: Int?
+    @State private var isSolvingPacking = true
+    @State private var showingPackingPlan = false
+    @State private var packingVariant = 0
+    @State private var packingCalculationGeneration = 0
+    @State private var packingPlanSessionUpdatedAt: Date?
 
     var body: some View {
         Group {
@@ -45,6 +53,28 @@ struct LiveLoadView: View {
         } message: {
             Text(errorMessage ?? "Please try again.")
         }
+        .navigationDestination(isPresented: $showingPackingPlan) {
+            if let session = cargoStore.loadSession(id: sessionID), let packingPlan {
+                PackingPlanView(
+                    session: session,
+                    plan: packingPlan,
+                    variant: packingVariant
+                ) { updatedPlan, updatedVariant in
+                    self.packingPlan = updatedPlan
+                    packingVariant = updatedVariant
+                    packingPlanSessionUpdatedAt = session.updatedAt
+                    Task {
+                        await calculatePackingFit(for: session, plan: updatedPlan)
+                    }
+                }
+            } else {
+                ContentUnavailableView(
+                    "Packing Plan Unavailable",
+                    systemImage: "shippingbox",
+                    description: Text("Return to the load and try again.")
+                )
+            }
+        }
     }
 
     private func loadList(_ session: LoadSession) -> some View {
@@ -56,6 +86,39 @@ struct LiveLoadView: View {
                     snapshot: snapshot,
                     vehicleName: session.vehicle.name,
                     loadedPackageCount: loadedPackageCount(in: session)
+                )
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+
+            Section {
+                PackingSummaryCard(
+                    plan: packingPlan,
+                    isSolving: isSolvingPacking,
+                    packageChoices: packingPackageChoices(in: session),
+                    selectedPackage: selectedFitPackage(in: session),
+                    fitCount: packingFitCount,
+                    onSelectPackage: { packageID in
+                        selectedFitPackageID = packageID
+                        packingFitCount = nil
+                        Task {
+                            guard let plan = packingPlan else { return }
+                            await calculatePackingFit(
+                                for: session,
+                                plan: plan,
+                                packageID: packageID
+                            )
+                        }
+                    },
+                    onViewPlan: {
+                        showingPackingPlan = true
+                    },
+                    onReorganize: {
+                        isSolvingPacking = true
+                        packingFitCount = nil
+                        packingCalculationGeneration += 1
+                        packingVariant = (packingVariant + 1) % PackingSolver.layoutVariantCount
+                    }
                 )
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -136,18 +199,104 @@ struct LiveLoadView: View {
                     )
                 }
 
-                Text("Space left is estimated from package volume versus the vehicle's conservative measured volume. It does not yet guarantee a physical 3D arrangement.")
+                Text("Capacity and packing use a conservative rectangular estimate. Confirm doors, wheel wells, tie-downs, weight, fragility, and safe visibility before driving.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
         .listStyle(.insetGrouped)
+        .task(id: packingTaskID(for: session)) {
+            await rebuildPackingPlan(for: session)
+        }
     }
 
     private func loadedPackageCount(in session: LoadSession) -> Int {
         session.items
             .filter { $0.status == .loaded }
             .reduce(0) { $0 + $1.quantity }
+    }
+
+    private func packingPackageChoices(in session: LoadSession) -> [PackageEntry] {
+        session.items.filter { package in
+            package.status == .loaded && package.dimensions?.isValid == true
+        }
+    }
+
+    private func selectedFitPackage(in session: LoadSession) -> PackageEntry? {
+        let choices = packingPackageChoices(in: session)
+        if let selectedFitPackageID,
+           let selected = choices.first(where: { $0.id == selectedFitPackageID }) {
+            return selected
+        }
+        return choices.last
+    }
+
+    private func packingTaskID(for session: LoadSession) -> String {
+        "\(session.id.uuidString)-\(session.updatedAt.timeIntervalSinceReferenceDate)-\(packingVariant)"
+    }
+
+    private func rebuildPackingPlan(for session: LoadSession) async {
+        if packingPlan?.variant == packingVariant,
+           packingPlanSessionUpdatedAt == session.updatedAt {
+            isSolvingPacking = false
+            return
+        }
+
+        isSolvingPacking = true
+        packingFitCount = nil
+        packingCalculationGeneration += 1
+        let requestedVariant = packingVariant
+        let sessionSnapshot = session
+        let updatedPlan = await Task.detached(priority: .userInitiated) {
+            PackingSolver.solve(session: sessionSnapshot, variant: requestedVariant)
+        }.value
+        guard !Task.isCancelled,
+              requestedVariant == packingVariant,
+              cargoStore.loadSession(id: sessionID)?.updatedAt == session.updatedAt else {
+            return
+        }
+
+        packingPlan = updatedPlan
+        packingPlanSessionUpdatedAt = session.updatedAt
+        let choices = packingPackageChoices(in: session)
+        if selectedFitPackageID == nil
+            || !choices.contains(where: { $0.id == selectedFitPackageID }) {
+            selectedFitPackageID = choices.last?.id
+        }
+        isSolvingPacking = false
+        await calculatePackingFit(for: session, plan: updatedPlan)
+    }
+
+    private func calculatePackingFit(
+        for session: LoadSession,
+        plan: PackingPlan,
+        packageID requestedPackageID: UUID? = nil
+    ) async {
+        packingCalculationGeneration += 1
+        let generation = packingCalculationGeneration
+        let packageID = requestedPackageID ?? selectedFitPackageID
+        guard plan.allItemsFit,
+              plan.placements.count < PackingSolver.maximumPackedInstances,
+              let packageID,
+              let dimensions = packingPackageChoices(in: session)
+                .first(where: { $0.id == packageID })?.dimensions else {
+            packingFitCount = 0
+            return
+        }
+
+        packingFitCount = nil
+        let currentPlan = plan
+        let count = await Task.detached(priority: .utility) {
+            PackingSolver.additionalFitCount(of: dimensions, in: currentPlan, limit: 100)
+        }.value
+        guard !Task.isCancelled,
+              generation == packingCalculationGeneration,
+              selectedFitPackageID == packageID,
+              packingPlan == plan,
+              cargoStore.loadSession(id: sessionID)?.updatedAt == session.updatedAt else {
+            return
+        }
+        packingFitCount = count
     }
 
     private func addPackage(_ draft: PackageDraft) -> Result<Void, CargoStoreError> {

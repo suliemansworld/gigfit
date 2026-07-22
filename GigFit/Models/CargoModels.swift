@@ -2,7 +2,7 @@ import Foundation
 
 /// Box dimensions captured independently from a scan so a package remains usable
 /// even if its source scan is later deleted.
-struct PackageDimensions: Codable, Equatable {
+struct PackageDimensions: Codable, Equatable, Sendable {
     var lengthMeters: Double
     var widthMeters: Double
     var heightMeters: Double
@@ -34,7 +34,7 @@ struct PackageDimensions: Codable, Equatable {
 
 /// A reusable vehicle/cargo-space profile. Capacity and dimensions are snapshots,
 /// rather than live lookups, so old loads survive deletion of the original scan.
-struct VehicleProfile: Identifiable, Codable, Equatable {
+struct VehicleProfile: Identifiable, Codable, Equatable, Sendable {
     var id: UUID
     var name: String
     var sourceScanID: UUID
@@ -70,7 +70,7 @@ struct VehicleProfile: Identifiable, Codable, Equatable {
     }
 }
 
-enum PackageStatus: String, Codable, CaseIterable, Identifiable {
+enum PackageStatus: String, Codable, CaseIterable, Identifiable, Sendable {
     case loaded
     case delivered
 
@@ -81,7 +81,7 @@ enum PackageStatus: String, Codable, CaseIterable, Identifiable {
 /// One package line in a live load. Quantity is always normalized to at least one.
 /// A screenshot may be attached before dimensions are known; undimensioned entries
 /// remain visible in the tally but contribute zero to occupied capacity.
-struct PackageEntry: Identifiable, Codable, Equatable {
+struct PackageEntry: Identifiable, Codable, Equatable, Sendable {
     var id: UUID
     var name: String
     var notes: String
@@ -152,7 +152,7 @@ struct PackageEntry: Identifiable, Codable, Equatable {
     }
 }
 
-enum LoadSessionStatus: String, Codable, CaseIterable, Identifiable {
+enum LoadSessionStatus: String, Codable, CaseIterable, Identifiable, Sendable {
     case active
     case completed
 
@@ -161,7 +161,7 @@ enum LoadSessionStatus: String, Codable, CaseIterable, Identifiable {
 
 /// A live Roadie/gig load. It embeds the vehicle snapshot used for its capacity
 /// calculation while retaining that profile's persistent identity.
-struct LoadSession: Identifiable, Codable, Equatable {
+struct LoadSession: Identifiable, Codable, Equatable, Sendable {
     var id: UUID
     var name: String
     var vehicle: VehicleProfile
@@ -192,7 +192,7 @@ struct LoadSession: Identifiable, Codable, Equatable {
 }
 
 /// Versioned persistence envelope kept separate from `gigfit_scans.json`.
-struct CargoStoreData: Codable, Equatable {
+struct CargoStoreData: Codable, Equatable, Sendable {
     static let currentSchemaVersion = 1
 
     var schemaVersion: Int

@@ -59,7 +59,18 @@ The first usable slice of the original delivery-driver MVP is implemented:
 4. Track each package as loaded or delivered. Quantity changes, deliveries, deletions, and app relaunches update the remaining-space tally immediately.
 5. The dashboard shows occupied volume, remaining volume, total conservative vehicle capacity, and a large remaining-space percentage (for example, 36% occupied displays 64% space left).
 
-Capacity v1 is an honest volume utilization estimate: `loaded package volume × quantity` is subtracted from the vehicle's conservative measured capacity. It does not yet prove that differently shaped packages can be arranged inside the vehicle. The 3D packing solver and placement guide remain a separate next phase.
+Capacity v1 remains an honest volume utilization estimate: `loaded package volume × quantity` is subtracted from the vehicle's conservative measured capacity. The separate packing layer now checks a conservative rectangular arrangement instead of treating volume alone as proof that a load fits.
+
+### Rectangular Packing Plan (v2)
+
+The next Roadie-focused packing slice is implemented locally:
+
+1. `PackingSolver` expands loaded package quantities, excludes delivered entries, and tries all unique 90-degree box rotations inside a conservative rectangular vehicle envelope.
+2. The bounded, deterministic extreme-point heuristic rejects out-of-bounds and overlapping placements and requires supported stacking surfaces. It tries several item orderings and keeps the best plan found. It analyzes up to 72 loaded package copies on-device and labels any remainder as not analyzed.
+3. `LiveLoadView` shows a packing summary alongside the volume dashboard, including placed/unplaced counts and how many additional placements the best-found plan discovered for a selected measured package.
+4. **View Plan** opens numbered isometric and top-down placement diagrams with step-by-step directions from the rear cargo door. **Reorganize** advances to another deterministic layout variant after load changes or on request.
+
+This is deliberately labeled a **rectangular estimate**, not a guarantee or mathematically optimal bin-packing result. The model does not describe wheel wells, curved trim, doors, tie-downs, irregular package shapes, weight distribution, fragility, or safe driver visibility. Drivers must verify those constraints before loading or driving.
 
 ## Architecture
 
@@ -88,6 +99,7 @@ GigFit/
     SafetyInsetCalculator.swift      — Conservative volume inset by confidence
     HexahedronMeshBuilder.swift      — Standalone SCNScene for 3D review
     CapacityCalculator.swift         — Loaded/remaining volume and percentage calculations
+    PackingSolver.swift              — Bounded best-found 3D rectangular packing heuristic
   Storage/
     ScanStore.swift                  — JSON persistence in documents directory
     CargoStore.swift                 — Versioned vehicle/load persistence in gigfit_cargo_v1.json
@@ -99,6 +111,7 @@ GigFit/
     ScanReviewView.swift             — 3D model + dimensions + confidence + save
     CalibrationView.swift            — Optional tape calibration (now has dismissAll hook)
     LiveLoadView.swift               — Live capacity dashboard and package status controls
+    PackingPlanView.swift            — Summary, diagrams, placement steps, fit estimate, and re-solve UI
     PackageEditorView.swift          — Screenshot, notes, quantity, and package measurements
   RoomPlan/
     RoomPlanCaptureController.swift  — RoomCaptureSession wrapper
@@ -113,6 +126,7 @@ GigFit/
     SafetyInsetCalculatorTests.swift
     CalibrationServiceTests.swift
     CargoLoadTests.swift             — Capacity, persistence, delivery, and image-asset tests
+    PackingSolverTests.swift         — Rotations, fit failures, stacking, limits, counts, and determinism
 ```
 
 ## Performance notes
@@ -185,7 +199,7 @@ xcodebuild -quiet \
   CODE_SIGNING_ALLOWED=NO test
 ```
 
-The project currently contains 24 XCTest methods: 14 geometry/calibration tests and 10 cargo-load tests. On July 21, 2026, the full simulator suite reached the XCTest summary with 24 executed and 0 failures. ARKit and LiDAR behavior still requires physical-iPhone testing.
+The project currently contains 34 XCTest methods: 14 geometry/calibration tests, 10 cargo-load tests, and 10 packing-solver tests. On July 21, 2026, the full simulator suite reached the XCTest summary with 34 executed and 0 failures after the packing phase was added. The unsigned Release device build also completed locally. ARKit and LiDAR behavior still requires physical-iPhone testing.
 
 ## Codemagic
 
@@ -229,21 +243,23 @@ Another app may occupy the only concurrent Codemagic builder. Leave GigFit queue
 
 ## MVP progress and next phase
 
-Implemented in the Roadie Live Load v1 slice:
+Implemented in the Roadie Live Load and rectangular packing slices:
 
 - Individual item dimensions from manual entry or a saved GigFit item scan
 - Saved vehicle profiles from measured cargo spaces
 - Roadie/gig-app screenshots and notes attached to package entries
 - Quantity, loaded/delivered status, removal, and a persistent running tally
 - Live occupied/remaining volume and remaining-space percentage
+- Deterministic, bounded 3D best-found placement with 90-degree rotations, quantity expansion, and delivered-item exclusion
+- Placement validation for rectangular bounds, overlap, and supported stacking
+- Dashboard packing summary and best-plan additional-fit estimate for a selected measured package
+- Reorganize plus numbered isometric/top-down placement guidance
 
-Still planned for the **3D bin packing and placement phase**:
+Still planned after this conservative rectangular phase:
 
-- A real 3D packing solver that tests orientation and physical arrangement, not only volume
-- A rendered box arrangement inside the measured vehicle model
-- Defensible "fits N more" predictions for a selected package size
-- "Reorganize" to re-solve after packages are added, removed, or delivered
-- Placement guidance for the next package and saved load history/catalog workflows
+- Vehicle-geometry-aware packing for wheel wells, curved trim, door clearances, and other irregular space
+- Weight distribution, tie-down, fragility, stacking-strength, and safe-visibility constraints
+- Saved load history and reusable package/catalog workflows
 - Optional screenshot OCR/import assistance; v1 stores the screenshot but does not infer package dimensions from it
 
 ## Known risks

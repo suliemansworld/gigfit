@@ -1,6 +1,6 @@
 import Foundation
 
-struct ScanDimensions: Codable, Equatable {
+struct ScanDimensions: Codable, Equatable, Sendable {
     var lengthMeters: Double
     var widthMeters: Double
     var heightMeters: Double

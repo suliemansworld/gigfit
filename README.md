@@ -2,7 +2,7 @@
 
 For architecture, deployment, Apple/TestFlight setup, and agent continuation instructions, see [AGENT_HANDOFF.md](AGENT_HANDOFF.md).
 
-Native iOS app that measures cargo spaces using ARKit and LiDAR when available, then turns those measurements into persistent live-load capacity tracking for Roadie and other delivery work. Drivers can attach a gig-app screenshot to a package, enter or reuse its measurements, and see remaining cargo volume update as packages are loaded or delivered.
+Native iOS app that measures cargo spaces using ARKit and LiDAR when available, then turns those measurements into persistent live-load capacity tracking for Roadie and other delivery work. Drivers can attach a gig-app screenshot to a package, enter or reuse its measurements, see remaining cargo volume update as packages are loaded or delivered, and generate a conservative rectangular packing plan.
 
 ## Architecture
 
@@ -29,6 +29,7 @@ GigFit/
     SafetyInsetCalculator.swift      — Conservative volume inset by confidence
     HexahedronMeshBuilder.swift      — Standalone SCNScene for 3D review
     CapacityCalculator.swift         — Remaining-space calculations
+    PackingSolver.swift              — Bounded best-found 3D rectangular packing
   Storage/
     ScanStore.swift                  — JSON persistence in documents directory
     CargoStore.swift                 — Vehicle profiles and live-load persistence
@@ -39,6 +40,7 @@ GigFit/
     ScanView.swift                   — Floor-calibrated expandable volume workflow
     ScanReviewView.swift             — 3D model + dimensions + confidence + save
     LiveLoadView.swift               — Capacity dashboard and package status controls
+    PackingPlanView.swift            — Packing summary, diagrams, steps, and re-solve UI
     PackageEditorView.swift          — Screenshot, notes, quantity, and dimensions
   Utilities/
     UnitFormatter.swift              — Imperial/metric display formatting
@@ -48,7 +50,18 @@ GigFit/
     SafetyInsetCalculatorTests.swift
     CalibrationServiceTests.swift
     CargoLoadTests.swift
+    PackingSolverTests.swift
 ```
+
+## Roadie packing plan
+
+The packing phase uses a deterministic, bounded heuristic to place loaded package quantities in a conservative rectangular vehicle envelope. Delivered packages are excluded. The solver tries unique 90-degree rotations, enforces container bounds and non-overlap, requires supported stacking surfaces, and keeps the best layout it finds across several item orderings. It analyzes up to 72 loaded package copies on-device and explicitly labels any remainder as not analyzed.
+
+The live-load dashboard shows placed/unplaced status and how many additional placements the best-found plan discovered for a selected measured package. **View Plan** provides numbered isometric and top-down placement guidance from the rear cargo door; **Reorganize** tries another deterministic layout variant.
+
+This is a conservative rectangular estimate, not a guarantee or proof of optimal packing. Irregular vehicle geometry such as wheel wells and curved trim is not modeled, and neither are weight distribution, tie-downs, package fragility, stacking strength, door clearance, or safe driver visibility. Verify the real load before driving.
+
+The project contains 34 XCTest methods, including 10 focused packing-solver tests for rotations, quantity handling, spatial failures, support, bounds, overlap, mobile limits, fit counts, and determinism.
 
 ## Setup on MacBook
 
