@@ -1,0 +1,2 @@
+# Browser automation for tests/run_tests.py. Browser binaries are installed separately.
+playwright==1.61.0

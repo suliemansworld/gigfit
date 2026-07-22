@@ -5,8 +5,15 @@
   "main": "index.html",
   "scripts": {
     "serve": "python3 -m http.server 8080",
-    "test": "python3 tests/test_echo_game.py && python3 tests/test_echo_game_e2e.py",
-    "test:all": "python3 tests/test_echo_game.py && python3 tests/test_echo_game_e2e.py && python3 tests/test_echo_game_fuzz.py && python3 tests/test_cache_lookup.py && python3 tests/test_rotor_fuzz.py"
+    "build": "node scripts/build-web.mjs",
+    "build:ios": "ECHO_TRANSCODE_AUDIO=1 node scripts/build-web.mjs",
+    "ios:add": "npm run build:ios && npx cap add ios --packagemanager SPM",
+    "ios:sync": "npm run build:ios && npx cap sync ios",
+    "ios:open": "npx cap open ios",
+    "test": "python3 tests/run_tests.py",
+    "test:all": "python3 tests/run_tests.py --all",
+    "test:browsers": "python3 tests/run_tests.py --browsers chromium,webkit",
+    "test:static": "python3 tests/run_tests.py --static-only"
   },
   "license": "SEE LICENSE IN LICENSE",
   "private": true,
@@ -20,6 +27,18 @@
     "game"
   ],
   "engines": {
-    "browser": ">= ios-safari 14, >= chrome 90, >= safari 14, >= firefox 88"
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@capacitor/app": "8.1.1",
+    "@capacitor/core": "8.4.2",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/ios": "8.4.2",
+    "@capacitor/preferences": "8.0.1",
+    "@capacitor/screen-reader": "8.0.1",
+    "@capacitor/share": "8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.4.2"
   }
 }

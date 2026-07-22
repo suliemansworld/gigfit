@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Echo Cave">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<script>window.ECHO_BUILD = '20260523a';</script>
+<script>window.ECHO_BUILD = '20260722-ios1';</script>
 <title>Echo Cave</title>
 <meta name="description" content="An audio-first cave exploration game designed for blind and sighted players alike. Memorize your way through the dark.">
 <link rel="icon" href="icons/icon-32.png">
@@ -30,9 +30,16 @@
   input, textarea {
     -webkit-user-select:text;-moz-user-select:text;-ms-user-select:text;user-select:text;
   }
-  html,body{height:100%;overflow:hidden;background:#000;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:#f5f5f7;touch-action:none}
+  html,body{height:100%;overflow:hidden;background:#000;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;color:#f5f5f7;touch-action:manipulation}
   body.audio-only .ui{display:none !important}
   body.audio-only .stage{background:#000 !important}
+  .sr-only{
+    position:fixed !important;width:1px !important;height:1px !important;
+    padding:0 !important;margin:-1px !important;overflow:hidden !important;
+    clip:rect(0,0,0,0) !important;white-space:nowrap !important;border:0 !important;
+  }
+  html.native-app #forceRefreshBtn,
+  html.native-app #diagOverlayBtn{display:none !important}
 
   .stage{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .visual-hint{position:absolute;width:8px;height:8px;border-radius:50%;background:#d4a847;opacity:0;transition:opacity .4s, transform .4s;pointer-events:none}
@@ -190,9 +197,10 @@
   .btn{
     display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:980px;
     background:#d4a847;color:#000;font-weight:500;font-size:1rem;letter-spacing:-.012em;
-    border:0;cursor:pointer;transition:all .2s;font-family:inherit;
+    border:0;cursor:pointer;transition:all .2s;font-family:inherit;text-decoration:none;
   }
   .btn:hover{background:#e8c578;transform:scale(1.04)}
+  .btn.hidden{display:none !important}
   .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(245,245,247,.25)}
   .btn-ghost:hover{background:rgba(245,245,247,.08);transform:none}
   .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
@@ -432,6 +440,21 @@
 <div class="live" id="live" aria-live="off" aria-atomic="true"></div>
 <div class="live" id="liveAssertive" aria-live="off" aria-atomic="true"></div>
 
+<!-- A persistent semantic control surface for VoiceOver and Switch Control.
+     It stays in the accessibility tree when Pure Audio mode hides the HUD. -->
+<div class="sr-only" id="accessibleActions" role="group" aria-label="Echo Cave controls" aria-hidden="true" inert>
+  <p id="accessibleState">The cave has not started.</p>
+  <button type="button" data-echo-action="up">Move forward</button>
+  <button type="button" data-echo-action="left">Move left</button>
+  <button type="button" data-echo-action="listen">Listen and describe this room</button>
+  <button type="button" data-echo-action="right">Move right</button>
+  <button type="button" data-echo-action="down">Retreat</button>
+  <button type="button" data-echo-action="repeat">Repeat last narration</button>
+  <button type="button" data-echo-action="teleport">Teleport to base</button>
+  <button type="button" data-echo-action="menu">Open menu</button>
+  <button type="button" data-echo-action="settings">Open settings</button>
+</div>
+
 <div class="ui" id="hud">
   <div class="top-bar">
     <div class="top-info">
@@ -443,6 +466,11 @@
       </div>
     </div>
     <div class="top-actions">
+      <button class="icon-btn" id="menuBtn" aria-label="Open menu" title="Menu">
+        <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <path d="M5 7 H19 M5 12 H19 M5 17 H19"/>
+        </svg>
+      </button>
       <button class="icon-btn" id="schematicBtn" aria-label="Show cave map" title="Cave map (M)">
         <svg viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M3.5 5.7 L9 3.7 L15 5.7 L20.5 3.7 V18.3 L15 20.3 L9 18.3 L3.5 20.3 Z"/>
@@ -534,7 +562,7 @@
         </svg>
       </button>
     </div>
-    <div class="status" id="status" aria-hidden="true">A still chamber. The cave waits.</div>
+    <div class="status" id="status" aria-live="off">A still chamber. The cave waits.</div>
   </div>
 </div>
 
@@ -556,7 +584,7 @@
     <p class="welcome-sub">Tap anywhere to enter the cave.</p>
     <p class="welcome-mini">Best with headphones · Sound &amp; haptics on</p>
   </div>
-  <button class="welcome-tap" id="welcomeTap" aria-label="Tap to enter the cave"></button>
+  <button class="welcome-tap" id="welcomeTap" aria-label="Enter Echo Cave"></button>
 </div>
 
 <!-- Intro cinematic — runs after welcome tap, before game -->
@@ -624,7 +652,7 @@
     <h2 id="brTitle">Braille Export</h2>
     <p>Below is your cave's path in Unicode Braille. On a refreshable braille display, this renders as physical raised dots. Or copy the text and print to paper braille.</p>
     <div id="brailleBody" class="schematic" style="font-size:1.05rem;line-height:1.7;letter-spacing:.05em" aria-label="Cave path in braille"></div>
-    <p style="font-size:.85rem;color:#a1a1a6;margin-top:14px"><strong>Print:</strong> Copy the text and paste into any braille translator (eg <a href="https://www.brailletranslator.org/" target="_blank" rel="noopener noreferrer" style="color:#d4a847">brailletranslator.org</a>) or directly to a braille embosser.</p>
+    <p style="font-size:.85rem;color:#a1a1a6;margin-top:14px"><strong>Print:</strong> Copy the text and paste it into your preferred braille translator, or send it directly to a braille embosser.</p>
     <div class="btn-row">
       <button class="btn btn-ghost" id="copyBrailleBtn">Copy text</button>
       <button class="btn" id="brailleDone" style="margin-left:auto">Done</button>
@@ -641,7 +669,7 @@
     <div class="item-grid" id="invGrid"></div>
     <div class="btn-row">
       <button class="btn btn-ghost" id="invAchBtn">🏅 Achievements</button>
-      <button class="btn btn-ghost" id="invTestNewBtn" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">Test as new player</button>
+      <button class="btn btn-ghost" id="invTestNewBtn" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">Clear all progress</button>
       <button class="btn btn-ghost" id="resetCaveBtn" style="margin-left:auto;color:#ff6464;border-color:rgba(255,100,100,.3)">Reset cave</button>
     </div>
   </div>
@@ -783,8 +811,9 @@
     <div class="btn-row">
       <button class="btn btn-ghost" id="newCaveBtn" style="color:#ff6464;border-color:rgba(255,100,100,.3)">Reset cave</button>
       <button class="btn btn-ghost" id="replayTutorialBtn" style="color:#86efac;border-color:rgba(134,239,172,.3)">📖 Replay tutorial</button>
-      <button class="btn btn-ghost" id="testAsNewBtn" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">Test as new player</button>
+      <button class="btn btn-ghost" id="testAsNewBtn" style="color:#a78bfa;border-color:rgba(167,139,250,.3)">Clear all progress</button>
       <button class="btn btn-ghost" id="forceRefreshBtn" style="color:#67e8f9;border-color:rgba(103,232,249,.3)">⟳ Force refresh</button>
+      <button class="btn btn-ghost" id="privacyBtn">Privacy &amp; support</button>
       <button class="btn" id="settingsDone" style="margin-left:auto">Done</button>
     </div>
     <h3 style="margin-top:24px;color:#a1a1a6;font-size:.85rem">Diagnostics</h3>
@@ -793,7 +822,62 @@
       <button class="btn btn-ghost" id="diagRefreshBtn" style="font-size:.8rem;padding:6px 12px">↻ Refresh diag</button>
       <button class="btn btn-ghost" id="diagOverlayBtn" style="font-size:.8rem;padding:6px 12px">📊 Toggle live overlay</button>
       <button class="btn btn-ghost" id="diagCopyBtn" style="font-size:.8rem;padding:6px 12px">📋 Copy</button>
-      <button class="btn btn-ghost" id="diagLiveLinkBtn" style="font-size:.8rem;padding:6px 12px;color:#67e8f9;border-color:rgba(103,232,249,.3)">📡 Live link off</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="menuPanel" role="dialog" aria-labelledby="menuTitle" aria-modal="true">
+  <div class="panel-inner">
+    <button class="panel-close" id="menuClose" aria-label="Close menu">✕</button>
+    <h2 id="menuTitle">Menu</h2>
+    <p>Every game action here is a standard labeled control. Custom gestures are optional shortcuts.</p>
+    <div class="btn-row">
+      <button class="btn" id="menuListenBtn">Listen</button>
+      <button class="btn btn-ghost" id="menuRepeatBtn">Repeat narration</button>
+      <button class="btn btn-ghost" id="menuTeleportBtn">Teleport home</button>
+      <button class="btn btn-ghost" id="menuDailyBtn">Daily Cave</button>
+      <button class="btn btn-ghost hidden" id="menuShareBtn">Share daily result</button>
+      <button class="btn btn-ghost" id="menuInventoryBtn">Inventory</button>
+      <button class="btn btn-ghost" id="menuJournalBtn">Journal</button>
+      <button class="btn btn-ghost" id="menuAchievementsBtn">Achievements</button>
+      <button class="btn btn-ghost" id="menuMapBtn">Cave map</button>
+      <button class="btn btn-ghost hidden" id="menuDescendBtn">Descend deeper</button>
+      <button class="btn btn-ghost" id="menuBrailleBtn">Braille guide</button>
+      <button class="btn btn-ghost" id="menuHelpBtn">Help &amp; tips</button>
+      <button class="btn btn-ghost" id="menuSettingsBtn">Settings</button>
+      <button class="btn btn-ghost" id="menuPrivacyBtn">Privacy &amp; support</button>
+      <button class="btn" id="menuDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="privacyPanel" role="dialog" aria-labelledby="privacyTitle" aria-modal="true">
+  <div class="panel-inner">
+    <button class="panel-close" id="privacyClose" aria-label="Close privacy and support">✕</button>
+    <h2 id="privacyTitle">Privacy &amp; support</h2>
+    <p><strong>Echo Cave does not collect, track, sell, or transmit personal data.</strong></p>
+    <p>Your cave, progress, inventory, achievements, journal, and settings stay on this device. The iOS app keeps a native backup of the same save so progress can survive WebKit storage cleanup.</p>
+    <p>There are no accounts, advertisements, analytics SDKs, location services, camera access, microphone access, or motion tracking. Narration and game audio are bundled with the app and work offline.</p>
+    <p>The Share button opens the iOS share sheet only when you choose it. The service you select then handles the text under its own privacy terms.</p>
+    <p>Reset Cave deletes the current cave and starts a new one. “Clear all progress” removes all local game data and settings. Removing the app deletes any remaining local data.</p>
+    <p><a href="https://echo-cave.suliemanhaidari.chatgpt.site/privacy" target="_blank" rel="noopener">Read the full Echo Cave Privacy Policy</a>.</p>
+    <h3>Support</h3>
+    <p>For help, accessibility feedback, or a deletion question, email <a href="mailto:vidalsulieman@gmail.com">vidalsulieman@gmail.com</a>. Please never include sensitive personal information in a diagnostic report.</p>
+    <div class="btn-row">
+      <a class="btn btn-ghost" href="https://echo-cave.suliemanhaidari.chatgpt.site/support" target="_blank" rel="noopener">Open support page</a>
+      <a class="btn btn-ghost" href="https://echo-cave.suliemanhaidari.chatgpt.site/accessibility" target="_blank" rel="noopener">Accessibility</a>
+      <button class="btn" id="privacyDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="confirmationPanel" role="alertdialog" aria-labelledby="confirmationTitle" aria-describedby="confirmationMessage" aria-modal="true">
+  <div class="panel-inner">
+    <h2 id="confirmationTitle">Please confirm</h2>
+    <p id="confirmationMessage"></p>
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="confirmationCancel">Cancel</button>
+      <button class="btn" id="confirmationAccept">Confirm</button>
     </div>
   </div>
 </div>
@@ -805,6 +889,31 @@
 
 <script>
 (()=>{
+  const IS_NATIVE_APP = location.protocol === 'capacitor:' || !!(
+    window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function'
+    && window.Capacitor.isNativePlatform()
+  );
+  window.ECHO_NATIVE_APP = IS_NATIVE_APP;
+  document.documentElement.classList.toggle('native-app', IS_NATIVE_APP);
+
+  function nativePlugin(name){
+    const publicPlugins = {
+      App: window.capacitorApp && window.capacitorApp.App,
+      Haptics: window.capacitorHaptics && window.capacitorHaptics.Haptics,
+      Preferences: window.capacitorPreferences && window.capacitorPreferences.Preferences,
+      ScreenReader: window.capacitorScreenReader && window.capacitorScreenReader.ScreenReader,
+      Share: window.capacitorShare && window.capacitorShare.Share,
+    };
+    try {
+      // App Store builds load the pinned package IIFEs and take this public
+      // registerPlugin path. The legacy registry remains a development-only
+      // fallback for older hand-built Capacitor shells.
+      return publicPlugins[name]
+        || (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[name]);
+    }
+    catch(e){ return null; }
+  }
+
   // ════════════════════════════════════════════════════════════
   // STORAGE  (v3 — spine model)
   // ════════════════════════════════════════════════════════════
@@ -926,6 +1035,7 @@
     try{
       if (location.search.indexOf('fresh') !== -1){
         localStorage.removeItem(STORAGE_KEY);
+        removeNativeSave(STORAGE_KEY);
         for (const k of LEGACY_STORAGE_KEYS){ localStorage.removeItem(k); }
         history.replaceState({}, '', location.pathname);
         return defaultState();
@@ -967,9 +1077,45 @@
     return parsed;
   }
   function currentSaveKey(){ return state && state.isDaily ? ('echo-cave-daily-' + dateUTC()) : STORAGE_KEY; }
+  function mirrorNativeSave(key, value){
+    if (!IS_NATIVE_APP) return;
+    const preferences = nativePlugin('Preferences');
+    if (!preferences || typeof preferences.set !== 'function') return;
+    Promise.resolve(preferences.set({ key, value })).catch(() => {});
+  }
+  function removeNativeSave(key){
+    if (!IS_NATIVE_APP) return Promise.resolve();
+    const preferences = nativePlugin('Preferences');
+    if (!preferences || typeof preferences.remove !== 'function') return Promise.resolve();
+    return Promise.resolve(preferences.remove({ key })).catch(() => {});
+  }
+  function clearAllSaveData(){
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--){
+        const key = localStorage.key(i);
+        if (key && (key === STORAGE_KEY || LEGACY_STORAGE_KEYS.includes(key) || key.startsWith('echo-cave-daily-'))){
+          localStorage.removeItem(key);
+        }
+      }
+    } catch(e){}
+    if (!IS_NATIVE_APP) return Promise.resolve();
+    const preferences = nativePlugin('Preferences');
+    if (!preferences || typeof preferences.keys !== 'function') return Promise.resolve();
+    return Promise.resolve(preferences.keys()).then(result => {
+      const keys = (result && result.keys || []).filter(key =>
+        key === STORAGE_KEY || LEGACY_STORAGE_KEYS.includes(key) || key.startsWith('echo-cave-daily-')
+      );
+      return Promise.all(keys.map(removeNativeSave));
+    }).catch(() => {});
+  }
   function save(){
     try{
-      localStorage.setItem(currentSaveKey(), JSON.stringify(state));
+      const key = currentSaveKey();
+      const value = JSON.stringify(state);
+      localStorage.setItem(key, value);
+      // WKWebView storage is normally durable. Preferences is a second,
+      // native-owned copy so an OS WebKit cleanup cannot silently erase a run.
+      mirrorNativeSave(key, value);
     } catch(e){
       // Surface persistence failures to the on-device diagnostic so a buyer
       // or operator can see when localStorage quota / private browsing /
@@ -1005,6 +1151,40 @@
   }
 
   let state = load();
+
+  // Restore the native backup only when WebKit has no save of its own. The
+  // one-shot session flag prevents a malformed preference from reload-looping.
+  function hydrateNativeSave(){
+    if (!IS_NATIVE_APP) return;
+    const preferences = nativePlugin('Preferences');
+    if (!preferences || typeof preferences.get !== 'function') return;
+    let alreadyHydrated = false;
+    try { alreadyHydrated = sessionStorage.getItem('echo-native-hydrated') === '1'; } catch(e){}
+    if (alreadyHydrated) return;
+    try { sessionStorage.setItem('echo-native-hydrated', '1'); } catch(e){}
+    const restoreKey = key => {
+      try { if (localStorage.getItem(key)) return Promise.resolve(false); } catch(e){}
+      return Promise.resolve(preferences.get({ key })).then(result => {
+        if (!result || !result.value) return false;
+        try {
+          const parsed = JSON.parse(result.value);
+          if (!parsed || typeof parsed !== 'object') return false;
+          localStorage.setItem(key, result.value);
+          return true;
+        } catch(e){ return false; }
+      });
+    };
+    const candidateKeys = typeof preferences.keys === 'function'
+      ? Promise.resolve(preferences.keys()).then(result => (result && result.keys || []).filter(key =>
+          key === STORAGE_KEY || LEGACY_STORAGE_KEYS.includes(key) || key.startsWith('echo-cave-daily-')
+        ))
+      : Promise.resolve([STORAGE_KEY]);
+    candidateKeys
+      .then(keys => Promise.all(keys.map(restoreKey)))
+      .then(restored => { if (restored.some(Boolean)) location.reload(); })
+      .catch(() => {});
+  }
+  hydrateNativeSave();
 
   // ════════════════════════════════════════════════════════════
   // CAVE GEN — SPINE + BRANCHES
@@ -1103,7 +1283,7 @@
     return a;
   }
 
-  function generateCave(seed, level){
+  function generateCave(seed, level, minimumSpineLength){
     const lvl = Math.max(1, level || 1);
     const rng = rngFromSeed(seed);
     const rooms = {};
@@ -1144,7 +1324,8 @@
     // ── 1) SPINE: linear path from base to exit ──
     // Each level adds ~2 rooms to the spine — caves get longer the deeper you go.
     const baseSpine = 7 + Math.floor(rng() * 3); // 7-9 at level 1
-    const spineLengthTarget = baseSpine + (lvl - 1) * 2;
+    const requestedMinimum = Math.max(0, Math.floor(minimumSpineLength || 0));
+    const spineLengthTarget = Math.max(baseSpine + (lvl - 1) * 2, requestedMinimum);
     const spineRooms = [];
     let prevDirOut = null;
     let curPos = { x: 0, y: 0 };
@@ -1168,9 +1349,12 @@
       if (i < spineLengthTarget - 1){
         // Pick the next direction; only spatial-free cells qualify so the
         // spine never crosses or overlaps itself.
-        const valid = DIRS.filter(d => d !== r.parentDir);
+        // The main route always trends deeper (north/up). Keeping it from
+        // stepping south guarantees that an unoccupied north cell remains
+        // available, so a deeper cave cannot be cut short by its own path.
+        const valid = DIRS.filter(d => d !== r.parentDir && d !== 'down');
         const spatial = valid.filter(d => cellFree(stepPos(curPos, d)));
-        if (spatial.length === 0) break;  // spine truncates here; this room becomes the exit
+        if (spatial.length === 0) break;  // defensive fallback; north should remain free
         prevDirOut = spatial[Math.floor(rng() * spatial.length)];
         curPos = stepPos(curPos, prevDirOut);
       }
@@ -1525,58 +1709,99 @@
   // ship any subset of these and the rest will sound synthesized.
   const AUDIO_ASSETS = {
     // Friction loops (continuous while finger drags)
-    'friction-stone':  'audio/friction-stone.wav',
-    'friction-wet':    'audio/friction-wet.wav',
-    'friction-sand':   'audio/friction-sand.wav',
-    'friction-gravel': 'audio/friction-gravel.wav',
+    'friction-stone':  'audio/friction-stone.mp3',
+    'friction-wet':    'audio/friction-wet.mp3',
+    'friction-sand':   'audio/friction-sand.mp3',
+    'friction-gravel': 'audio/friction-gravel.mp3',
     // Footstep one-shots (plays on each room entry)
-    'step-stone':      'audio/step-stone.wav',
-    'step-wet':        'audio/step-wet.wav',
-    'step-sand':       'audio/step-sand.wav',
-    'step-gravel':     'audio/step-gravel.wav',
-    // Ambient drones
-    'ambient-shallow': 'audio/ambient-shallow.wav',
-    'ambient-deep':    'audio/ambient-deep.wav',
+    'step-stone':      'audio/step-stone.mp3',
+    'step-wet':        'audio/step-wet.mp3',
+    'step-sand':       'audio/step-sand.mp3',
+    'step-gravel':     'audio/step-gravel.mp3',
     // Landmark room loops
-    'landmark-drip':   'audio/drip-loop.wav',
-    'landmark-wind':   'audio/wind-loop.wav',
-    'landmark-hum':    'audio/hum-loop.wav',
-    'landmark-chime':  'audio/chime-loop.wav',
-    'landmark-echo':   'audio/echo-loop.wav',
+    'landmark-drip':   'audio/drip-loop.mp3',
+    'landmark-wind':   'audio/wind-loop.mp3',
+    'landmark-hum':    'audio/hum-loop.mp3',
+    'landmark-chime':  'audio/chime-loop.mp3',
+    'landmark-echo':   'audio/echo-loop.mp3',
     // Welcome screen music — ElevenLabs-generated calm fantasy ambient
     'welcome-music':        'audio/welcome-music.mp3',
     // Per-cave atmospheric beds (real recordings via ElevenLabs)
-    'bed-base-classic':     'audio/bed-base-classic.wav',
-    'bed-classic-shallow':  'audio/bed-classic-shallow.wav',
-    'bed-classic-mid':      'audio/bed-classic-mid.wav',
-    'bed-classic-deep':     'audio/bed-classic-deep.wav',
-    'bed-base-grotto':      'audio/bed-base-grotto.wav',
-    'bed-grotto-shallow':   'audio/bed-grotto-shallow.wav',
-    'bed-grotto-mid':       'audio/bed-grotto-mid.wav',
-    'bed-grotto-deep':      'audio/bed-grotto-deep.wav',
+    'bed-base-classic':     'audio/bed-base-classic.mp3',
+    'bed-classic-shallow':  'audio/bed-classic-shallow.mp3',
+    'bed-classic-mid':      'audio/bed-classic-mid.mp3',
+    'bed-classic-deep':     'audio/bed-classic-deep.mp3',
+    'bed-base-grotto':      'audio/bed-base-grotto.mp3',
+    'bed-grotto-shallow':   'audio/bed-grotto-shallow.mp3',
+    'bed-grotto-mid':       'audio/bed-grotto-mid.mp3',
+    'bed-grotto-deep':      'audio/bed-grotto-deep.mp3',
   };
   const loadedBuffers = {};
+  const assetRequests = {};
+  const assetLastUsed = {};
+  const MAX_ASSET_CACHE_BYTES = 64 * 1024 * 1024;
   let assetsRequested = false;
+  function decodedBytes(buffer){
+    return buffer && buffer.length && buffer.numberOfChannels
+      ? buffer.length * buffer.numberOfChannels * 4
+      : 0;
+  }
+  function trimAssetCache(protectedKeys=[]){
+    const protectedSet = new Set(protectedKeys);
+    let total = Object.values(loadedBuffers).reduce((sum, b) => sum + decodedBytes(b), 0);
+    if (total <= MAX_ASSET_CACHE_BYTES) return;
+    const oldest = Object.keys(loadedBuffers)
+      .filter(key => !protectedSet.has(key))
+      .sort((a, b) => (assetLastUsed[a] || 0) - (assetLastUsed[b] || 0));
+    for (const key of oldest){
+      if (total <= MAX_ASSET_CACHE_BYTES) break;
+      total -= decodedBytes(loadedBuffers[key]);
+      delete loadedBuffers[key];
+      delete assetLastUsed[key];
+    }
+  }
+  function loadAsset(key){
+    if (loadedBuffers[key]){
+      assetLastUsed[key] = Date.now();
+      return Promise.resolve(loadedBuffers[key]);
+    }
+    if (assetRequests[key]) return assetRequests[key];
+    const c = ensureAudio();
+    const path = AUDIO_ASSETS[key];
+    if (!c || !path) return Promise.resolve(null);
+    const url = path + '?v=' + (window.ECHO_BUILD || '1');
+    assetRequests[key] = fetch(url, { cache: 'no-cache' })
+      .then(r => r.ok ? r.arrayBuffer() : Promise.reject(new Error('audio ' + r.status)))
+      .then(ab => c.decodeAudioData(ab))
+      .then(buf => {
+        loadedBuffers[key] = buf;
+        assetLastUsed[key] = Date.now();
+        const active = [ambientBedKey, harmonicPlaying ? 'welcome-music' : null].filter(Boolean);
+        trimAssetCache(active);
+        return buf;
+      })
+      .catch(() => null)
+      .finally(() => { delete assetRequests[key]; });
+    return assetRequests[key];
+  }
   function preloadAssets(){
     if (assetsRequested) return;
+    if (!ensureAudio()) return;
     assetsRequested = true;
-    const c = ensureAudio(); if (!c) return;
-    // Cache-bust audio URLs so phones never serve a stale .wav.
-    // Using build-time tag below; bump it whenever audio is regenerated.
-    const ASSET_VERSION = (window.ECHO_BUILD || '1');
-    for (const key in AUDIO_ASSETS){
-      const url = AUDIO_ASSETS[key] + '?v=' + ASSET_VERSION;
-      fetch(url, { cache: 'no-cache' })
-        .then(r => r.ok ? r.arrayBuffer() : Promise.reject('404'))
-        .then(ab => c.decodeAudioData(ab))
-        .then(buf => { loadedBuffers[key] = buf; })
-        .catch(() => { /* file missing → silent fallback to synth */ });
-    }
-    // Voice manifest fetch — clip preload happens inside loadVoiceManifest's
-    // .then() so timing isn't a guess.
+    // Warm only the first-screen and common movement sounds. Beds, landmarks,
+    // floor loops, and narration are fetched from the local bundle on demand.
+    // This keeps decoded WebKit memory bounded on older iPhones.
+    ['welcome-music', 'step-stone', 'step-wet', 'step-sand', 'step-gravel',
+      (state.settings.theme || 'classic') === 'grotto' ? 'bed-base-grotto' : 'bed-base-classic']
+      .forEach(key => { loadAsset(key); });
     loadVoiceManifest();
   }
-  function getRealBuffer(key){ return loadedBuffers[key] || null; }
+  function getRealBuffer(key){
+    const buffer = loadedBuffers[key] || null;
+    if (buffer) assetLastUsed[key] = Date.now();
+    else loadAsset(key);
+    return buffer;
+  }
 
   // ── REVERB ENGINE — convolver per chamber size ─────────────────
   // Synthesizes 4 impulse-response profiles. Updated whenever room changes.
@@ -2549,10 +2774,13 @@
     if (ambient && ambientBedKey === targetKey) return;  // already playing the right bed
     const buf = getRealBuffer(targetKey);
     if (!buf){
-      // Bed not loaded yet — DO NOT fall back to a synth oscillator. The user
-      // explicitly does not want the original synth tones layered over real
-      // cave audio. Stay silent until the real recording is decoded; the next
-      // room change (or this one re-evaluated) will play it.
+      // Start as soon as the local recording finishes decoding, provided the
+      // player is still in the same depth band. Never substitute a synth bed.
+      loadAsset(targetKey).then(loaded => {
+        if (!loaded || !state.cave) return;
+        const current = curRoom();
+        if (current && bedKeyFor(current.depth) === targetKey) setAmbient(current.depth);
+      });
       return;
     }
     // Fade out previous bed
@@ -2637,13 +2865,14 @@
       else if (kind === 'exit') navigator.vibrate([100, 50, 100, 50, 100, 50, 200]);
       else if (kind === 'teleport') navigator.vibrate([100, 30, 50, 30, 30]);
     }
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics){
-      const H = window.Capacitor.Plugins.Haptics;
-      if (kind === 'wall') H.impact({style:'Heavy'});
-      else if (kind === 'step') H.impact({style:'Light'});
-      else if (kind === 'mainvein') H.impact({style:'Medium'});
-      else if (kind === 'loot' || kind === 'exit') H.notification({type:'SUCCESS'});
-    }
+    const H = nativePlugin('Haptics');
+    if (!H) return;
+    let pulse = null;
+    if (kind === 'wall' || kind === 'teleport') pulse = H.impact({ style:'HEAVY' });
+    else if (kind === 'sealed' || kind === 'mainvein') pulse = H.impact({ style:'MEDIUM' });
+    else if (kind === 'step' || kind === 'back') pulse = H.impact({ style:'LIGHT' });
+    else if (kind === 'loot' || kind === 'exit') pulse = H.notification({ type:'SUCCESS' });
+    if (pulse && typeof pulse.catch === 'function') pulse.catch(() => {});
   }
 
   // ════════════════════════════════════════════════════════════
@@ -2653,12 +2882,47 @@
   // ════════════════════════════════════════════════════════════
   let voiceManifest = null;          // { stem: { text, wav } }
   let voiceTextIndex = null;          // text → stem (for speak() lookup)
-  const voiceBuffers = {};            // stem → AudioBuffer
+  const voiceBuffers = {};            // stem → AudioBuffer | 'pending'
+  const voiceRequests = {};
+  const voiceLastUsed = {};
+  const MAX_VOICE_CACHE_BYTES = 48 * 1024 * 1024;
   // Every clip scheduled by the most recent speak() — we keep ALL of them so
   // a follow-up speak() with cancel:true can stop the entire queue, not just
   // the last source. Without this, a multi-clip utterance could overlap the
   // next utterance because earlier-scheduled clips kept playing on schedule.
   let voiceQueue = [];
+  function trimVoiceCache(extraProtected=[]){
+    const protectedSet = new Set(extraProtected.concat(voiceQueue.map(item => item.stem).filter(Boolean)));
+    let total = Object.values(voiceBuffers)
+      .filter(buffer => buffer && buffer !== 'pending')
+      .reduce((sum, buffer) => sum + decodedBytes(buffer), 0);
+    if (total <= MAX_VOICE_CACHE_BYTES) return;
+    const oldest = Object.keys(voiceBuffers)
+      .filter(stem => voiceBuffers[stem] !== 'pending' && !protectedSet.has(stem))
+      .sort((a, b) => (voiceLastUsed[a] || 0) - (voiceLastUsed[b] || 0));
+    for (const stem of oldest){
+      if (total <= MAX_VOICE_CACHE_BYTES) break;
+      total -= decodedBytes(voiceBuffers[stem]);
+      delete voiceBuffers[stem];
+      delete voiceLastUsed[stem];
+    }
+  }
+  function rememberVoiceBuffer(stem, buffer){
+    voiceBuffers[stem] = buffer;
+    voiceLastUsed[stem] = Date.now();
+    trimVoiceCache([stem]);
+    return buffer;
+  }
+  function preloadVoiceBatch(stems, concurrency=4){
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < stems.length){
+        const stem = stems[cursor++];
+        await preloadVoiceClipPromise(stem);
+      }
+    };
+    return Promise.allSettled(Array.from({ length: Math.min(concurrency, stems.length) }, worker));
+  }
   function loadVoiceManifest(){
     if (voiceManifest !== null) return;
     voiceManifest = {};
@@ -2668,12 +2932,8 @@
         voiceManifest = m;
         voiceTextIndex = {};
         for (const stem in m){ voiceTextIndex[m[stem].text.trim().toLowerCase()] = stem; }
-        // Two-phase preload. iOS Safari serializes decodeAudioData() per audio
-        // context, and 615 concurrent fetches make priority clips wait behind
-        // hundreds of others. So we load PRIORITY clips serially first (each
-        // fetched + decoded before the next), THEN fire off the rest in
-        // parallel. Net effect: welcome / intro / tutorial speech is reliably
-        // ready by the time speak() fires, even on a slow iPhone connection.
+        // Warm the opening flow with a small concurrency cap. Everything else
+        // is loaded on first use and retained only inside the LRU budget.
         const PRIORITY = [
           // Welcome greeting (fires within seconds of first interaction)
           'welcome-greeting-full', 'welcome-greeting', 'welcome-tap-anywhere',
@@ -2686,10 +2946,6 @@
           'tutorial-in-the-dark', 'tutorial-first-cave', 'tutorial-sealed',
           'tutorial-listen', 'tutorial-once-you-do', 'tutorial-teleport-v3',
           'tutorial-menu-hold', 'tutorial-tap-begin',
-          // Journal fragments — fire on first loot pickup at depth 3+. Without
-          // priority preload these race against the cave bed downloads on
-          // iPhone and lose, falling through to system voice.
-          ...Array.from({length: 34}, (_, i) => 'journal-frag-' + String(i).padStart(2, '0')),
           // Rotor menu narration (fires on double-tap-hold). Includes the
           // 'Menu open.' lead-in plus all main rotor labels so the first menu
           // a player opens always speaks instead of timing out silent.
@@ -2698,8 +2954,7 @@
           'rotor-journal', 'rotor-descend-deeper', 'rotor-cave-map',
           'rotor-settings', 'rotor-teleport-home', 'rotor-print-braille',
           'rotor-replay-tutorial', 'rotor-reset-cave',
-          // Base-arrival narration (fires when player exits tutorial). Static
-          // prefixes load with priority; numeric tails will load via bulk.
+          // Base-arrival narration (fires when player exits tutorial).
           'base-stage1-prefix', 'base-stage2-prefix',
           'base-tail-stage1-1', 'base-tail-stage1-2', 'base-tail-stage1-3', 'base-tail-stage1-4',
           'base-tail-stage2-1', 'base-tail-stage2-2', 'base-tail-stage2-3',
@@ -2709,52 +2964,36 @@
           'help-shortcuts-summary', 'help-and-tips',
         ];
         const priorityStems = PRIORITY.filter(stem => m[stem]);
-        // Phase 1: kick off all priority fetches in parallel. iOS Safari
-        // serializes decodeAudioData() internally regardless, so this gives
-        // us network parallelism without slowing iOS decode pace.
-        const priorityPromises = priorityStems.map(stem => preloadVoiceClipPromise(stem));
-        // Phase 2: once priority clips are settled (decoded or failed),
-        // release the bulk load for everything else. Priority gets a clean
-        // "head start" without competing for fetch slots.
-        Promise.allSettled(priorityPromises).then(() => {
-          for (const stem in m){
-            if (PRIORITY.indexOf(stem) === -1) preloadVoiceClip(stem);
-          }
-        });
+        preloadVoiceBatch(priorityStems, 4);
       })
       .catch(() => {});
   }
   // Promise-returning variant of preloadVoiceClip used by the serial priority
   // phase. Resolves when the buffer is decoded (or fetch fails).
   function preloadVoiceClipPromise(stem){
-    if (voiceBuffers[stem] && voiceBuffers[stem] !== 'pending') return Promise.resolve();
+    if (voiceBuffers[stem] && voiceBuffers[stem] !== 'pending'){
+      voiceLastUsed[stem] = Date.now();
+      return Promise.resolve(voiceBuffers[stem]);
+    }
+    if (voiceRequests[stem]) return voiceRequests[stem];
     const c = ensureAudio(); if (!c) return Promise.resolve();
     const entry = voiceManifest && voiceManifest[stem];
     if (!entry) return Promise.resolve();
     voiceBuffers[stem] = 'pending';
-    return fetch(entry.wav + '?v=' + (window.ECHO_BUILD || '1'), { cache: 'no-cache' })
+    voiceRequests[stem] = fetch(entry.wav + '?v=' + (window.ECHO_BUILD || '1'), { cache: 'no-cache' })
       .then(r => r.ok ? r.arrayBuffer() : Promise.reject(404))
       .then(ab => c.decodeAudioData(ab))
-      .then(buf => { voiceBuffers[stem] = buf; })
+      .then(buf => rememberVoiceBuffer(stem, buf))
       .catch(() => {
         delete voiceBuffers[stem];
         if (typeof DIAG !== 'undefined') DIAG.audioDecodeFailures++;
-      });
+        return null;
+      })
+      .finally(() => { delete voiceRequests[stem]; });
+    return voiceRequests[stem];
   }
   function preloadVoiceClip(stem){
-    if (voiceBuffers[stem] === 'pending' || voiceBuffers[stem]) return;
-    const c = ensureAudio(); if (!c) return;
-    const entry = voiceManifest && voiceManifest[stem];
-    if (!entry) return;
-    voiceBuffers[stem] = 'pending';
-    fetch(entry.wav + '?v=' + (window.ECHO_BUILD || '1'), { cache: 'no-cache' })
-      .then(r => r.ok ? r.arrayBuffer() : Promise.reject(404))
-      .then(ab => c.decodeAudioData(ab))
-      .then(buf => { voiceBuffers[stem] = buf; })
-      .catch(() => {
-        delete voiceBuffers[stem];
-        if (typeof DIAG !== 'undefined') DIAG.audioDecodeFailures++;
-      });
+    preloadVoiceClipPromise(stem);
   }
   function stopVoiceQueue(){
     const c = ensureAudio();
@@ -2823,7 +3062,8 @@
     let scheduled = 0;
     for (const stem of stems){
       const buf = voiceBuffers[stem];
-      if (!buf){ continue; }  // permanently failed; skip this atom but keep playing
+      if (!buf || buf === 'pending'){ continue; }
+      voiceLastUsed[stem] = Date.now();
       const src = c.createBufferSource();
       src.buffer = buf;
       const g = c.createGain();
@@ -2834,7 +3074,7 @@
       // Auto-disconnect on end so the node is GC-eligible — prevents the slow
       // accumulation of source nodes the audit flagged as a memory leak.
       src.onended = () => { try { src.disconnect(); g.disconnect(); } catch(e){} };
-      voiceQueue.push({ src, gain: g });
+      voiceQueue.push({ src, gain: g, stem });
       t += buf.duration + 0.06;
       scheduled++;
     }
@@ -2884,39 +3124,22 @@
     waitTimedOut: 0,       // waited 8s for buffer, never loaded
     log: [],               // recent speak events, newest first
     lastError: null,
-    liveLink: false,       // when true, each diagLog also fetches a URL the server logs
-    sessionId: Math.random().toString(36).slice(2, 8),  // 6-char unique-ish session tag
     // ── Item 11: lightweight client telemetry ──
     // Counts of audio context state transitions, JS errors, and bad audio
     // decodes. A buyer / future operator can read these from Settings →
-    // Diagnostics → Copy. No data leaves the device unless Live Link is on.
+    // Diagnostics → Copy. No data leaves the device unless the player shares it.
     audioCtxResumes: 0,
     audioCtxInterrupts: 0,
     audioDecodeFailures: 0,
     pageErrors: 0,
     sessionStart: Date.now(),
   };
-  // Fire a tiny GET that the static server records as a 404 in its access log.
-  // We don't care about the response; the URL itself is the message. The log
-  // line shows up as: ..."GET /diag/<sessionId>/<kind>/<text>"... 404
-  function diagSendLive(kind, text, detail){
-    if (!DIAG.liveLink) return;
-    try {
-      const url = '/diag/' + DIAG.sessionId
-        + '/' + encodeURIComponent(kind)
-        + '/' + encodeURIComponent((text || '').slice(0, 80))
-        + (detail ? '/' + encodeURIComponent(detail.slice(0, 60)) : '');
-      // keepalive so the fetch completes even if the page navigates away
-      fetch(url, { method: 'GET', cache: 'no-store', keepalive: true }).catch(() => {});
-    } catch(e){}
-  }
   const DIAG_MAX_LOG = 30;
   function diagLog(kind, text, detail){
     const entry = { t: new Date().toLocaleTimeString([], { hour12: false }), kind, text: (text || '').slice(0, 60), detail: detail || '' };
     DIAG.log.unshift(entry);
     if (DIAG.log.length > DIAG_MAX_LOG) DIAG.log.length = DIAG_MAX_LOG;
     diagRenderOverlay();
-    diagSendLive(kind, text, detail);
   }
   function diagSnapshot(){
     let loaded = 0, pending = 0, failed = 0;
@@ -2965,10 +3188,10 @@
     // Modal panels need role + aria-modal + aria-labelledby (or aria-label)
     document.querySelectorAll('.panel').forEach(p => {
       const id = p.id || '?';
-      const hasRole = p.getAttribute('role') === 'dialog';
+      const hasRole = ['dialog', 'alertdialog'].includes(p.getAttribute('role'));
       const hasModal = p.getAttribute('aria-modal') === 'true';
       const hasLabel = p.hasAttribute('aria-labelledby') || p.hasAttribute('aria-label');
-      check('panel #' + id + ': role=dialog', hasRole);
+      check('panel #' + id + ': dialog role', hasRole);
       check('panel #' + id + ': aria-modal', hasModal);
       check('panel #' + id + ': aria-labelledby', hasLabel);
     });
@@ -3038,7 +3261,7 @@
   // users land inside the dialog. When it closes, restore focus to whatever
   // the user had before. Implements the missing focus-trap-lite pattern
   // identified by the accessibility audit.
-  let lastFocusBeforePanel = null;
+  const panelFocusOrigins = new WeakMap();
   const _panelObserver = new MutationObserver(records => {
     for (const r of records){
       if (r.type !== 'attributes' || r.attributeName !== 'class') continue;
@@ -3048,7 +3271,9 @@
       const isShown = el.classList.contains('show');
       if (isShown && !wasShown){
         // Panel just opened — remember where focus was, move into the panel.
-        try { lastFocusBeforePanel = document.activeElement; } catch(e){}
+        try {
+          if (!panelFocusOrigins.has(el)) panelFocusOrigins.set(el, document.activeElement);
+        } catch(e){}
         // Prefer the close button as the initial focus target so Esc/Enter
         // works immediately. Fall back to first interactive element.
         const target = el.querySelector('.panel-close, [autofocus], button, [tabindex]:not([tabindex="-1"])');
@@ -3056,11 +3281,14 @@
       } else if (!isShown && wasShown){
         // Panel just closed — restore prior focus.
         try {
-          if (lastFocusBeforePanel && document.body.contains(lastFocusBeforePanel)){
-            lastFocusBeforePanel.focus({ preventScroll: true });
+          const restoreTarget = panelFocusOrigins.get(el);
+          panelFocusOrigins.delete(el);
+          if (restoreTarget && document.body.contains(restoreTarget) && !restoreTarget.closest('[inert]')){
+            restoreTarget.focus({ preventScroll: true });
           }
         } catch(e){}
       }
+      syncAccessibleActions();
     }
   });
   document.querySelectorAll('.panel').forEach(p => {
@@ -3094,6 +3322,34 @@
     }
     speak(lastSpoken, lastSpokenOpts || {});
   }
+  function speakWithSystemVoice(text, opts, reason){
+    if (!('speechSynthesis' in window)){
+      DIAG.silentSkipped++;
+      diagLog('silent', text, 'no system voice available');
+      if (opts.onComplete) try { opts.onComplete(); } catch(e){}
+      return false;
+    }
+    if (opts.cancel !== false){
+      speechSynthesis.cancel();
+      stopVoiceQueue();
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = opts.rate || 1.05;
+    utterance.pitch = opts.pitch || 1;
+    utterance.volume = Math.min(opts.volume || VOICE_DEFAULT_GAIN, VOICE_MAX_GAIN);
+    let completed = false;
+    const finish = () => {
+      if (completed) return;
+      completed = true;
+      if (opts.onComplete) try { opts.onComplete(); } catch(e){}
+    };
+    utterance.onend = finish;
+    utterance.onerror = finish;
+    speechSynthesis.speak(utterance);
+    DIAG.systemFallback++;
+    diagLog('system', text, reason);
+    return true;
+  }
   function speak(text, opts={}){
     DIAG.speakCalls++;
     if (!state.settings.tts){ DIAG.silentSkipped++; diagLog('skipped', text, 'tts-off'); return; }
@@ -3108,14 +3364,7 @@
     if (URL_FLAGS.novoice){
       // Skip the corpus path entirely; go straight to system voice.
       if (opts.silentIfUnmatched){ DIAG.silentSkipped++; diagLog('silent', text, 'novoice + silent-opt'); return; }
-      if (!('speechSynthesis' in window)) return;
-      if (opts.cancel !== false) speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = opts.rate || 1.05; u.pitch = opts.pitch || 1;
-      u.volume = Math.min(opts.volume || VOICE_DEFAULT_GAIN, VOICE_MAX_GAIN);
-      speechSynthesis.speak(u);
-      DIAG.systemFallback++;
-      diagLog('system', text, 'novoice kill-switch');
+      speakWithSystemVoice(text, opts, 'novoice kill-switch');
       return;
     }
     loadVoiceManifest();
@@ -3146,9 +3395,11 @@
         DIAG.waitTimedOut++;
         const stillPending = stems.filter(s => !voiceBuffers[s] || voiceBuffers[s] === 'pending');
         diagLog('TIMEOUT', text, stillPending.length + ' clips never loaded');
-        // Fire onComplete on timeout so callers waiting on speech-end (eg.
-        // tutorial gate) don't have to depend on their own safety timer.
-        if (opts.onComplete) try { opts.onComplete(); } catch(e){}
+        if (opts.silentIfUnmatched){
+          if (opts.onComplete) try { opts.onComplete(); } catch(e){}
+        } else {
+          speakWithSystemVoice(text, opts, 'corpus load timeout');
+        }
       };
       waitForBuffers();
       return;
@@ -3162,21 +3413,7 @@
       if (opts.onComplete) try { opts.onComplete(); } catch(e){}
       return;
     }
-    if (!('speechSynthesis' in window)){
-      DIAG.silentSkipped++;
-      diagLog('silent', text, 'no synth available');
-      return;
-    }
-    if (opts.cancel !== false) {
-      speechSynthesis.cancel();
-      stopVoiceQueue();
-    }
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = opts.rate || 1.05; u.pitch = opts.pitch || 1;
-    u.volume = Math.min(opts.volume || VOICE_DEFAULT_GAIN, VOICE_MAX_GAIN);
-    speechSynthesis.speak(u);
-    DIAG.systemFallback++;
-    diagLog('system', text, 'no corpus match');
+    speakWithSystemVoice(text, opts, 'no corpus match');
   }
 
   // ════════════════════════════════════════════════════════════
@@ -3244,10 +3481,43 @@
   const liveEl = document.getElementById('live');
   const liveAssertive = document.getElementById('liveAssertive');
   const statusEl = document.getElementById('status');
+  const accessibleActions = document.getElementById('accessibleActions');
+  const accessibleState = document.getElementById('accessibleState');
+  function syncAccessibleActions(message){
+    if (!accessibleActions) return;
+    const panelOpen = !!document.querySelector('.panel.show');
+    const hud = document.getElementById('hud');
+    if (hud){
+      if (panelOpen){
+        hud.setAttribute('inert', '');
+        hud.setAttribute('aria-hidden', 'true');
+      } else {
+        hud.removeAttribute('inert');
+        hud.removeAttribute('aria-hidden');
+      }
+    }
+    const fallbackNeeded = !!(
+      (state.settings.audioOnly && !isEmbedded() && !isNonTouchDevice())
+      || state.settings.hidePad
+    );
+    const gameplayAvailable = !!(state.started && state.cave && state.currentId && !panelOpen && fallbackNeeded);
+    accessibleActions.setAttribute('aria-hidden', gameplayAvailable ? 'false' : 'true');
+    if (gameplayAvailable) accessibleActions.removeAttribute('inert');
+    else accessibleActions.setAttribute('inert', '');
+    if (!gameplayAvailable) return;
+    let summary = message;
+    if (!summary){
+      try { summary = describeRoomLong(); } catch(e){ summary = 'Echo Cave gameplay controls.'; }
+    }
+    if (accessibleState) accessibleState.textContent = summary;
+    accessibleActions.setAttribute('aria-label', `Echo Cave controls. ${summary}`);
+  }
   function announce(msg, assertive=false){
     if (assertive) liveAssertive.textContent = msg;
     else liveEl.textContent = msg;
     statusEl.textContent = msg;
+    if (accessibleState) accessibleState.textContent = msg;
+    syncAccessibleActions(msg);
   }
 
   // ════════════════════════════════════════════════════════════
@@ -3421,9 +3691,7 @@
     playTransit(destFloor, false);
     setTimeout(() => {
       // Step on arrival — main-vein chime if applicable, else regular step
-      if (isStage2() && newR.onSpine){
-        playMainVeinStep();
-      } else if (!isStage2() && newR.onSpine){
+      if (newR.onSpine && state.settings.mainvein){
         playMainVeinStep();
       } else {
         playStep();
@@ -3697,7 +3965,11 @@
   function switchToDaily(){
     if (state.isDaily){ speak('Already in daily mode.'); return; }
     // Save personal first
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+    try {
+      const personalValue = JSON.stringify(state);
+      localStorage.setItem(STORAGE_KEY, personalValue);
+      mirrorNativeSave(STORAGE_KEY, personalValue);
+    }catch(e){}
     const dKey = 'echo-cave-daily-' + dateUTC();
     let daily;
     try {
@@ -3743,7 +4015,12 @@
   function switchToPersonal(){
     if (!state.isDaily){ speak('Already in your cave.'); return; }
     // Save daily first
-    try { localStorage.setItem('echo-cave-daily-' + dateUTC(), JSON.stringify(state)); }catch(e){}
+    try {
+      const dailyKey = 'echo-cave-daily-' + dateUTC();
+      const dailyValue = JSON.stringify(state);
+      localStorage.setItem(dailyKey, dailyValue);
+      mirrorNativeSave(dailyKey, dailyValue);
+    }catch(e){}
     let personal;
     try {
       const s = localStorage.getItem(STORAGE_KEY);
@@ -3789,16 +4066,34 @@
     // Use the page's own origin so shares work whether served from a custom
     // domain, the dev droplet IP, or localhost. Trim trailing path; point
     // back at the cave-game directory the player is in.
-    lines.push(location.origin + location.pathname);
+    // The bundled app has a capacitor:// URL that must never appear in a
+    // shared result. The public web build can link back to its own address.
+    if (!IS_NATIVE_APP) lines.push(location.origin + location.pathname);
     return lines.join('\n');
   }
   function shareDailyResult(){
     const txt = buildShareText();
-    if (navigator.share){
-      navigator.share({ title: 'Echo Cave', text: txt }).catch(() => copyShareText(txt));
+    const nativeShare = nativePlugin('Share');
+    if (IS_NATIVE_APP && nativeShare && typeof nativeShare.share === 'function'){
+      Promise.resolve(nativeShare.share({
+        title: 'Echo Cave',
+        text: txt,
+        dialogTitle: 'Share your Echo Cave result',
+      })).catch(error => handleShareFailure(error, txt));
+    } else if (navigator.share){
+      navigator.share({ title: 'Echo Cave', text: txt }).catch(error => handleShareFailure(error, txt));
     } else {
       copyShareText(txt);
     }
+  }
+  function handleShareFailure(error, txt){
+    const name = String(error && error.name || '').toLowerCase();
+    const message = String(error && error.message || error || '').toLowerCase();
+    const cancelled = name === 'aborterror'
+      || message.includes('share canceled')
+      || message.includes('share cancelled');
+    if (cancelled) return;
+    copyShareText(txt);
   }
   function copyShareText(txt){
     if (navigator.clipboard){
@@ -3927,6 +4222,7 @@
       tag.textContent = `Level ${state.level || 1} · Stage 1 · find the exit`;
       tag.classList.remove('s2');
     }
+    syncAccessibleActions();
   }
 
   // Make every settings toggle screen-reader friendly. Each <button class="switch">
@@ -3978,6 +4274,12 @@
         el.setAttribute('aria-checked', !!state.settings[k]);
       });
     document.body.classList.toggle('hide-pad', !!state.settings.hidePad);
+    // George is the live narrator when spoken narration is enabled. If the
+    // player turns it off, restore ARIA announcements so VoiceOver still
+    // communicates every room and movement result.
+    liveEl.setAttribute('aria-live', state.settings.tts ? 'off' : 'polite');
+    liveAssertive.setAttribute('aria-live', state.settings.tts ? 'off' : 'assertive');
+    syncAccessibleActions();
   }
 
   // ════════════════════════════════════════════════════════════
@@ -4116,6 +4418,88 @@
     if (!el.classList.contains('show')) return;
     el.classList.remove('show');
     speak('Closed.', { cancel:true, silentIfUnmatched: true });
+  }
+
+  let pendingConfirmation = null;
+  let confirmationBackgroundState = [];
+
+  function isolateConfirmationBackground(){
+    confirmationBackgroundState = Array.from(document.querySelectorAll('.panel.show'))
+      .filter(panel => panel.id !== 'confirmationPanel')
+      .map(panel => {
+        const focusables = Array.from(panel.querySelectorAll(
+          'a[href], button, input, select, textarea, [tabindex]'
+        )).map(element => ({ element, tabindex: element.getAttribute('tabindex') }));
+        for (const { element } of focusables) element.setAttribute('tabindex', '-1');
+        const state = {
+          panel,
+          wasInert: panel.hasAttribute('inert'),
+          ariaHidden: panel.getAttribute('aria-hidden'),
+          focusables,
+        };
+        panel.setAttribute('inert', '');
+        panel.setAttribute('aria-hidden', 'true');
+        return state;
+      });
+  }
+
+  function restoreConfirmationBackground(){
+    for (const state of confirmationBackgroundState){
+      if (!state.wasInert) state.panel.removeAttribute('inert');
+      if (state.ariaHidden === null) state.panel.removeAttribute('aria-hidden');
+      else state.panel.setAttribute('aria-hidden', state.ariaHidden);
+      for (const { element, tabindex } of state.focusables){
+        if (tabindex === null) element.removeAttribute('tabindex');
+        else element.setAttribute('tabindex', tabindex);
+      }
+    }
+    confirmationBackgroundState = [];
+  }
+
+  function requestConfirmation(title, message, confirmLabel, onConfirm){
+    pendingConfirmation = onConfirm;
+    document.getElementById('confirmationTitle').textContent = title;
+    document.getElementById('confirmationMessage').textContent = message;
+    document.getElementById('confirmationAccept').textContent = confirmLabel || 'Confirm';
+    const confirmationPanel = document.getElementById('confirmationPanel');
+    try { panelFocusOrigins.set(confirmationPanel, document.activeElement); } catch(e){}
+    confirmationPanel.classList.add('show');
+    try { document.getElementById('confirmationCancel').focus({ preventScroll: true }); } catch(e){}
+    isolateConfirmationBackground();
+    speak(`${title}. ${message}`, { cancel:true });
+  }
+  function dismissConfirmation(accepted){
+    const action = pendingConfirmation;
+    pendingConfirmation = null;
+    document.getElementById('confirmationPanel').classList.remove('show');
+    restoreConfirmationBackground();
+    if (accepted && action) action();
+    else speak('Cancelled.', { cancel:true, silentIfUnmatched: true });
+  }
+  function testAsNewPlayer(){
+    requestConfirmation(
+      'Start as a new player?',
+      'This clears the cave, inventory, settings, and introduction progress on this device.',
+      'Clear all progress',
+      () => {
+        clearAllSaveData().finally(() => location.reload());
+      }
+    );
+  }
+  function openMenu(){
+    if (!state.started || isOnboardingActive()) return;
+    document.querySelectorAll('.panel.show').forEach(panel => panel.classList.remove('show'));
+    const dailyButton = document.getElementById('menuDailyBtn');
+    dailyButton.textContent = state.isDaily ? 'Return to personal cave' : 'Daily Cave';
+    document.getElementById('menuShareBtn').classList.toggle('hidden', !state.isDaily);
+    const descendButton = document.getElementById('menuDescendBtn');
+    descendButton.classList.toggle('hidden', !state.exitReached || !!state.isDaily);
+    document.getElementById('menuPanel').classList.add('show');
+    speak('Menu open.');
+  }
+  function runMenuAction(action){
+    document.getElementById('menuPanel').classList.remove('show');
+    setTimeout(action, 100);
   }
 
   function openHelp(){
@@ -4661,11 +5045,29 @@
         document.querySelectorAll('.panel.show').forEach(p => {
           if (p.id === 'startPanel') return;
           if (ONBOARDING_PANELS.includes(p.id) && !state.started) return;
+          if (p.id === 'confirmationPanel'){ dismissConfirmation(false); return; }
           p.classList.remove('show');
         });
       }
     });
     document.querySelectorAll('.dpad button[data-dir]').forEach(b => b.addEventListener('click', () => tryMove(b.dataset.dir)));
+    const accessibleActionHandlers = {
+      up: () => tryMove('up'),
+      down: () => tryMove('down'),
+      left: () => tryMove('left'),
+      right: () => tryMove('right'),
+      listen,
+      repeat: repeatLastSpoken,
+      teleport,
+      menu: openMenu,
+      settings: () => document.getElementById('settingsPanel').classList.add('show'),
+    };
+    document.querySelectorAll('[data-echo-action]').forEach(button => {
+      button.addEventListener('click', () => {
+        const handler = accessibleActionHandlers[button.dataset.echoAction];
+        if (handler) handler();
+      });
+    });
 
     // ── Swipe gestures + double-tap-hold rotor ──────────────────────
     let tStartX = 0, tStartY = 0, tStartT = 0, tFingers = 0, tHandled = false;
@@ -4728,7 +5130,7 @@
       { label:'Boost atmosphere volume', toggle:'boostVolume' },
       { label:'Gesture sounds', toggle:'gestureSound' },
       { label:'Crossover passages', toggle:'loops' },
-      { label:'Test as new player', open: () => { try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} location.reload(); } },
+      { label:'Clear all progress', open: testAsNewPlayer },
       { label:'Reset cave', open: () => resetCave() },
     ];
 
@@ -5141,9 +5543,34 @@
       document.getElementById('invPanel').classList.remove('show');
       setTimeout(() => openAchievements(), 200);
     });
+    document.getElementById('menuBtn').addEventListener('click', openMenu);
+    document.getElementById('menuClose').addEventListener('click', ()=> closePanel('menuPanel'));
+    document.getElementById('menuDone').addEventListener('click', ()=> closePanel('menuPanel'));
+    document.getElementById('menuListenBtn').addEventListener('click', () => runMenuAction(listen));
+    document.getElementById('menuRepeatBtn').addEventListener('click', () => runMenuAction(repeatLastSpoken));
+    document.getElementById('menuTeleportBtn').addEventListener('click', () => runMenuAction(teleport));
+    document.getElementById('menuDailyBtn').addEventListener('click', () => runMenuAction(state.isDaily ? switchToPersonal : switchToDaily));
+    document.getElementById('menuShareBtn').addEventListener('click', () => runMenuAction(shareDailyResult));
+    document.getElementById('menuInventoryBtn').addEventListener('click', () => runMenuAction(openInventory));
+    document.getElementById('menuJournalBtn').addEventListener('click', () => runMenuAction(openJournal));
+    document.getElementById('menuAchievementsBtn').addEventListener('click', () => runMenuAction(openAchievements));
+    document.getElementById('menuMapBtn').addEventListener('click', () => runMenuAction(openSchematic));
+    document.getElementById('menuDescendBtn').addEventListener('click', () => runMenuAction(descend));
+    document.getElementById('menuBrailleBtn').addEventListener('click', () => runMenuAction(openBraille));
+    document.getElementById('menuHelpBtn').addEventListener('click', () => runMenuAction(openHelp));
+    document.getElementById('menuSettingsBtn').addEventListener('click', () => runMenuAction(() => document.getElementById('settingsPanel').classList.add('show')));
+    document.getElementById('menuPrivacyBtn').addEventListener('click', () => runMenuAction(() => document.getElementById('privacyPanel').classList.add('show')));
     document.getElementById('settingsBtn').addEventListener('click', ()=> document.getElementById('settingsPanel').classList.add('show'));
     document.getElementById('settingsClose').addEventListener('click', ()=> closePanel('settingsPanel'));
     document.getElementById('settingsDone').addEventListener('click', ()=> closePanel('settingsPanel'));
+    document.getElementById('privacyBtn').addEventListener('click', () => {
+      document.getElementById('settingsPanel').classList.remove('show');
+      document.getElementById('privacyPanel').classList.add('show');
+    });
+    document.getElementById('privacyClose').addEventListener('click', ()=> closePanel('privacyPanel'));
+    document.getElementById('privacyDone').addEventListener('click', ()=> closePanel('privacyPanel'));
+    document.getElementById('confirmationCancel').addEventListener('click', () => dismissConfirmation(false));
+    document.getElementById('confirmationAccept').addEventListener('click', () => dismissConfirmation(true));
 
     [['t-audio','audioOnly'],['t-hints','hints'],['t-tts','tts'],['t-haptic','haptic'],['t-pings','pings'],['t-mainvein','mainvein'],['t-buzz','buzz'],['t-autolisten','autoListen'],['t-swipe','swipe'],['t-hidepad','hidePad'],['t-boost','boostVolume'],['t-gesture','gestureSound'],['t-loops','loops']]
       .forEach(([id,k]) => {
@@ -5189,11 +5616,6 @@
     document.getElementById('copyBrailleBtn').addEventListener('click', copyBraille);
     document.getElementById('newCaveBtn').addEventListener('click', resetCave);
     document.getElementById('resetCaveBtn').addEventListener('click', resetCave);
-    function testAsNewPlayer(){
-      if (!confirm("Wipe everything (cave, inventory, settings, intro) and reload as a brand-new player?")) return;
-      try { localStorage.removeItem(STORAGE_KEY); }catch(e){}
-      location.reload();
-    }
     // Replay tutorial — show the tutorial panel + George's reading without
     // wiping save state. Useful for returning players who want a refresher.
     const replayBtn = document.getElementById('replayTutorialBtn');
@@ -5276,23 +5698,6 @@
         ta.focus(); ta.select();
         diagCopy.textContent = '↑ Long-press to copy';
         setTimeout(() => { diagCopy.textContent = '📋 Copy'; }, 4000);
-      }
-    });
-    // Live Link toggle — when on, every diagLog event silently fires a
-    // fetch to /diag/<session>/<kind>/<text> which the static server logs.
-    // Lets the developer tail server logs on the droplet and watch the
-    // user's events stream in as they play, without screen sharing.
-    const liveBtn = document.getElementById('diagLiveLinkBtn');
-    if (liveBtn) liveBtn.addEventListener('click', () => {
-      DIAG.liveLink = !DIAG.liveLink;
-      liveBtn.textContent = DIAG.liveLink ? '📡 Live link ON · ' + DIAG.sessionId : '📡 Live link off';
-      liveBtn.style.background = DIAG.liveLink ? 'rgba(103,232,249,.18)' : '';
-      if (DIAG.liveLink){
-        // Send a session-start marker so the server log shows when this began
-        diagSendLive('session-start', 'live-link-on', window.ECHO_BUILD || '?');
-        diagLog('live-link', 'enabled', 'session=' + DIAG.sessionId);
-      } else {
-        diagLog('live-link', 'disabled', '');
       }
     });
     // Capture pageerrors into the diagnostic so users can see them on-device.
@@ -5438,11 +5843,21 @@
       const m = "Reach the exit before descending. Stage 1 first.";
       announce(m, true); speak(m); return;
     }
-    if (!confirm(`Descend to Level ${(state.level || 1) + 1}? The exit becomes the entrance to a deeper cave. Inventory, coins, and achievements stay with you.`)) return;
+    const nextLevel = (state.level || 1) + 1;
+    requestConfirmation(
+      `Descend to Level ${nextLevel}?`,
+      'The exit becomes the entrance to a deeper cave. Inventory, coins, achievements, and journal entries stay with you.',
+      'Descend',
+      performDescend
+    );
+  }
+
+  function performDescend(){
+    const previousSpineLength = Math.max(0, Number(state.cave && state.cave.spineLength) || 0);
     state.level = (state.level || 1) + 1;
     state.maxLevel = Math.max(state.maxLevel || 1, state.level);
     state.seed = Math.floor(Math.random() * 0xffffffff) >>> 0;
-    state.cave = generateCave(state.seed, state.level);
+    state.cave = generateCave(state.seed, state.level, previousSpineLength + 2);
     state.currentId = state.cave.rootId;
     state.visited = { [state.cave.rootId]: true };
     state.cooldowns = {};
@@ -5501,7 +5916,15 @@
   }
 
   function resetCave(){
-    if (!confirm("Reset cave? Inventory and coins stay. New layout. You'll go back to Stage 1, Level 1.")) return;
+    requestConfirmation(
+      'Reset this cave?',
+      'You will get a new layout and return to Stage 1, Level 1. Inventory, coins, and achievements stay with you.',
+      'Reset cave',
+      performResetCave
+    );
+  }
+
+  function performResetCave(){
     state.level = 1;
     state.seed = Math.floor(Math.random() * 0xffffffff) >>> 0;
     state.cave = generateCave(state.seed, state.level);
@@ -5736,6 +6159,71 @@
   // ════════════════════════════════════════════════════════════
   // BOOT
   // ════════════════════════════════════════════════════════════
+  function setupNativeIntegrations(){
+    if (!IS_NATIVE_APP) return;
+    const accessibilityAlert = message => {
+      const prior = liveAssertive.getAttribute('aria-live');
+      liveAssertive.setAttribute('aria-live', 'assertive');
+      liveAssertive.textContent = '';
+      setTimeout(() => { liveAssertive.textContent = message; }, 20);
+      setTimeout(() => {
+        liveAssertive.setAttribute('aria-live', state.settings.tts ? 'off' : (prior || 'assertive'));
+      }, 1500);
+      statusEl.textContent = message;
+    };
+
+    if (window.capacitorExports && typeof window.capacitorExports.registerPlugin === 'function'){
+      const echoNative = window.capacitorExports.registerPlugin('EchoNative');
+      Promise.resolve(echoNative.configureAudioSession()).catch(() => {});
+      Promise.resolve(echoNative.addListener('accessibilityAction', event => {
+        if (event && window.EchoCaveNative) window.EchoCaveNative.perform(event.action);
+      })).catch(() => {});
+      Promise.resolve(echoNative.addListener('audioInterruption', event => {
+        if (!event) return;
+        if (event.phase === 'began'){
+          if (actx && actx.state === 'running') actx.suspend().catch(() => {});
+          statusEl.textContent = 'Audio paused for a system interruption.';
+        } else if (event.phase === 'ended' && event.shouldResume){
+          ensureAudio();
+        }
+      })).catch(() => {});
+      Promise.resolve(echoNative.addListener('audioRouteChange', event => {
+        if (!event || event.reason !== 'old-device-unavailable') return;
+        try { stopVoiceQueue(); } catch(e){}
+        if (actx && actx.state === 'running') actx.suspend().catch(() => {});
+        accessibilityAlert('Headphones disconnected. Echo Cave audio is paused. Tap to resume when ready.');
+      })).catch(() => {});
+    }
+
+    const screenReader = nativePlugin('ScreenReader');
+    const applyScreenReaderState = enabled => {
+      document.body.classList.toggle('screen-reader-running', !!enabled);
+      if (accessibleActions){
+        accessibleActions.setAttribute('aria-description', enabled
+          ? 'Swipe up or down through these standard actions, then double-tap to activate.'
+          : '');
+      }
+    };
+    if (screenReader && typeof screenReader.isEnabled === 'function'){
+      Promise.resolve(screenReader.isEnabled())
+        .then(result => applyScreenReaderState(result && result.value))
+        .catch(() => {});
+      if (typeof screenReader.addListener === 'function'){
+        Promise.resolve(screenReader.addListener('stateChange', result => {
+          applyScreenReaderState(result && result.value);
+        })).catch(() => {});
+      }
+    }
+
+    const app = nativePlugin('App');
+    if (app && typeof app.addListener === 'function'){
+      Promise.resolve(app.addListener('appStateChange', event => {
+        if (event && event.isActive) ensureAudio();
+        else if (actx && actx.state === 'running') actx.suspend().catch(() => {});
+      })).catch(() => {});
+    }
+  }
+  setupNativeIntegrations();
   bindInput();
   refreshSettings();
   updateHUD();
@@ -5772,50 +6260,33 @@
   document.addEventListener('click', ensureAudio);
 
 
-  // ── iOS Safari double-tap-zoom guard ──────────────────────────
-  // iOS 10+ ignores `user-scalable=no` for accessibility, so a second tap
-  // within ~350 ms still triggers zoom. Block ONLY the double-tap path —
-  // pinch-zoom stays available for low-vision players.
-  let __lastTouchEnd = 0;
-  document.addEventListener('touchend', (e) => {
-    // Only treat single-finger lift events as candidates for the double-tap-
-    // zoom guard. Pinch-zoom (multi-touch) and the rotor's double-tap-and-hold
-    // path must not be blocked.
-    const isSingleFingerLift = e.changedTouches.length === 1 && e.touches.length === 0;
-    if (!isSingleFingerLift){ __lastTouchEnd = 0; return; }
-    const now = Date.now();
-    if (now - __lastTouchEnd < 350){
-      e.preventDefault();
-    }
-    __lastTouchEnd = now;
-  }, { passive: false });
-  // Some iOS Safari versions also fire a synthetic dblclick for non-touch
-  // pointers (eg trackpad in Stage Manager). Catch that too.
-  document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
-
-  // Recovery: if the page somehow gets stuck zoomed, snap it back when the
-  // user lifts their fingers. Briefly tighten the viewport then restore it,
-  // which is the only reliable "reset zoom" trick on iOS Safari.
-  if (window.visualViewport){
-    let snapping = false;
-    window.visualViewport.addEventListener('resize', () => {
-      if (snapping) return;
-      if (window.visualViewport.scale > 1.02){
-        snapping = true;
-        const meta = document.querySelector('meta[name="viewport"]');
-        const orig = meta.getAttribute('content');
-        meta.setAttribute('content', orig + ', maximum-scale=1.0');
-        setTimeout(() => {
-          meta.setAttribute('content', orig);
-          snapping = false;
-        }, 250);
-      }
-    });
-  }
+  // Native accessibility custom actions call this small, stable bridge.
+  // The same API is also useful for XCTest without exposing mutable state.
+  window.EchoCaveNative = Object.freeze({
+    perform(action){
+      const handlers = {
+        up: () => tryMove('up'), down: () => tryMove('down'),
+        left: () => tryMove('left'), right: () => tryMove('right'),
+        listen, repeat: repeatLastSpoken, teleport,
+        inventory: openInventory,
+        menu: openMenu,
+        settings: () => document.getElementById('settingsPanel').classList.add('show'),
+      };
+      const handler = handlers[action];
+      if (!handler) return false;
+      handler();
+      return true;
+    },
+    summary(){
+      if (!state.started || !state.cave) return 'Echo Cave onboarding.';
+      try { return describeRoomLong(); } catch(e){ return 'Echo Cave.'; }
+    },
+  });
+  window.dispatchEvent(new CustomEvent('echo-cave-ready'));
 })();
 </script>
 <script>
-if ('serviceWorker' in navigator) {
+if (!window.ECHO_NATIVE_APP && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js')
       .catch(err => console.warn('[SW] registration failed:', err));

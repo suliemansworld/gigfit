@@ -11,8 +11,7 @@ Usage:
 """
 import asyncio, sys, random, time, argparse, json
 from playwright.async_api import async_playwright
-
-GAME_URL = 'http://localhost:8080/echo-game/?fresh=1&nogate=1'
+from test_support import GAME_URL, launch_browser
 
 # Action weights — relative probabilities
 ACTIONS = [
@@ -44,7 +43,7 @@ PANELS = ['settingsBtn', 'invBtn', 'schematicBtn', 'achievementsBtn', 'journalBt
 
 async def run(minutes):
     async with async_playwright() as p:
-        b = await p.chromium.launch()
+        b = await launch_browser(p)
         ctx = await b.new_context(
             viewport={'width': 390, 'height': 844},
             has_touch=True, is_mobile=True
@@ -276,7 +275,7 @@ async def run(minutes):
         print(full_diag[:2000])
 
         # Exit code
-        return 0 if (not page_errors and not console_errors) else 1
+        return 0 if (not page_errors and not console_errors and not crashes) else 1
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

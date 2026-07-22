@@ -2,11 +2,9 @@
 
 An audio-first cave exploration game designed for blind and sighted players. The cave is generated procedurally and navigated by sound — drips, wind, hums, and chimes hint at room shape and depth. Sighted players can opt into a visual layer; blind players have parity (or an advantage) by design.
 
-**Live demo:** http://134.209.6.140:8080/echo-game/
-
 ## What this is
 
-A single-page web game served as one HTML file. No build system. No backend. All state stored in `localStorage`. Voice narration uses pre-rendered ElevenLabs audio clips ("George", a warm British storyteller voice).
+A single-page web game plus a hardened Capacitor iOS shell. There is no backend, account, advertising, analytics, or remote game content. Web saves use `localStorage`; the iOS app mirrors its save through native Preferences. Voice narration uses pre-rendered ElevenLabs audio clips ("George", a warm British storyteller voice).
 
 ## Core design
 
@@ -28,12 +26,34 @@ npx serve .
 
 Open `http://localhost:8080/` in a browser. Save state lives in `localStorage` under `echo-cave-v3`.
 
+## iOS app
+
+The iOS target is iPhone-only, supports iOS 15+, bundles all game content, and uses Capacitor 8 with Swift Package Manager. Native integrations cover durable saves, haptics, sharing, screen-reader state, audio-session interruptions, headphone disconnects, and accessibility custom actions.
+
+Requirements for an App Store archive:
+
+- Node 22+
+- Xcode 26+ on a supported Mac
+- An Apple Developer team and App Store Connect record
+
+```bash
+npm install
+npm run ios:sync       # builds compressed AAC narration and updates Xcode
+npm run ios:open       # opens ios/App/App.xcodeproj
+```
+
+The current bundle identifier is `com.suliemansworld.echocave`. `npm run build:ios` converts the 610 WAV narration files into cached 96 kbps AAC outputs without modifying the source recordings. The generated `www/`, native `public/`, and `.build/` directories are intentionally ignored.
+
 ## File layout
 
 ```
 index.html             # ~5,800 lines — game logic, UI, audio pipeline
 sw.js                  # Service worker — precache + runtime voice cache
 manifest.json          # PWA manifest
+capacitor.config.json  # Native app identity and bundled-web configuration
+scripts/build-web.mjs  # Reproducible web/iOS bundle builder + AAC conversion
+ios/                   # Xcode project, Swift bridge, privacy manifest, UI tests
+docs/app-store/        # Store copy, review notes, labels, TestFlight/release plans
 audio/
   bed-*.wav            # 8 atmospheric beds (Classic + Crystal Grotto, base/shallow/mid/deep)
   drip-loop.wav        # Landmark sound loops (5 types)
@@ -42,8 +62,8 @@ audio/
   welcome-music.mp3    # Welcome screen ambient track
   voice/
     manifest.json      # 689 entries — text → WAV index
-    *.wav              # ~689 voice clips for the corpus
-tests/                 # Playwright + unit test suites (see Tests section)
+    *.wav / *.mp3      # 689 source voice clips for the corpus
+tests/                 # Static, Chromium, WebKit, E2E, and fuzz suites
 icons/                 # PWA icons (192, 512, 180, maskable-512)
 LICENSE                # Proprietary license; commercial use restricted
 README.md              # This file
@@ -61,7 +81,7 @@ The runtime `voiceLookup()` function tries:
 1. Full-string exact match against any entry's text
 2. Sentence-split: split on `. ! ?` and look up each sentence; if all match, stitch them at runtime
 
-This is how 613 atomic clips can compose tens of thousands of utterances. Adding a new line of dialog only requires a clip for any new atomic sentence.
+This is how 689 atomic clips can compose tens of thousands of utterances. Adding a new line of dialog only requires a clip for any new atomic sentence.
 
 ## Schema versioning
 
@@ -91,57 +111,57 @@ Use these if a bad deploy ships and you need users to remain functional while yo
 
 ## Diagnostics
 
-Open Settings → Diagnostics for an on-device readout: build tag, audio context state, voice clip load progress, speak() outcome counts, A11y audit results, recent speak events. The "📡 Live link" toggle silently fires `/diag/<session>/...` GET requests for each event so a developer tailing the server log can watch the user's session in real time. No data leaves the device unless Live Link is on.
+Open Settings → Diagnostics for an on-device readout: build tag, audio context state, voice clip load progress, speak() outcome counts, accessibility audit results, and recent speak events. Diagnostics are local-only. The earlier remote “Live Link” and `/diag/` request path were removed for the private, no-data App Store build.
 
 ## Tests
 
 All test suites live under `tests/` in this repo:
 
 ```bash
-npm test          # runs the two primary suites (unit + e2e)
-npm run test:all  # also runs fuzz + cache + rotor suites
-```
-
-Or directly:
-
-```bash
-python3 tests/test_echo_game.py       # unit checks
-python3 tests/test_echo_game_e2e.py   # end-to-end Playwright
-python3 tests/test_echo_game_fuzz.py  # input fuzzer
-python3 tests/test_cache_lookup.py    # voice-corpus lookup checks
-python3 tests/test_rotor_fuzz.py      # rotor gesture fuzzer
+python3 -m pip install -r requirements-dev.txt
+python3 -m playwright install chromium webkit
+npm test                 # static checks plus primary Chromium suites
+npm run test:all         # static, E2E, and fuzz suites
+npm run test:browsers    # repeat browser suites in Chromium and WebKit
+npm run test:static      # install-free manifest/audio/cache integrity gate
 ```
 
 Coverage: welcome flow, panels, gestures, settings, audio assets, achievements, journal, descent, SVG schematic, voice resolution, gesture blocks, panel modal interactions, rotor menu.
 
-**Note:** the tests assume the game is served at `http://localhost:8080/echo-game/`. If you run `npm run serve` directly from this repo (which serves at `http://localhost:8080/`), update the `BASE` constant at the top of each test file to `http://localhost:8080`.
+The runner starts an isolated local server automatically. Override its URL with `ECHO_BASE_URL` and a browser with `ECHO_BROWSER=chromium|webkit`. The Xcode project also includes an `EchoCaveUITests` target and shared `App` scheme with an iOS system accessibility audit.
 
 ## Dependencies
 
-None. Single HTML file, no npm, no bundler, no framework.
+Runtime web code remains framework-free. Exact Capacitor and plugin versions are locked in `package-lock.json`; Python Playwright is pinned in `requirements-dev.txt`.
 
 ## Browser support
 
-- iOS Safari 14+ (primary target — extensive iOS-specific audio context recovery)
+- Native iPhone app: iOS 15+
+- iOS Safari 14+ for the standalone web/PWA build
 - Desktop Chrome / Safari / Firefox (current)
 - Tested cross-device via Playwright; production behavior has been observed on real iPhone
 
 ## Known iOS-specific behaviors handled
 
 - AudioContext `interrupted` state recovery on visibility change, focus, touch, click
-- Double-tap-to-zoom guard (preserves pinch-zoom)
+- Low-vision pinch zoom is permitted; the old forced zoom reset was removed
 - HTTP-context Clipboard API fallback (uses `execCommand('copy')` then textarea-select)
-- Voice clip preload prioritization (welcome → intro → tutorial → bulk)
+- Priority plus on-demand narration with a 48 MiB decoded-audio LRU budget
+- Native AVAudioSession interruption recovery and headphone-disconnect pause
 
 ## Accessibility
 
 - ARIA dialog + `aria-modal` on every panel
 - `aria-label` on every interactive element
 - Live regions for status updates (selectively disabled where George duplicates them — see Settings → Diagnostics for current ARIA audit pass count)
+- A persistent semantic action surface remains available in Pure Audio mode
+- Native accessibility custom actions mirror movement, Listen, Repeat, Teleport, Inventory, and Settings
 - Auto Listen Mode after 4 seconds of stillness
 - Two-finger tap = teleport home (works without seeing the dpad)
 - Double-tap-and-hold = rotor menu (VoiceOver-style action wheel)
 
 ## License & ownership
 
-See `LICENSE`. Audio clips are subject to the ElevenLabs subscription terms of the account that generated them. Transfer of ownership requires confirmation of the appropriate ElevenLabs license tier.
+See `LICENSE`. On July 22, 2026, Sulieman Vidal attested that he generated the Echo Cave clips under a paid ElevenLabs subscription represented as commercially usable. A supplied Stripe credit note corroborates the Creator plan at US$22 per month; generation-period coverage and applicable terms remain a documentary release gate in the asset-rights ledger.
+
+Before App Store submission, close every gate in [the release checklist](docs/app-store/release-checklist.md), especially documentary support for the [ElevenLabs paid-plan attestation](docs/app-store/owner-confirmations.md), public privacy/support URLs, blind-player TestFlight sign-off, and an Xcode 26 archive.

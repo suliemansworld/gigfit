@@ -1,6 +1,8 @@
 """End-to-end gameplay test: walk to exit, traverse loop, verify achievements."""
 import asyncio
+import sys
 from playwright.async_api import async_playwright
+from test_support import GAME_URL, launch_browser
 
 PASSES = []
 ISSUES = []
@@ -9,16 +11,16 @@ def issue(m): ISSUES.append(m); print(f"  ❌ {m}")
 
 async def run():
     async with async_playwright() as p:
-        b = await p.chromium.launch()
+        b = await launch_browser(p)
         ctx = await b.new_context(viewport={"width":390,"height":844}, is_mobile=True, has_touch=True)
         pg = await ctx.new_page()
         errs = []
         pg.on("pageerror", lambda e: errs.append(("pageerror", str(e))))
         pg.on("console", lambda m: errs.append(("console.error", m.text)) if m.type == "error" else None)
 
-        # Auto-accept any confirm() dialogs (resetCave uses one)
+        # Keep a compatibility handler for any browser-native dialog regression.
         pg.on("dialog", lambda d: asyncio.create_task(d.accept()))
-        await pg.goto("http://localhost:8080/echo-game/?fresh=1&nogate=1", wait_until="networkidle", timeout=20000)
+        await pg.goto(GAME_URL, wait_until="networkidle", timeout=20000)
         await pg.wait_for_timeout(800)
         await pg.click("#welcomeTap"); await pg.wait_for_timeout(2200)
         await pg.click("#introSkip"); await pg.wait_for_timeout(700)
@@ -266,6 +268,7 @@ async def run():
         before_level = await pg.evaluate("() => (JSON.parse(localStorage.getItem('echo-cave-v3')||'{}').level)||1")
         before_spine = await pg.evaluate("() => JSON.parse(localStorage.getItem('echo-cave-v3')||'{}').cave.spineLength")
         await pg.click("#descendBtn")
+        await pg.click("#confirmationAccept")
         await pg.wait_for_timeout(900)
         after = await pg.evaluate("""() => {
           const s = JSON.parse(localStorage.getItem('echo-cave-v3') || '{}');
@@ -306,7 +309,9 @@ async def run():
         # Achievements are global to the player, NOT per-cave. Reset cave should keep them.
         await pg.click("#settingsBtn"); await pg.wait_for_timeout(400)
         before_ach = await pg.evaluate("() => Object.keys((JSON.parse(localStorage.getItem('echo-cave-v3')||'{}').achievements)||{}).length")
-        await pg.click("#newCaveBtn"); await pg.wait_for_timeout(800)
+        await pg.click("#newCaveBtn")
+        await pg.click("#confirmationAccept")
+        await pg.wait_for_timeout(800)
         after_ach = await pg.evaluate("() => Object.keys((JSON.parse(localStorage.getItem('echo-cave-v3')||'{}').achievements)||{}).length")
         depth_after = await pg.evaluate("() => document.getElementById('depthV').textContent")
         if after_ach == before_ach: passt(f"Achievements preserved across reset cave ({after_ach})")
@@ -332,5 +337,7 @@ async def run():
     if ISSUES:
         print("\nIssues:")
         for i in ISSUES: print(f"  • {i}")
+    return 1 if ISSUES else 0
 
-asyncio.run(run())
+if __name__ == "__main__":
+    sys.exit(asyncio.run(run()))

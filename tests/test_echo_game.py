@@ -3,10 +3,10 @@ Comprehensive test pass for Echo Cave.
 Exercises every major feature path, captures screenshots, reports issues.
 """
 import asyncio
-import json
+import sys
 from playwright.async_api import async_playwright
+from test_support import GAME_URL, launch_browser
 
-BASE = "http://localhost:8080/echo-game"
 ISSUES = []
 PASSES = []
 
@@ -15,7 +15,7 @@ def passt(msg): PASSES.append(msg); print(f"  ✓  {msg}")
 
 async def run():
     async with async_playwright() as p:
-        b = await p.chromium.launch()
+        b = await launch_browser(p)
         ctx = await b.new_context(viewport={"width":390,"height":844}, device_scale_factor=2, is_mobile=True, has_touch=True)
         pg = await ctx.new_page()
         js_errors = []
@@ -24,7 +24,7 @@ async def run():
         pg.on("console", lambda m: console_errors.append(m.text) if m.type == "error" else None)
 
         print("══════════ TEST 1: Fresh load + welcome ══════════")
-        await pg.goto(f"{BASE}/?fresh=1&nogate=1", wait_until="networkidle", timeout=20000)
+        await pg.goto(GAME_URL, wait_until="networkidle", timeout=20000)
         await pg.wait_for_timeout(800)
         wp_visible = await pg.evaluate("() => document.getElementById('welcomePanel').classList.contains('show')")
         if wp_visible: passt("Welcome panel visible on fresh load")
@@ -128,6 +128,52 @@ async def run():
         await pg.wait_for_timeout(300)
         await pg.click("#settingsDone")
         await pg.wait_for_timeout(300)
+
+        print("\n══════════ TEST 8b: Destructive confirmation isolates its parent dialog ══════════")
+        await pg.click("#settingsBtn")
+        await pg.wait_for_timeout(200)
+        await pg.click("#newCaveBtn")
+        await pg.wait_for_timeout(200)
+        modal_state = await pg.evaluate("""() => {
+          const settings = document.getElementById('settingsPanel');
+          const confirmation = document.getElementById('confirmationPanel');
+          const focusables = Array.from(settings.querySelectorAll(
+            'a[href], button, input, select, textarea, [tabindex]'
+          ));
+          return {
+            confirmationVisible: confirmation.classList.contains('show'),
+            settingsInert: settings.hasAttribute('inert'),
+            settingsHiddenFromAT: settings.getAttribute('aria-hidden') === 'true',
+            backgroundFocusable: focusables.filter(element => element.tabIndex >= 0).length,
+            focusInsideConfirmation: confirmation.contains(document.activeElement),
+          };
+        }""")
+        if (modal_state['confirmationVisible'] and modal_state['settingsInert']
+                and modal_state['settingsHiddenFromAT']
+                and modal_state['backgroundFocusable'] == 0
+                and modal_state['focusInsideConfirmation']):
+            passt("Confirmation hides and disables the underlying Settings dialog")
+        else:
+            issue(f"Confirmation isolation failed: {modal_state}")
+        await pg.click("#confirmationCancel")
+        await pg.wait_for_timeout(200)
+        restored_state = await pg.evaluate("""() => {
+          const settings = document.getElementById('settingsPanel');
+          return {
+            settingsVisible: settings.classList.contains('show'),
+            settingsInert: settings.hasAttribute('inert'),
+            ariaHidden: settings.getAttribute('aria-hidden'),
+            activeId: document.activeElement && document.activeElement.id,
+          };
+        }""")
+        if (restored_state['settingsVisible'] and not restored_state['settingsInert']
+                and restored_state['ariaHidden'] is None
+                and restored_state['activeId'] == 'newCaveBtn'):
+            passt("Cancel restores Settings and focus to the initiating control")
+        else:
+            issue(f"Confirmation restoration failed: {restored_state}")
+        await pg.click("#settingsDone")
+        await pg.wait_for_timeout(200)
 
         print("\n══════════ TEST 9: Schematic shows valid layout ══════════")
         await pg.click("#schematicBtn")
@@ -276,13 +322,16 @@ async def run():
         if day_n >= 1: passt(f"Daily day number: {day_n}")
         else: issue(f"Daily day number invalid: {day_n}")
 
-        print("\n══════════ TEST 13: Audio context + assets loaded ══════════")
-        # Don't test asset loading directly (may not have completed) but verify functions exist
-        ctx_state = await pg.evaluate("""() => {
-          // Try to find any AudioContext that exists in the page
-          return { noErrors: true };
-        }""")
-        passt("Audio context tests passed (assumed)")
+        print("\n══════════ TEST 13: Audio API support ══════════")
+        audio_support = await pg.evaluate("""() => ({
+          audioContext: typeof (window.AudioContext || window.webkitAudioContext) === 'function',
+          audioElement: typeof window.Audio === 'function',
+          build: window.ECHO_BUILD || ''
+        })""")
+        if audio_support['audioContext'] and audio_support['audioElement'] and audio_support['build']:
+            passt(f"Audio APIs available for build {audio_support['build']}")
+        else:
+            issue(f"Required audio APIs or build tag missing: {audio_support}")
 
         print("\n══════════ TEST 14a: Crystal Grotto theme picker ══════════")
         # Open settings panel
@@ -310,13 +359,78 @@ async def run():
         await pg.click("#settingsClose"); await pg.wait_for_timeout(300)
 
         print("\n══════════ TEST 14: All audio files served ══════════")
-        for filename in ['friction-stone.wav','friction-wet.wav','friction-sand.wav','friction-gravel.wav',
-                         'step-stone.wav','step-wet.wav','step-sand.wav','step-gravel.wav',
-                         'drip-loop.wav','wind-loop.wav','hum-loop.wav','chime-loop.wav','echo-loop.wav',
-                         'ambient-shallow.wav','ambient-deep.wav']:
+        for filename in ['friction-stone.mp3','friction-wet.mp3','friction-sand.mp3','friction-gravel.mp3',
+                         'step-stone.mp3','step-wet.mp3','step-sand.mp3','step-gravel.mp3',
+                         'drip-loop.mp3','wind-loop.mp3','hum-loop.mp3','chime-loop.mp3','echo-loop.mp3',
+                         'welcome-music.mp3','bed-base-classic.mp3','bed-classic-shallow.mp3',
+                         'bed-classic-mid.mp3','bed-classic-deep.mp3','bed-base-grotto.mp3',
+                         'bed-grotto-shallow.mp3','bed-grotto-mid.mp3','bed-grotto-deep.mp3']:
             r = await pg.evaluate(f"async () => {{ const r = await fetch('audio/{filename}', {{method:'HEAD'}}); return r.status; }}")
             if r == 200: passt(f"{filename}: 200")
             else: issue(f"{filename}: {r}")
+
+        print("\n══════════ TEST 14b: Cancelled sharing never writes to the clipboard ══════════")
+        await pg.click("#menuBtn")
+        await pg.click("#menuDailyBtn")
+        await pg.wait_for_timeout(500)
+        await pg.evaluate("""() => {
+          window.__shareCalls = 0;
+          window.__clipboardWrites = 0;
+          Object.defineProperty(navigator, 'share', {
+            configurable: true,
+            value: () => {
+              window.__shareCalls += 1;
+              return Promise.reject(new DOMException('The user aborted a request.', 'AbortError'));
+            },
+          });
+          Object.defineProperty(navigator, 'clipboard', {
+            configurable: true,
+            value: {
+              writeText: () => {
+                window.__clipboardWrites += 1;
+                return Promise.resolve();
+              },
+            },
+          });
+        }""")
+        await pg.click("#menuBtn")
+        share_visible = await pg.evaluate(
+            "() => !document.getElementById('menuShareBtn').classList.contains('hidden')"
+        )
+        if share_visible: passt("Daily result has a standard labeled Share control")
+        else: issue("Daily Share control is hidden in daily mode")
+        await pg.click("#menuShareBtn")
+        await pg.wait_for_timeout(200)
+        cancelled_share = await pg.evaluate(
+            "() => ({ shares: window.__shareCalls, writes: window.__clipboardWrites })"
+        )
+        if cancelled_share == {'shares': 1, 'writes': 0}:
+            passt("Cancelling the share sheet performs no clipboard write")
+        else:
+            issue(f"Cancelled share had side effects: {cancelled_share}")
+
+        await pg.evaluate("""() => {
+          Object.defineProperty(navigator, 'share', {
+            configurable: true,
+            value: () => {
+              window.__shareCalls += 1;
+              return Promise.reject(new Error('Share service unavailable'));
+            },
+          });
+        }""")
+        await pg.click("#menuBtn")
+        await pg.click("#menuShareBtn")
+        await pg.wait_for_timeout(200)
+        failed_share = await pg.evaluate(
+            "() => ({ shares: window.__shareCalls, writes: window.__clipboardWrites })"
+        )
+        if failed_share == {'shares': 2, 'writes': 1}:
+            passt("A real share failure falls back to one clipboard copy")
+        else:
+            issue(f"Share failure fallback was incorrect: {failed_share}")
+        await pg.click("#menuBtn")
+        await pg.click("#menuDailyBtn")
+        await pg.wait_for_timeout(300)
 
         print("\n══════════ TEST 15: Console errors check ══════════")
         if not js_errors: passt("No JS pageerror events")
@@ -336,5 +450,7 @@ async def run():
         print("\nIssues to fix:")
         for i in ISSUES:
             print(f"  • {i}")
+    return 1 if ISSUES else 0
 
-asyncio.run(run())
+if __name__ == "__main__":
+    sys.exit(asyncio.run(run()))

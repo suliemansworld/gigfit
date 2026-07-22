@@ -1,0 +1,14 @@
+{
+  "appId": "com.suliemansworld.echocave",
+  "appName": "Echo Cave",
+  "webDir": "www",
+  "server": {
+    "iosScheme": "capacitor"
+  },
+  "ios": {
+    "backgroundColor": "#000000",
+    "preferredContentMode": "mobile",
+    "allowsLinkPreview": false,
+    "initialFocus": true
+  }
+}

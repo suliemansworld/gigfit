@@ -14,8 +14,8 @@ Reports any iteration where the rotor failed to open, advance, or close.
 """
 import asyncio, sys, random, time, argparse
 from playwright.async_api import async_playwright
+from test_support import GAME_URL, launch_browser
 
-URL = 'http://localhost:8080/echo-game/?fresh=1&nogate=1'
 HOLD_DURATION = 220  # matches index.html
 ROTOR_STEP = 36
 DOUBLE_TAP_GAP = 100  # within DOUBLE_TAP_MAX_GAP of 320
@@ -71,14 +71,14 @@ DISPATCH = """async (params) => {
 
 async def run(iterations):
     async with async_playwright() as p:
-        b = await p.chromium.launch()
+        b = await launch_browser(p)
         ctx = await b.new_context(viewport={'width':390,'height':844}, has_touch=True, is_mobile=True)
         pg = await ctx.new_page()
         errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)))
         pg.on('console', lambda m: errs.append(f"err:{m.text}") if m.type=='error' else None)
         pg.on('dialog', lambda d: asyncio.create_task(d.accept()))
-        await pg.goto(URL, wait_until='networkidle', timeout=20000)
+        await pg.goto(GAME_URL, wait_until='networkidle', timeout=20000)
         await pg.wait_for_timeout(800)
         try: await pg.click('#welcomeTap', timeout=2000); await pg.wait_for_timeout(2200)
         except: pass
@@ -133,7 +133,7 @@ async def run(iterations):
         print(f"  failures: {len(failures)}")
         for f in failures[:10]:
             print(f"    {f}")
-        return 0 if not failures else 1
+        return 0 if not failures and not errs else 1
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

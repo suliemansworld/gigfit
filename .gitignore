@@ -2,4 +2,9 @@
 .wrangler/
 .DS_Store
 node_modules/
+__pycache__/
+*.pyc
+www/
+.build/
+ios/App/App/public/
 *.log
