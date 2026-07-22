@@ -13,8 +13,8 @@ This is the operational handoff for another coding agent working on GigFit.
 - Codemagic app ID: `6a5e8d6ad0ba9e4019350389`
 - TestFlight group: `GigFit Internal` with automatic distribution enabled
 - Internal tester: `haidari.sulieman@gmail.com`
-- Latest verified build: #22 (commit `f14bb71`, tag `testflight-packing-20260721-1`)
-- Build 22: `https://codemagic.io/app/6a5e8d6ad0ba9e4019350389/build/6a603f12d74bf456ea073fb5`
+- Latest verified Codemagic upload: #24 (commit `ba4714e`, tag `testflight-scanflow-20260721-1`)
+- Build 24: `https://codemagic.io/app/6a5e8d6ad0ba9e4019350389/build/6a604e184dea4b46b1769820`
 - Build #23 (commit `5ff990f`, tag `testflight-packing-20260721-2`) was canceled while queued after build-22 scan-flow blockers were reported; it was never uploaded.
 
 ## Product behavior
@@ -245,6 +245,7 @@ Another app may occupy the only concurrent Codemagic builder. Leave GigFit queue
 - Internal testing does not require external beta-review contact information.
 - Build #22 uploaded successfully and App Store Connect finished processing it. Codemagic's later `422 External testing is not supported for build` message was only its attempted external beta-review submission being rejected for an internal-only binary; it was not an IPA upload or internal TestFlight failure.
 - Commit `5ff990f` disables that incompatible beta-review request while preserving App Store Connect upload and the internal-only archive. Build #23 was canceled before a machine became available because it did not yet contain the later scan exit/name fixes.
+- Build #24 uploaded successfully with no errors on July 21, 2026 (delivery UUID `5a1954e5-a1fb-4887-8b9d-442f0a5ace2c`). It contains the scan-exit and editable-name fixes from `ba4714e` and is the first upload using the corrected internal-only publishing configuration. Apple's only upload warning was expected: the required `arkit` capability makes the iPhone app unavailable on visionOS.
 - Codemagic may report missing Feedback Email and review-contact details after a successful upload. That affects external beta review, not internal testing.
 
 ## MVP progress and next phase
